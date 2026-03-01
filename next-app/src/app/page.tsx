@@ -30,7 +30,6 @@ export default function Home() {
 
     return () => {
       clearTimeout(timer);
-      document.body.classList.remove('loader-active');
     };
   }, []);
 
@@ -42,6 +41,12 @@ export default function Home() {
       return () => clearTimeout(timer);
     }
   }, [loaderRevealed]);
+
+  useEffect(() => {
+    return () => {
+      document.body.classList.remove('loader-active');
+    };
+  }, []);
 
   // Smooth scroll handler
   useEffect(() => {
