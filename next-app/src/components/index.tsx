@@ -74,11 +74,7 @@ export function Nav() {
 
 export function Hero() {
   return (
-    <header className="hero" ref={heroRef => {
-      if (heroRef) {
-        (heroRef as HTMLDivElement).dataset.hero = 'true';
-      }
-    }}>
+    <header className="hero">
       <div className="hero-bg" aria-hidden="true" />
       <HeroParticles />
       <div className="hero-content">

@@ -21,13 +21,17 @@ export default function Home() {
     // Initialize theme from localStorage
     const theme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', theme);
+    document.body.classList.add('loader-active');
 
     // Reveal loader after page load
     const timer = setTimeout(() => {
       setLoaderRevealed(true);
     }, 100);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      document.body.classList.remove('loader-active');
+    };
   }, []);
 
   useEffect(() => {
@@ -42,16 +46,17 @@ export default function Home() {
   // Smooth scroll handler
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'A' && target.getAttribute('href')?.startsWith('#')) {
-        const href = target.getAttribute('href');
-        if (href) {
-          const element = document.querySelector(href);
-          if (element) {
-            e.preventDefault();
-            element.scrollIntoView({ behavior: 'smooth' });
-          }
-        }
+      const target = e.target as HTMLElement | null;
+      const anchor = target?.closest('a[href^="#"]') as HTMLAnchorElement | null;
+      if (!anchor) return;
+
+      const href = anchor.getAttribute('href');
+      if (!href) return;
+
+      const element = document.querySelector(href);
+      if (element) {
+        e.preventDefault();
+        element.scrollIntoView({ behavior: 'smooth' });
       }
     };
 

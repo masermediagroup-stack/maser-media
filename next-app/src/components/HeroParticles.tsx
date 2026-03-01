@@ -4,11 +4,10 @@ import { useEffect, useRef } from 'react';
 
 export function HeroParticles() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const hero = heroRef.current;
+    const hero = canvas?.closest('.hero') as HTMLElement | null;
     if (!canvas || !hero) return;
 
     const ctx = canvas.getContext('2d');
