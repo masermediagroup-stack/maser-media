@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maser Media — Creative Agency</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    (function() {
+      var t = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
+<body>
+  <div class="page-loader" id="page-loader" aria-hidden="true">
+    <div class="loader-panel loader-panel-left"></div>
+    <div class="loader-panel loader-panel-right"></div>
+  </div>
+
+  <nav class="nav" id="nav">
+    <a href="/" class="nav-logo"><img src="" alt="" class="logo-img" id="nav-logo"></a>
+    <div class="nav-right">
+      <a href="#contact" class="nav-cta" id="nav-cta"></a>
+      <label class="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-toggle-label" data-light>Light</span>
+        <input type="checkbox" class="theme-toggle-input" id="theme-toggle" aria-label="Dark mode">
+        <span class="theme-toggle-slider"></span>
+        <span class="theme-toggle-label" data-dark>Dark</span>
+      </label>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <canvas class="hero-particles" id="hero-particles" aria-hidden="true"></canvas>
+    <div class="hero-content">
+    <p class="hero-badge" id="hero-badge"></p>
+    <h1 class="hero-title" id="hero-title"></h1>
+    <p class="hero-subtitle" id="hero-subtitle"></p>
+    <div class="hero-cta" id="hero-cta"></div>
+    </div>
+  </header>
+
+  <section class="clients scroll-animate" aria-label="Trusted by">
+    <p class="clients-label" id="clients-label"></p>
+    <div class="clients-grid" id="clients-grid"></div>
+  </section>
+
+  <section class="services scroll-animate" id="services">
+    <h2 class="section-title" id="services-title"></h2>
+    <div class="services-grid" id="services-grid"></div>
+  </section>
+
+  <section class="work scroll-animate" id="work">
+    <h2 class="section-title" id="work-title"></h2>
+    <div class="work-grid" id="work-grid"></div>
+  </section>
+
+  <section class="testimonials scroll-animate">
+    <h2 class="section-title" id="testimonials-title"></h2>
+    <div class="testimonials-grid" id="testimonials-grid"></div>
+  </section>
+
+  <section class="cta scroll-animate" id="contact">
+    <h2 class="cta-title" id="cta-title"></h2>
+    <p class="cta-subtitle" id="cta-subtitle"></p>
+    <a href="#" class="btn btn-primary btn-large" id="cta-button"></a>
+  </section>
+
+  <footer class="footer scroll-animate">
+    <div class="footer-content">
+      <a href="/" class="footer-logo"><img src="" alt="" class="logo-img" id="footer-logo"></a>
+      <nav class="footer-nav" id="footer-nav"></nav>
+      <p class="footer-copy" id="footer-copy"></p>
+    </div>
+  </footer>
+
+  <script src="content.js"></script>
+  <script src="script.js"></script>
+  <script>
+    (function() {
+      var loader = document.getElementById('page-loader');
+      var startReveal = function() {
+        if (!loader) return;
+        loader.classList.add('revealed');
+        setTimeout(function() {
+          loader.remove();
+          document.body.classList.remove('loader-active');
+        }, 1200);
+      };
+      document.body.classList.add('loader-active');
+      if (document.readyState === 'complete') {
+        startReveal();
+      } else {
+        window.addEventListener('load', startReveal);
+      }
+    })();
+  </script>
+</body>
+</html>
