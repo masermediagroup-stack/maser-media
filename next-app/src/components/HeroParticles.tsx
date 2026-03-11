@@ -24,7 +24,7 @@ export function HeroParticles() {
       speed: number;
     }[] = [];
 
-    let mouse = { x: null as number | null, y: null as number | null };
+    const mouse = { x: null as number | null, y: null as number | null };
     let animationId: number;
 
     const PARTICLE_COUNT = 80;

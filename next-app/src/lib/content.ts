@@ -54,6 +54,16 @@ export interface CtaConfig {
   button: { text: string; href: string };
 }
 
+export interface PlaygroundConfig {
+  title: string;
+  subtitle: string;
+  tags: string[];
+}
+
+export interface LayersStripConfig {
+  lines: string[];
+}
+
 export interface FooterConfig {
   nav: { text: string; href: string }[];
   copyright: string;
@@ -70,6 +80,8 @@ export interface Content {
     title: string;
     items: ServiceItem[];
   };
+  playground: PlaygroundConfig;
+  layersStrip: LayersStripConfig;
   work: {
     title: string;
     items: WorkItem[];
@@ -142,6 +154,36 @@ export const CONTENT: Content = {
     ],
   },
 
+  // ─── Internet Playground / Crash-style section ──────────────────────
+  playground: {
+    title: "We do cool things for people on the internet.",
+    subtitle:
+      "Serious strategy, playful execution. This is where brand, design, and digital crash together into work people actually care about.",
+    tags: [
+      "Brand strategy",
+      "Launch campaigns",
+      "Web & product design",
+      "Content systems",
+      "Funnels that convert",
+      "Creative direction",
+      "Landing pages",
+      "Storytelling",
+      "Internet experiments",
+      "Optimizations",
+      "Cool things online",
+      "Fun to work with",
+    ],
+  },
+
+  // ─── Layers strip (under footer) ────────────────────────────────────
+  layersStrip: {
+    lines: [
+      "YES WE CAN. YES WE SHIP.",
+      "LAYERS OF STRATEGY. LAYERS OF CRAFT.",
+      "PROFESSIONAL ON PAPER. FUN ON THE INTERNET.",
+    ],
+  },
+
   // ─── Work / Portfolio ─────────────────────────────────────────────
   work: {
     title: "Selected work.",
@@ -194,7 +236,7 @@ export const CONTENT: Content = {
 
   // ─── CTA ──────────────────────────────────────────────────────────
   cta: {
-    title: "Let's create something together.",
+    title: "Let's make something unforgettable.",
     subtitle: "Tell us about your project. We'll show you how we can help.",
     button: { text: "Book a Call", href: "mailto:hello@masermedia.com" },
   },

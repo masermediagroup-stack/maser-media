@@ -1,20 +1,31 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import {
+  GalaxyBackground,
   PageLoader,
   Nav,
   Hero,
   PillNav,
   Clients,
   Services,
+  CrashPlayground,
   Work,
   Testimonials,
+  PricingPlans,
   Cta,
   Footer,
 } from '@/components';
 
-export default function Home() {
+export default function Home({
+  params,
+  searchParams,
+}: {
+  params?: Promise<Record<string, string | string[]>>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  use(params ?? Promise.resolve({}));
+  use(searchParams ?? Promise.resolve({}));
   const [loaderRevealed, setLoaderRevealed] = useState(false);
 
   useEffect(() => {
@@ -48,28 +59,7 @@ export default function Home() {
     };
   }, []);
 
-  // Smooth scroll handler
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement | null;
-      const anchor = target?.closest('a[href^="#"]') as HTMLAnchorElement | null;
-      if (!anchor) return;
-
-      const href = anchor.getAttribute('href');
-      if (!href) return;
-
-      const element = document.querySelector(href);
-      if (element) {
-        e.preventDefault();
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    };
-
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
-  }, []);
-
-  // Scroll animation observer
+  // Scroll animation observer for sections
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -79,7 +69,10 @@ export default function Home() {
           }
         });
       },
-      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+      {
+        threshold: 0.15,
+        rootMargin: '-40px 0px -40px 0px',
+      }
     );
 
     const elements = document.querySelectorAll('.scroll-animate');
@@ -90,18 +83,21 @@ export default function Home() {
 
   return (
     <>
+      <GalaxyBackground />
       <PageLoader />
       <Nav />
       <main>
         <Hero />
-        <PillNav />
         <Clients />
         <Services />
+        <CrashPlayground />
         <Work />
         <Testimonials />
+        <PricingPlans />
         <Cta />
+        <Footer />
       </main>
-      <Footer />
+      <PillNav />
     </>
   );
 }

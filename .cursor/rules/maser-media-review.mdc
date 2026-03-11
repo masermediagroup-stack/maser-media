@@ -1,0 +1,19 @@
+---
+description: After changes to maser-media next-app, run UX code review and demo capture
+globs: next-app/**/*
+alwaysApply: false
+---
+
+# Maser-Media: Review & Demo on Change
+
+When you modify files under `next-app/` (pages, components, styles), do the following so the user experience stays high and changes are demonstrable:
+
+1. **Apply the maser-media-review skill** (`.cursor/skills/maser-media-review/SKILL.md`):
+   - Run a **UX-focused code review** on the changed files (accessibility, responsiveness, performance, interactions, content, consistency).
+   - Run a **demo**: start dev server if needed, use the browser MCP to open the site, exercise the changed areas, and capture screenshots at key steps. Unlock the browser when done.
+
+2. **Report briefly**:
+   - Review summary (critical / suggestions / OK).
+   - Demo summary: which steps you ran and which screenshot files you saved. If the user wants a real video, suggest they record while you drive the same flow or use Playwright with video/trace.
+
+This keeps every change to the maser-media site reviewed for UX and backed by a visual demo (screenshots); video recording can be added by the user or via Playwright when needed.

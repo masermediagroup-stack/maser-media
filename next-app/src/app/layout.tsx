@@ -6,11 +6,14 @@ export const metadata: Metadata = {
   description: "Design & creative studio for startups and brands that need to ship fast, look credible, and stand out.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params?: Promise<Record<string, string | string[]>>;
 }>) {
+  if (params) await params;
   return (
     <html lang="en">
       <body>
