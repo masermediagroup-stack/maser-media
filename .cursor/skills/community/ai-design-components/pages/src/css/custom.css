@@ -1,0 +1,340 @@
+/**
+ * AI Design Components - Custom Theme
+ *
+ * Brand Colors:
+ * - Primary: Cyber Orange #FA582D
+ * - Dark: #B23808
+ * - Light: #FF724D
+ * - GTM Colors: Cloud Blue #00C0E8, Intelligence Green #00CC66,
+ *               Security Yellow #FFCB06, Fire Red #C84727
+ */
+
+/* Light mode colors */
+:root {
+  --ifm-color-primary: #FA582D;
+  --ifm-color-primary-dark: #E84A1F;
+  --ifm-color-primary-darker: #B23808;
+  --ifm-color-primary-darkest: #8A2A06;
+  --ifm-color-primary-light: #FF724D;
+  --ifm-color-primary-lighter: #FF9270;
+  --ifm-color-primary-lightest: #FFB8A3;
+
+  /* Brand accent colors */
+  --color-cloud-blue: #00C0E8;
+  --color-intelligence-green: #00CC66;
+  --color-security-yellow: #FFCB06;
+  --color-fire-red: #C84727;
+
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(250, 88, 45, 0.1);
+
+  /* Typography - Helvetica Neue family */
+  --ifm-font-family-base: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --ifm-heading-font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Dark mode colors - lighter orange for readability */
+[data-theme='dark'] {
+  --ifm-color-primary: #FF724D;
+  --ifm-color-primary-dark: #FA582D;
+  --ifm-color-primary-darker: #E84A1F;
+  --ifm-color-primary-darkest: #B23808;
+  --ifm-color-primary-light: #FF9270;
+  --ifm-color-primary-lighter: #FFB8A3;
+  --ifm-color-primary-lightest: #FFDDD4;
+  --ifm-background-color: #0f172a;
+  --ifm-background-surface-color: #1e293b;
+  --docusaurus-highlighted-code-line-bg: rgba(255, 114, 77, 0.15);
+}
+
+/* Dark theme background */
+html[data-theme='dark'] {
+  --ifm-background-color: #0f172a;
+  --ifm-background-surface-color: #1e293b;
+}
+
+/* Smooth transitions for interactive elements */
+.button {
+  transition: all 0.2s ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(250, 88, 45, 0.3);
+}
+
+/* Link hover effects */
+a {
+  transition: color 0.2s ease;
+}
+
+/* Card shadows for depth */
+.card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 8px 24px rgba(250, 88, 45, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Code block styling */
+code {
+  background-color: rgba(250, 88, 45, 0.1);
+  border: 1px solid rgba(250, 88, 45, 0.2);
+  border-radius: 4px;
+  padding: 0.2em 0.4em;
+}
+
+/* Navbar adjustments */
+.navbar {
+  border-bottom: 1px solid rgba(250, 88, 45, 0.15);
+  backdrop-filter: blur(10px);
+}
+
+/* Footer styling */
+.footer {
+  background-color: var(--ifm-background-surface-color);
+  border-top: 1px solid rgba(250, 88, 45, 0.15);
+}
+
+/* Improve scrollbar appearance */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ifm-background-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(250, 88, 45, 0.5);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(250, 88, 45, 0.7);
+}
+
+/* Responsive typography */
+@media screen and (max-width: 996px) {
+  :root {
+    --ifm-font-size-base: 16px;
+  }
+
+  /* Improve mobile navbar spacing */
+  .navbar__items {
+    gap: 0.5rem;
+  }
+
+  .navbar__link {
+    padding: 0.5rem;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  :root {
+    --ifm-font-size-base: 15px;
+  }
+
+  /* Mobile-specific improvements */
+  .navbar {
+    padding: 0.5rem;
+  }
+
+  .navbar__brand {
+    margin-right: auto;
+  }
+
+  .navbar__title {
+    font-size: 1rem;
+  }
+
+  /* Improve mobile sidebar navigation */
+  .menu__link {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .menu__list-item-collapsible .menu__link {
+    padding-right: 2rem;
+  }
+
+  /* Better touch targets for mobile */
+  .pagination-nav__link {
+    padding: 1rem;
+  }
+
+  /* Improve code blocks on mobile */
+  pre {
+    font-size: 0.85em;
+    padding: 0.8rem;
+  }
+
+  /* Better table scrolling on mobile */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Brand accent color utilities */
+.text-cloud-blue { color: var(--color-cloud-blue); }
+.text-intelligence-green { color: var(--color-intelligence-green); }
+.text-security-yellow { color: var(--color-security-yellow); }
+.text-fire-red { color: var(--color-fire-red); }
+
+.bg-cloud-blue { background-color: var(--color-cloud-blue); }
+.bg-intelligence-green { background-color: var(--color-intelligence-green); }
+.bg-security-yellow { background-color: var(--color-security-yellow); }
+.bg-fire-red { background-color: var(--color-fire-red); }
+
+/* ===========================================
+   Mermaid Diagram Styling
+   =========================================== */
+
+/* Subgraph container spacing */
+.mermaid .cluster rect {
+  rx: 8px;
+  ry: 8px;
+}
+
+/* Improve overall diagram readability */
+.mermaid {
+  margin: 1.5rem 0;
+}
+
+/*
+ * Dark mode: Force dark text on ALL subgraph/cluster labels
+ * These are the container headings like "User", "Entry Point", etc.
+ * Using multiple selectors to ensure we catch all Mermaid versions
+ */
+[data-theme='dark'] .mermaid .cluster text,
+[data-theme='dark'] .mermaid .cluster-label text,
+[data-theme='dark'] .mermaid .cluster-label span,
+[data-theme='dark'] .mermaid .cluster-label foreignObject span,
+[data-theme='dark'] .mermaid .cluster-label foreignObject div,
+[data-theme='dark'] .mermaid .cluster-label .nodeLabel,
+[data-theme='dark'] .mermaid g.cluster > text,
+[data-theme='dark'] .mermaid g[class*="cluster"] text,
+[data-theme='dark'] .mermaid [class*="cluster"] text,
+[data-theme='dark'] .mermaid .flowchart-label text,
+[data-theme='dark'] .mermaid svg g.cluster text {
+  fill: #1a1a2e !important;
+  color: #1a1a2e !important;
+}
+
+/* Target foreignObject content which Mermaid uses for complex labels */
+[data-theme='dark'] .mermaid .cluster foreignObject div,
+[data-theme='dark'] .mermaid .cluster foreignObject span,
+[data-theme='dark'] .mermaid .cluster-label foreignObject * {
+  color: #1a1a2e !important;
+}
+
+/* Ensure subgraph title text styling */
+.mermaid .cluster text,
+.mermaid .cluster-label text {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Light mode: ensure good contrast */
+.mermaid .cluster text {
+  fill: #1e293b;
+}
+
+/* ===========================================
+   Sequence Diagram Dark Mode Fixes
+   =========================================== */
+
+/* Sequence diagram actor boxes and text */
+[data-theme='dark'] .mermaid .actor,
+[data-theme='dark'] .mermaid .actor-man {
+  fill: #1e293b !important;
+  stroke: #64748b !important;
+}
+
+[data-theme='dark'] .mermaid .actor text,
+[data-theme='dark'] .mermaid text.actor {
+  fill: #e2e8f0 !important;
+}
+
+/* Sequence diagram message labels */
+[data-theme='dark'] .mermaid .messageText,
+[data-theme='dark'] .mermaid .sequenceNumber,
+[data-theme='dark'] .mermaid .labelText,
+[data-theme='dark'] .mermaid text.messageText {
+  fill: #e2e8f0 !important;
+}
+
+/* Sequence diagram loop/alt boxes */
+[data-theme='dark'] .mermaid .loopText,
+[data-theme='dark'] .mermaid .loopText tspan,
+[data-theme='dark'] .mermaid .labelBox {
+  fill: #334155 !important;
+}
+
+[data-theme='dark'] .mermaid .loopLine {
+  stroke: #64748b !important;
+}
+
+/* Sequence diagram activation bars */
+[data-theme='dark'] .mermaid .activation0,
+[data-theme='dark'] .mermaid .activation1,
+[data-theme='dark'] .mermaid .activation2 {
+  fill: #475569 !important;
+}
+
+/* Sequence diagram lines */
+[data-theme='dark'] .mermaid .messageLine0,
+[data-theme='dark'] .mermaid .messageLine1 {
+  stroke: #94a3b8 !important;
+}
+
+/* ===========================================
+   Mindmap Dark Mode Fixes
+   =========================================== */
+
+/* Mindmap node backgrounds */
+[data-theme='dark'] .mermaid .mindmap-node rect,
+[data-theme='dark'] .mermaid .mindmap-node circle,
+[data-theme='dark'] .mermaid .mindmap-node ellipse,
+[data-theme='dark'] .mermaid .section-root rect,
+[data-theme='dark'] .mermaid .section-root circle {
+  fill: #334155 !important;
+  stroke: #64748b !important;
+}
+
+/* Mindmap text - ensure visibility */
+[data-theme='dark'] .mermaid .mindmap-node text,
+[data-theme='dark'] .mermaid .mindmap-node .nodeLabel,
+[data-theme='dark'] .mermaid .mindmap-label,
+[data-theme='dark'] .mermaid g.mindmap-node text {
+  fill: #e2e8f0 !important;
+  color: #e2e8f0 !important;
+}
+
+/* Mindmap root node */
+[data-theme='dark'] .mermaid .section-root text,
+[data-theme='dark'] .mermaid .mindmap-node.section-root text {
+  fill: #f8fafc !important;
+}
+
+/* Mindmap connecting lines */
+[data-theme='dark'] .mermaid .mindmap-edge,
+[data-theme='dark'] .mermaid .edge-depth-0,
+[data-theme='dark'] .mermaid .edge-depth-1,
+[data-theme='dark'] .mermaid .edge-depth-2 {
+  stroke: #64748b !important;
+}
+
+/* Light mode sequence/mindmap defaults */
+.mermaid .actor {
+  stroke-width: 2px;
+}
+
+.mermaid .mindmap-node {
+  padding: 8px 16px;
+}

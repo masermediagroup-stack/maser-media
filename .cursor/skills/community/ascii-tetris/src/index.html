@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>ASCII Tetris</title>
+    
+    <!-- Open Graph meta tags for social media sharing -->
+    <meta property="og:title" content="ASCII Tetris" />
+    <meta property="og:description" content="Classic Tetris game with retro terminal graphics. Play in your browser!" />
+    <meta property="og:image" content="%IMAGE_URL%" />
+    <meta property="og:url" content="%BASE_URL%" />
+    <meta property="og:type" content="website" />
+    
+    <!-- Twitter Card meta tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ASCII Tetris" />
+    <meta name="twitter:description" content="Classic Tetris game with retro terminal graphics. Play in your browser!" />
+    <meta name="twitter:image" content="%IMAGE_URL%" />
+  </head>
+  <body>
+    <div id="start-screen">
+      <div id="title">ASCII TETRIS</div>
+      <div class="start-message">Press any key to start</div>
+      <div class="start-message-mobile">Click/Tap to start</div>
+    </div>
+    <div id="tetris-container" style="display: none">
+      <div id="mobile-top-container">
+        <div id="scoreboard"></div>
+        <div id="next-piece"></div>
+      </div>
+      <div>
+        <div id="game-board"></div>
+         <div id="game-message"></div>
+        <div id="pause-button" class="mobile-only">PAUSE</div>
+      </div>
+      <div>
+        <div id="instructions"></div>
+      </div>
+    </div>
+
+    <div>
+      <h6 class="game-author-credits hide-on-mobile">Made with ♥ by <a href="https://michaelmovsesov.com" target="_blank">Michael Movsesov</a></h6>
+    </div>
+    <script src="./main.ts" type="module"></script>
+  </body>
+</html>

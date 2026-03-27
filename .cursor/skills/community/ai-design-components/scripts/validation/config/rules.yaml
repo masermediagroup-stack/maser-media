@@ -1,0 +1,324 @@
+# Skill Validation Rules (Core)
+# Based on Anthropic's Skills Best Practices
+# https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
+#
+# These rules are ENFORCED - violations cause errors or warnings.
+# For community suggestions, see community.yaml
+#
+# Version: 1.0.0
+
+version: "1.0.0"
+
+# =============================================================================
+# SKILL.md Requirements
+# =============================================================================
+skill_md:
+  # Maximum lines for SKILL.md body (after frontmatter)
+  max_lines: 500
+
+  # Required files
+  required_files:
+    - "SKILL.md"
+
+# =============================================================================
+# Frontmatter Requirements
+# =============================================================================
+frontmatter:
+  # Required fields
+  required_fields:
+    - name
+    - description
+
+  # Name field rules
+  name:
+    max_length: 64
+    # Pattern: lowercase letters, numbers, hyphens only
+    pattern: "^[a-z0-9-]+$"
+    pattern_description: "lowercase letters, numbers, and hyphens only"
+    # Cannot start or end with hyphen
+    no_leading_hyphen: true
+    no_trailing_hyphen: true
+    # Cannot have consecutive hyphens
+    no_consecutive_hyphens: true
+    # Reserved words that cannot appear in name
+    reserved_words:
+      - "anthropic"
+      - "claude"
+    # Preferred naming convention (warning if not followed)
+    preferred_format:
+      pattern: "ing(-|$)"
+      description: "gerund form (verb + -ing)"
+      severity: "warning"
+
+  # Description field rules
+  description:
+    max_length: 1024
+    min_length: 1
+    # Cannot contain XML-like tags
+    no_xml_tags: true
+    # Should include usage guidance (warning if not detected)
+    should_include_when:
+      keywords:
+        - "when"
+        - "When"
+        - "Use "
+        - "use "
+      severity: "warning"
+
+# =============================================================================
+# Reference Files
+# =============================================================================
+references:
+  # Maximum nesting depth (1 = references can't reference other references)
+  max_depth: 1
+
+  # Files over this line count should have Table of Contents
+  toc_threshold: 100
+  toc_required: false  # warning if missing, not error
+
+  # Patterns to detect ToC
+  toc_patterns:
+    - "^## Table of Contents"
+    - "^## Contents"
+    - "^# Table of Contents"
+
+# =============================================================================
+# Anti-Patterns to Detect
+# =============================================================================
+anti_patterns:
+  # Second person usage (you/your)
+  second_person:
+    enabled: true
+    severity: "warning"
+    patterns:
+      - "\\byou\\b"
+      - "\\byour\\b"
+      - "\\byou're\\b"
+      - "\\byou'll\\b"
+    message: "Use imperative form instead of second person"
+
+  # Time-sensitive information
+  time_sensitive:
+    enabled: true
+    severity: "warning"
+    patterns:
+      - "as of (january|february|march|april|may|june|july|august|september|october|november|december) 20[0-9][0-9]"
+      - "current(ly)? (version|release)"
+      - "latest (version|release)"
+    message: "Avoid time-sensitive information that becomes outdated"
+
+  # Windows-style paths - disabled due to false positives with escape sequences
+  windows_paths:
+    enabled: false
+    severity: "warning"
+    patterns:
+      - "[A-Z]:\\\\"
+    message: "Use forward slashes for file paths"
+
+# =============================================================================
+# Outputs.yaml Requirements (Skill Deliverables)
+# =============================================================================
+outputs_yaml:
+  # Required top-level fields
+  required_fields:
+    - skill
+    - version
+
+  # At least one of these output sections must be present
+  output_sections:
+    - base_outputs
+    - conditional_outputs
+
+  # Skill field rules (must match skill directory name)
+  skill:
+    must_match_directory: true
+
+  # Version field rules
+  version:
+    type: "string_or_number"
+
+  # base_outputs item rules
+  base_output_item:
+    required_fields:
+      - path
+    optional_fields:
+      - reason
+      - description
+      - must_contain
+      - patterns
+      - content_markers
+    path:
+      type: "string"
+    reason:
+      type: "string"
+    description:
+      type: "string"
+    must_contain:
+      type: "list"
+
+  # conditional_outputs structure rules
+  conditional_outputs:
+    allowed_sections:
+      - maturity
+      - provider
+      - technology
+      - framework
+      - platform
+    maturity:
+      allowed_levels:
+        # Blueprint naming convention
+        - mvp
+        - production
+        - enterprise
+        # Alternative naming convention (used in some skills)
+        - starter
+        - intermediate
+        - advanced
+
+# =============================================================================
+# File Structure
+# =============================================================================
+structure:
+  # Expected directories (optional - just for validation hints)
+  optional_directories:
+    - "references"
+    - "examples"
+    - "scripts"
+    - "assets"
+
+  # Example file extensions to validate
+  example_extensions:
+    - ".ts"
+    - ".tsx"
+    - ".py"
+    - ".go"
+    - ".rs"
+    - ".js"
+    - ".jsx"
+
+# =============================================================================
+# Phase Definitions (for skill development roadmap)
+# =============================================================================
+phases:
+  phase_1:
+    name: "Critical Foundation"
+    priority: 1
+    skills:
+      - testing-strategies
+      - building-ci-pipelines
+      - operating-kubernetes
+      - writing-infrastructure-code
+      - security-hardening
+      - secret-management
+
+  phase_2:
+    name: "High Priority"
+    priority: 2
+    skills:
+      - implementing-gitops
+      - administering-linux
+      - architecting-networks
+      - load-balancing-patterns
+      - planning-disaster-recovery
+      - performance-engineering
+      - implementing-compliance
+      - managing-vulnerabilities
+      - siem-logging
+      - implementing-tls
+      - implementing-service-mesh
+      - platform-engineering
+
+  phase_3:
+    name: "Medium Priority"
+    priority: 3
+    skills:
+      - architecting-security
+      - configuring-firewalls
+      - managing-configuration
+      - managing-incidents
+      - writing-github-actions
+      - designing-apis
+      - building-clis
+      - designing-sdks
+      - generating-documentation
+      - debugging-techniques
+      - managing-git-workflows
+      - architecting-data
+      - streaming-data
+      - transforming-data
+      - optimizing-sql
+      - managing-dns
+      - configuring-nginx
+      - writing-dockerfiles
+
+  phase_4:
+    name: "Enhancement"
+    priority: 4
+    skills:
+      - implementing-mlops
+      - prompt-engineering
+      - evaluating-llms
+      - embedding-optimization
+      - deploying-on-aws
+      - deploying-on-gcp
+      - deploying-on-azure
+      - optimizing-costs
+      - resource-tagging
+      - shell-scripting
+      - designing-distributed-systems
+
+# =============================================================================
+# Blueprint Validation Rules (Skillchain Blueprints)
+# =============================================================================
+blueprints:
+  # Required section in blueprint markdown
+  required_section: "## Deliverables Specification"
+
+  # Required subsections within Deliverables Specification
+  required_subsections:
+    - "### Deliverables"
+    - "### Maturity Profiles"
+
+  # Deliverables structure rules
+  deliverables:
+    # Required fields for each deliverable
+    required_fields:
+      - primary_skill
+      - required_files
+    # Optional allowed fields
+    optional_fields:
+      - content_checks
+      - maturity_required
+      - condition
+      - conditional
+      - cloud_provider
+
+  # Maturity profiles rules
+  maturity_profiles:
+    # Required profile levels
+    required_profiles:
+      - starter
+      - intermediate
+      - advanced
+    # Allowed fields in each profile
+    allowed_fields:
+      - description
+      - require_additionally
+      - skip_deliverables
+      - empty_dirs_allowed
+      - generation_adjustments
+      - additional_deliverables
+
+  # Default blueprints directory (relative to ~/.claude/commands/)
+  default_path: "skillchain/blueprints"
+
+# =============================================================================
+# Severity Configuration
+# =============================================================================
+severity:
+  # Which severities cause validation failure
+  fail_on:
+    - "error"
+  # Which severities are reported but don't fail
+  warn_on:
+    - "warning"

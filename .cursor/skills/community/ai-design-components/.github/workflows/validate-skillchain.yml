@@ -1,0 +1,355 @@
+name: Validate Skillchain
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.claude-commands/skillchain/**'
+      - '.claude-commands/skillchain-data/**'
+      - '.claude-plugin/marketplace.json'
+      - '.github/workflows/validate-skillchain.yml'
+      - 'evaluation/**'
+      - 'scripts/validation/**'
+      - 'scripts/runtime/**'
+      - 'scripts/sync_registry_invocations.py'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.claude-commands/skillchain/**'
+      - '.claude-commands/skillchain-data/**'
+      - '.claude-plugin/marketplace.json'
+      - '.github/workflows/validate-skillchain.yml'
+      - 'evaluation/**'
+      - 'scripts/validation/**'
+      - 'scripts/runtime/**'
+      - 'scripts/sync_registry_invocations.py'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  validate-registries:
+    name: Validate Skillchain Registries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+
+      - name: Validate registry files
+        run: |
+          echo "Validating skillchain registries..."
+
+          python3 << 'EOF'
+          import yaml
+          import sys
+          from pathlib import Path
+
+          registries_dir = Path(".claude-commands/skillchain-data/registries")
+          errors = []
+
+          # Check index exists
+          index_file = registries_dir / "_index.yaml"
+          if not index_file.exists():
+              errors.append(f"Missing registry index: {index_file}")
+              print(f"ERROR: {errors[-1]}")
+              sys.exit(1)
+
+          with open(index_file) as f:
+              index = yaml.safe_load(f)
+
+          print(f"Registry version: {index.get('version', 'unknown')}")
+          print(f"Total skills declared: {index.get('total_skills', 0)}")
+
+          domains = index.get("domains", {})
+          total_skill_count = 0
+
+          for domain, info in domains.items():
+              registry_file = registries_dir / info.get("file", f"{domain}.yaml")
+
+              if not registry_file.exists():
+                  errors.append(f"Missing registry file: {registry_file}")
+                  print(f"ERROR: {errors[-1]}")
+                  continue
+
+              with open(registry_file) as f:
+                  registry = yaml.safe_load(f)
+
+              skills = registry.get("skills", {})
+              skill_count = len(skills) if isinstance(skills, dict) else 0
+              total_skill_count += skill_count
+
+              print(f"  {domain}: {skill_count} skills")
+
+              # Validate each skill has required fields
+              for skill_name, config in (skills.items() if isinstance(skills, dict) else []):
+                  if not isinstance(config, dict):
+                      continue
+
+                  if "keywords" not in config:
+                      errors.append(f"{domain}/{skill_name}: missing keywords")
+                  elif "primary" not in config.get("keywords", {}):
+                      errors.append(f"{domain}/{skill_name}: missing primary keywords")
+
+          print(f"\nTotal skills in registries: {total_skill_count}")
+
+          if errors:
+              print(f"\n{len(errors)} validation errors:")
+              for error in errors:
+                  print(f"  - {error}")
+              sys.exit(1)
+
+          print("\nAll registries validated successfully!")
+          EOF
+
+      - name: Validate registry invocations match marketplace.json
+        run: |
+          echo "Checking registry invocations match marketplace.json..."
+
+          python3 << 'EOF'
+          import json
+          import yaml
+          import re
+          import sys
+          from pathlib import Path
+
+          # Load marketplace.json mappings
+          marketplace_path = Path(".claude-plugin/marketplace.json")
+          if not marketplace_path.exists():
+              print("WARNING: marketplace.json not found, skipping invocation check")
+              sys.exit(0)
+
+          with open(marketplace_path) as f:
+              data = json.load(f)
+
+          expected = {}
+          for plugin in data.get('plugins', []):
+              plugin_name = plugin['name']
+              for skill_path in plugin.get('skills', []):
+                  skill_name = skill_path.replace('./skills/', '')
+                  expected[skill_name] = f"{plugin_name}:{skill_name}"
+
+          print(f"Loaded {len(expected)} skill mappings from marketplace.json")
+
+          # Check all registry invocations
+          registries_dir = Path(".claude-commands/skillchain-data/registries")
+          errors = []
+
+          for registry_file in registries_dir.glob('*.yaml'):
+              if registry_file.name == '_index.yaml':
+                  continue
+
+              with open(registry_file) as f:
+                  content = f.read()
+
+              # Find all invocation fields
+              for match in re.finditer(r'invocation: ["\']([^"\']+)["\']', content):
+                  invocation = match.group(1)
+                  if ':' in invocation:
+                      skill_name = invocation.split(':')[1]
+                      if skill_name in expected and expected[skill_name] != invocation:
+                          errors.append(f"{registry_file.name}: {invocation} should be {expected[skill_name]}")
+
+          if errors:
+              print(f"\n{len(errors)} registry invocations don't match marketplace.json:")
+              for error in errors:
+                  print(f"  - {error}")
+              print("\nRun: python scripts/sync_registry_invocations.py")
+              sys.exit(1)
+
+          print("All registry invocations match marketplace.json!")
+          EOF
+
+  validate-blueprints:
+    name: Validate Blueprints
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+
+      - name: Install skillchain commands
+        run: |
+          # Install skillchain to ~/.claude/commands for validation (CI mode)
+          # Note: install.sh requires interactive mode or CLI args, so we do manual copy for CI
+          echo "Installing skillchain commands for CI validation..."
+
+          mkdir -p ~/.claude/commands/skillchain
+          mkdir -p ~/.claude/skillchain-data
+
+          # Copy commands
+          if [[ -d ".claude-commands/skillchain" ]]; then
+            cp -r .claude-commands/skillchain/* ~/.claude/commands/skillchain/
+            echo "✓ Copied skillchain commands"
+          fi
+
+          # Copy data (registries, etc.)
+          if [[ -d ".claude-commands/skillchain-data" ]]; then
+            cp -r .claude-commands/skillchain-data/* ~/.claude/skillchain-data/
+            echo "✓ Copied skillchain data"
+          fi
+
+          echo "Installation complete for CI"
+
+      - name: Validate blueprint structure (basic checks)
+        run: |
+          echo "Running basic blueprint structure checks..."
+
+          blueprints_dir=".claude-commands/skillchain/blueprints"
+          errors=0
+
+          for bp_file in "$blueprints_dir"/*.md; do
+            bp_name=$(basename "$bp_file" .md)
+
+            # Check file size (should be substantial)
+            line_count=$(wc -l < "$bp_file")
+            if [[ $line_count -lt 100 ]]; then
+              echo "WARNING: $bp_name has only $line_count lines (expected 100+)"
+            else
+              echo "✓ $bp_name: $line_count lines"
+            fi
+
+            # Check for required sections
+            if ! grep -q "## Trigger Keywords" "$bp_file"; then
+              echo "ERROR: $bp_name missing 'Trigger Keywords' section"
+              errors=$((errors + 1))
+            fi
+
+            if ! grep -q "## .*Skill Chain" "$bp_file"; then
+              echo "ERROR: $bp_name missing 'Skill Chain' section"
+              errors=$((errors + 1))
+            fi
+
+            if ! grep -q "## Pre-configured Defaults" "$bp_file"; then
+              echo "ERROR: $bp_name missing 'Pre-configured Defaults' section"
+              errors=$((errors + 1))
+            fi
+          done
+
+          blueprint_count=$(ls -1 "$blueprints_dir"/*.md 2>/dev/null | wc -l)
+          echo ""
+          echo "Total blueprints: $blueprint_count"
+
+          if [[ $errors -gt 0 ]]; then
+            echo "Found $errors basic validation errors"
+            exit 1
+          fi
+
+          echo "Basic structure validation passed!"
+
+      - name: Validate blueprint deliverables (YAML validation)
+        run: |
+          echo "Running deliverables YAML validation..."
+          python -m scripts.validation blueprints --verbose
+
+  run-evaluation:
+    name: Run Skillchain Evaluation
+    runs-on: ubuntu-latest
+    needs: [validate-registries, validate-blueprints]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+
+      - name: Run evaluation scenarios
+        id: evaluation
+        run: |
+          if [[ -f "evaluation/evaluate.py" ]]; then
+            echo "Running skillchain evaluation..."
+
+            # Run evaluation (ignore exit code - we check pass rate ourselves)
+            python3 evaluation/evaluate.py --report --output evaluation_results.json || true
+
+            # Check if evaluation report was created
+            if [[ -f "evaluation/evaluation_results.json" ]]; then
+              # Extract pass rate from passed/total_scenarios
+              PASS_RATE=$(python3 -c "import json; d=json.load(open('evaluation/evaluation_results.json')); print(int(d.get('passed',0)/max(d.get('total_scenarios',1),1)*100))")
+              echo "Pass rate: ${PASS_RATE}%"
+              echo "pass_rate=$PASS_RATE" >> $GITHUB_OUTPUT
+
+              # Fail only if pass rate is below 80% threshold
+              if [[ "$PASS_RATE" -lt 80 ]]; then
+                echo ""
+                echo "ERROR: Evaluation pass rate is ${PASS_RATE}% (below 80% threshold)"
+                echo "See evaluation report artifact for details"
+                exit 1
+              fi
+              echo "✓ Evaluation passed (${PASS_RATE}% >= 80% threshold)"
+            fi
+          else
+            echo "Evaluation script not found, skipping..."
+          fi
+
+      - name: Upload evaluation report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: skillchain-evaluation-report
+          path: evaluation/evaluation_results.json
+          if-no-files-found: ignore
+
+  summary:
+    name: Skillchain Validation Summary
+    runs-on: ubuntu-latest
+    needs: [validate-registries, validate-blueprints, run-evaluation]
+    if: always()
+    steps:
+      - name: Check results
+        run: |
+          echo "=== Skillchain Validation Summary ==="
+          echo ""
+
+          FAILED=0
+
+          if [[ "${{ needs.validate-registries.result }}" == "success" ]]; then
+            echo "✓ Registries: PASSED"
+          else
+            echo "✗ Registries: FAILED"
+            FAILED=1
+          fi
+
+          if [[ "${{ needs.validate-blueprints.result }}" == "success" ]]; then
+            echo "✓ Blueprints: PASSED"
+          else
+            echo "✗ Blueprints: FAILED"
+            FAILED=1
+          fi
+
+          if [[ "${{ needs.run-evaluation.result }}" == "success" ]]; then
+            echo "✓ Evaluation: PASSED"
+          else
+            echo "✗ Evaluation: FAILED (below 80% threshold - see artifacts)"
+            FAILED=1
+          fi
+
+          echo ""
+          echo "=== End Summary ==="
+
+          if [[ $FAILED -eq 1 ]]; then
+            echo ""
+            echo "One or more validation checks failed."
+            echo "Review the evaluation report artifact for scenario details."
+            exit 1
+          fi

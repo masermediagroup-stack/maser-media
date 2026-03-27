@@ -87,10 +87,9 @@ export function HeroParticles() {
         p.x = Math.max(0, Math.min(canvas.width, p.x));
         p.y = Math.max(0, Math.min(canvas.height, p.y));
 
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = isDark ? 'rgba(16, 164, 255, 0.4)' : 'rgba(0, 151, 245, 0.35)';
+        ctx.fillStyle = 'rgba(16, 164, 255, 0.4)';
         ctx.fill();
       });
 
@@ -111,6 +110,28 @@ export function HeroParticles() {
     const handleResize = () => {
       resize();
     };
+
+    const drawFrame = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(16, 164, 255, 0.4)';
+        ctx.fill();
+      });
+    };
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reducedMotion) {
+      const onResizeReduced = () => {
+        resize();
+        drawFrame();
+      };
+      onResizeReduced();
+      window.addEventListener('resize', onResizeReduced);
+      return () => window.removeEventListener('resize', onResizeReduced);
+    }
 
     hero.addEventListener('mousemove', handleMouseMove);
     hero.addEventListener('mouseleave', handleMouseLeave);

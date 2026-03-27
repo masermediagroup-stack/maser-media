@@ -105,67 +105,46 @@ export function GalaxyBackground() {
     };
 
     const drawBase = () => {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, '#0a0a0a');
+      gradient.addColorStop(0.3, '#0d1520');
+      gradient.addColorStop(0.7, '#0a0f18');
+      gradient.addColorStop(1, '#0a0a0a');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      if (isDark) {
-        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        gradient.addColorStop(0, '#0a0a0a');
-        gradient.addColorStop(0.3, '#0d1520');
-        gradient.addColorStop(0.7, '#0a0f18');
-        gradient.addColorStop(1, '#0a0a0a');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const blob1 = ctx.createRadialGradient(
+        canvas.width * 0.2,
+        canvas.height * 0.3,
+        0,
+        canvas.width * 0.2,
+        canvas.height * 0.3,
+        canvas.width * 0.6
+      );
+      blob1.addColorStop(0, 'rgba(16, 164, 255, 0.08)');
+      blob1.addColorStop(1, 'transparent');
+      ctx.fillStyle = blob1;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const blob1 = ctx.createRadialGradient(
-          canvas.width * 0.2,
-          canvas.height * 0.3,
-          0,
-          canvas.width * 0.2,
-          canvas.height * 0.3,
-          canvas.width * 0.6
-        );
-        blob1.addColorStop(0, 'rgba(16, 164, 255, 0.08)');
-        blob1.addColorStop(1, 'transparent');
-        ctx.fillStyle = blob1;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        const blob2 = ctx.createRadialGradient(
-          canvas.width * 0.8,
-          canvas.height * 0.7,
-          0,
-          canvas.width * 0.8,
-          canvas.height * 0.7,
-          canvas.width * 0.5
-        );
-        blob2.addColorStop(0, 'rgba(0, 101, 163, 0.06)');
-        blob2.addColorStop(1, 'transparent');
-        ctx.fillStyle = blob2;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      } else {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        const blob1 = ctx.createRadialGradient(
-          canvas.width * 0.3,
-          canvas.height * 0.2,
-          0,
-          canvas.width * 0.3,
-          canvas.height * 0.2,
-          canvas.width * 0.5
-        );
-        blob1.addColorStop(0, 'rgba(0, 151, 245, 0.04)');
-        blob1.addColorStop(1, 'transparent');
-        ctx.fillStyle = blob1;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
+      const blob2 = ctx.createRadialGradient(
+        canvas.width * 0.8,
+        canvas.height * 0.7,
+        0,
+        canvas.width * 0.8,
+        canvas.height * 0.7,
+        canvas.width * 0.5
+      );
+      blob2.addColorStop(0, 'rgba(0, 101, 163, 0.06)');
+      blob2.addColorStop(1, 'transparent');
+      ctx.fillStyle = blob2;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
     };
 
     const drawStars = (time: number) => {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      const blueStarColor = isDark ? 'rgba(16, 164, 255, ' : 'rgba(0, 101, 163, ';
-      const whiteStarColor = isDark ? 'rgba(255, 255, 255, ' : 'rgba(255, 255, 255, ';
-      const blueMaxOpacity = isDark ? 0.6 : 0.25;
-      const whiteMaxOpacity = isDark ? 0.5 : 0.35;
+      const blueStarColor = 'rgba(16, 164, 255, ';
+      const whiteStarColor = 'rgba(255, 255, 255, ';
+      const blueMaxOpacity = 0.6;
+      const whiteMaxOpacity = 0.5;
 
       stars.forEach((s) => {
         const parallaxOffset = scrollY * s.parallax * 0.1;
@@ -183,8 +162,7 @@ export function GalaxyBackground() {
     };
 
     const drawParticles = () => {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      const particleColor = isDark ? 'rgba(16, 164, 255, 0.35)' : 'rgba(0, 151, 245, 0.2)';
+      const particleColor = 'rgba(16, 164, 255, 0.35)';
 
       particles.forEach((p) => {
         if (!reducedMotion) {
@@ -218,9 +196,8 @@ export function GalaxyBackground() {
       });
     };
 
-    const drawPlanets = (time: number) => {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      const planetColor = isDark ? 'rgba(0, 151, 245, 0.15)' : 'rgba(0, 101, 163, 0.08)';
+    const drawPlanets = () => {
+      const planetColor = 'rgba(0, 151, 245, 0.15)';
 
       const centers = [
         { cx: canvas.width * 0.2, cy: canvas.height * 0.3 },
@@ -248,16 +225,28 @@ export function GalaxyBackground() {
 
         ctx.beginPath();
         ctx.arc(px, py, pl.radius, 0, Math.PI * 2);
-        ctx.fillStyle = isDark ? 'rgba(16, 164, 255, 0.25)' : 'rgba(0, 101, 163, 0.15)';
+        ctx.fillStyle = 'rgba(16, 164, 255, 0.25)';
         ctx.fill();
       });
     };
 
+    let lastReducedDraw = 0;
+    const REDUCED_FRAME_MS = 320;
+
     const animate = (time: number = 0) => {
+      if (reducedMotion) {
+        const now = performance.now();
+        if (now - lastReducedDraw < REDUCED_FRAME_MS) {
+          animationId = requestAnimationFrame(animate);
+          return;
+        }
+        lastReducedDraw = now;
+      }
+
       drawBase();
       drawStars(time);
       drawParticles();
-      drawPlanets(time);
+      drawPlanets();
       animationId = requestAnimationFrame(animate);
     };
 

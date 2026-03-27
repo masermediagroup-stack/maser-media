@@ -1,0 +1,222 @@
+:root {
+  --background-color: #000;
+  --text-color: #00ff00;
+}
+
+html,
+body {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background-color);
+  color: var(--text-color);
+  font-family: 'Courier New', Courier, monospace;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-size: 24px;
+}
+
+a {
+  color: var(--text-color);
+}
+
+#start-screen {
+  text-align: center;
+  white-space: pre;
+  font-size: 24px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  height: 100%;
+  width: 100%;
+}
+
+#title {
+  font-size: 36px;
+  letter-spacing: 2px;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.blink-animation {
+  animation: blink 1s infinite;
+}
+
+.start-message,
+.start-message-mobile {
+  animation: blink 1s infinite;
+}
+
+.start-message-mobile {
+  display: none;
+}
+
+#tetris-container {
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+/* TODO: convert ids to classes for styling */
+#game-board,
+#next-piece,
+#scoreboard,
+#instructions {
+  white-space: pre;
+  font-size: 20px;
+  line-height: 1.1;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+}
+
+#game-board {
+  margin-right: 20px;
+}
+
+#scoreboard {
+  margin-bottom: 20px;
+}
+
+.mobile-only {
+  display: none;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  body {
+    padding: 20px;
+    justify-content: flex-start;
+    font-size: 20px;
+  }
+
+  .hide-on-mobile {
+    display: none;
+  }
+
+  #start-screen {
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: var(--background-color);
+  }
+
+  #title {
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
+
+  .start-message {
+    display: none;
+  }
+
+  .start-message-mobile {
+    display: block;
+    font-size: 20px;
+  }
+
+  #tetris-container {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    align-items: center;
+    height: calc(100vh - 40px); /* Account for body padding */
+    padding-top: 10px;
+  }
+
+  #game-board {
+    margin-right: 0;
+    font-size: 16px;
+    letter-spacing: 0;
+  }
+
+  #next-piece,
+  #scoreboard {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  #instructions {
+    display: none;
+  }
+
+  .mobile-controls {
+    display: none;
+  }
+
+  #mobile-top-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 0;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+
+  .game-author-credits {
+    position: fixed;
+    top: 10px;
+    bottom: auto;
+  }
+}
+
+#pause-button {
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  margin-top: 10px;
+  background: var(--background-color);
+  border: 2px solid var(--text-color);
+  color: var(--text-color);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 20px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#pause-button:active {
+  background: var(--text-color);
+  color: var(--background-color);
+}
+
+.game-author-credits {
+  font-weight: normal;
+  font-size: 14px;
+  color: var(--text-color);
+  text-align: center;
+  margin-top: 20px;
+  position: fixed;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
+  pointer-events: auto;
+}

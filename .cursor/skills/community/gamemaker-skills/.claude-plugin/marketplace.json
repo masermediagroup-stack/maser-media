@@ -1,0 +1,22 @@
+{
+  "name": "gamemaker-skills",
+  "owner": {
+    "name": "leihaht",
+    "email": ""
+  },
+  "metadata": {
+    "description": "Comprehensive GameMaker Studio 2 and GML development skills for Claude Code",
+    "version": "1.3.3"
+  },
+  "plugins": [
+    {
+      "name": "gamemaker-expert",
+      "description": "Expert-level GameMaker Studio 2 and GML knowledge covering beginner to advanced topics including shaders, networking, and platform-specific development",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./gamemaker-expert"
+      ]
+    }
+  ]
+}

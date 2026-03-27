@@ -1,63 +1,26 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { MotionConfig, motion } from 'motion/react';
+import { useReducedMotionAfterMount } from '@/lib/useReducedMotionAfterMount';
 import {
   GalaxyBackground,
-  PageLoader,
   Nav,
+  SideRail,
   Hero,
   PillNav,
   Clients,
-  Services,
   CrashPlayground,
   Work,
+  Services,
   Testimonials,
-  PricingPlans,
   Cta,
   Footer,
 } from '@/components';
 
-export default function Home({
-  params,
-  searchParams,
-}: {
-  params?: Promise<Record<string, string | string[]>>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  use(params ?? Promise.resolve({}));
-  use(searchParams ?? Promise.resolve({}));
-  const [loaderRevealed, setLoaderRevealed] = useState(false);
-
-  useEffect(() => {
-    // Initialize theme from localStorage
-    const theme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', theme);
-    document.body.classList.add('loader-active');
-
-    // Reveal loader after page load
-    const timer = setTimeout(() => {
-      setLoaderRevealed(true);
-    }, 100);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (loaderRevealed) {
-      const timer = setTimeout(() => {
-        document.body.classList.remove('loader-active');
-      }, 1200);
-      return () => clearTimeout(timer);
-    }
-  }, [loaderRevealed]);
-
-  useEffect(() => {
-    return () => {
-      document.body.classList.remove('loader-active');
-    };
-  }, []);
+export default function Home() {
+  const { mounted, prefersReducedMotion } = useReducedMotionAfterMount();
+  const entrance = !mounted || prefersReducedMotion !== true;
 
   // Scroll animation observer for sections
   useEffect(() => {
@@ -82,22 +45,33 @@ export default function Home({
   }, []);
 
   return (
-    <>
+    <MotionConfig reducedMotion="user">
       <GalaxyBackground />
-      <PageLoader />
-      <Nav />
-      <main>
-        <Hero />
-        <Clients />
-        <Services />
-        <CrashPlayground />
-        <Work />
-        <Testimonials />
-        <PricingPlans />
-        <Cta />
-        <Footer />
+      <Nav entrance={entrance} />
+      <SideRail entrance={entrance} />
+      {/* Hero shader + galaxy read as static; only body sections use a soft entrance */}
+      <main id="main-content" className="site-main">
+        <Hero entrance={entrance} />
+        <motion.div
+          className="site-main-entrance"
+          initial={entrance ? { opacity: 0, y: 28 } : false}
+          animate={entrance ? { opacity: 1, y: 0 } : false}
+          transition={
+            entrance
+              ? { duration: 0.55, delay: 0.14, ease: [0.22, 1, 0.36, 1] }
+              : undefined
+          }
+        >
+          <Clients />
+          <CrashPlayground />
+          <Work />
+          <Services />
+          <Testimonials />
+          <Cta />
+          <Footer />
+        </motion.div>
       </main>
-      <PillNav />
-    </>
+      <PillNav entrance={entrance} />
+    </MotionConfig>
   );
 }

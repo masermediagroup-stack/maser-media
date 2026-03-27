@@ -1,302 +1,341 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'motion/react';
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
+import { LiquidMetal, Metaballs } from '@paper-design/shaders-react';
+import { motion, useReducedMotion } from 'motion/react';
 
-const CheckIcon = ({ light = false }: { light?: boolean }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, marginTop: 2 }} color={light ? '#FFFFFF' : 'var(--color-text)'}>
-    <circle cx="12" cy="12" r="10" fill="currentColor" fillOpacity={0.15} />
-    <path d="M8 12L11 15L16 9" stroke="currentColor" strokeOpacity={light ? 1 : 0.5} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+/** Paper artboard `15O-0` — copy + layout from Paper MCP `get_jsx` export (March 2025). */
+const BOOK_CALL_HREF = '/#contact';
+
+const METABALLS_COLORS = [
+  '#0097F5',
+  '#0084D7',
+  '#388ACB',
+  '#0065A3',
+  '#000000',
+  '#000000FC',
+  '#FFFFFF',
+];
+
+const METABALLS_PROPS = {
+  speed: 1.23,
+  count: 16,
+  size: 0.7,
+  scale: 1.17,
+  colors: METABALLS_COLORS,
+  colorBack: '#000000FA',
+};
+
+const LIQUID_METAL_IMAGE =
+  'https://workers.paper.design/file-assets/01KJG8T4NE29Q3TPBDYJSJ9C00/01KMJ26CTKB12E4REG0CR4BZY1.webp';
+
+const LIQUID_METAL_PROPS = {
+  speed: 0.24,
+  softness: 0.34,
+  repetition: 1.75,
+  shiftRed: -0.14,
+  shiftBlue: 0,
+  distortion: 0.1,
+  contour: 0.64,
+  scale: 0.82,
+  rotation: 0,
+  shape: 'diamond' as const,
+  angle: -40,
+  image: LIQUID_METAL_IMAGE,
+  colorBack: '#00000000',
+  colorTint: '#FFFFFF',
+};
+
+const PAPER_COPY = {
+  lede:
+    'Two ways to work with us. Both built for speed, backed by senior talent, and designed to get you results - not excuses.',
+  retainer: {
+    title: 'Retainer',
+    summary: 'Ongoing execution. Relentless output.',
+    bullets: [
+      'Design, dev and strategy - no bottlenecks',
+      'You scale, we keep up - month after month',
+      'Built to move fast and hit deadlines, period',
+    ],
+    priceMain: '$2k',
+    priceSuffix: '/month',
+  },
+  project: {
+    title: 'Project',
+    summary: 'One goal. One timeline. Done right.',
+    bullets: [
+      'Scoped, quoted, and delivered in 2-4 weeks flat.',
+      'Custom code, not cookie-cutter templates',
+      'Launch ready assets that will drive real results',
+    ],
+  },
+} as const;
+
+const CheckIcon = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    role="presentation"
+    aria-hidden="true"
+    focusable="false"
+    className="pricing-card__check"
+  >
+    <circle cx="12" cy="12" r="10" fill="#683A3333" />
+    <path
+      d="M8 12L11 15L16 9"
+      stroke="#FFFFFFF7"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
-export function PricingPlans() {
+const cardFaceGradient: CSSProperties = {
+  backgroundImage:
+    'radial-gradient(ellipse 90.04% 164.2% at 82.02% 94.55% in oklab, oklab(78.9% -0.042 -0.104 / 36%) 0%, oklab(69.8% -0.062 -0.154 / 25%) 28.61%, oklab(27.7% -0.025 -0.058) 57.23%, oklab(0% 0 -0.0001) 100%)',
+};
+
+const ctaGradient: CSSProperties = {
+  backgroundImage:
+    'radial-gradient(ellipse 187.36% 246.57% at 50.27% 50% in oklab, oklab(99.8% -0.0005 -0.001) 0%, oklab(49.1% -0.051 -0.115 / 0%) 100%)',
+};
+
+type TiltNode = HTMLElement & { __pricingTiltRaf?: number };
+
+function handleTiltMove(event: ReactPointerEvent<HTMLElement>, enabled: boolean) {
+  if (!enabled || event.pointerType !== 'mouse') return;
+
+  const node = event.currentTarget as TiltNode;
+  const rect = node.getBoundingClientRect();
+  const x = (event.clientX - rect.left) / rect.width;
+  const y = (event.clientY - rect.top) / rect.height;
+  const rotateY = (x - 0.5) * 6;
+  const rotateX = (0.5 - y) * 5;
+
+  if (node.__pricingTiltRaf) {
+    window.cancelAnimationFrame(node.__pricingTiltRaf);
+  }
+
+  node.__pricingTiltRaf = window.requestAnimationFrame(() => {
+    node.style.setProperty('--pricing-pointer-x', `${Math.round(x * 100)}%`);
+    node.style.setProperty('--pricing-pointer-y', `${Math.round(y * 100)}%`);
+    node.style.transform = `perspective(1100px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-2px)`;
+  });
+}
+
+function handleTiltLeave(event: ReactPointerEvent<HTMLElement>, enabled: boolean) {
+  if (!enabled) return;
+  const node = event.currentTarget as TiltNode;
+  if (node.__pricingTiltRaf) {
+    window.cancelAnimationFrame(node.__pricingTiltRaf);
+  }
+  node.style.transform = '';
+  node.dataset.pressed = 'false';
+  node.style.removeProperty('--pricing-pointer-x');
+  node.style.removeProperty('--pricing-pointer-y');
+}
+
+function handleTiltDown(event: ReactPointerEvent<HTMLElement>, enabled: boolean) {
+  if (!enabled || event.pointerType !== 'mouse') return;
+  const node = event.currentTarget as HTMLElement;
+  node.dataset.pressed = 'true';
+}
+
+function handleTiltUp(event: ReactPointerEvent<HTMLElement>) {
+  const node = event.currentTarget as HTMLElement;
+  node.dataset.pressed = 'false';
+}
+
+function RetainerCard({ reducedMotion }: { reducedMotion: boolean | null }) {
+  const canTilt = !reducedMotion;
+  const liquidStyle: CSSProperties = {
+    position: 'absolute',
+    left: 42.5,
+    top: 13,
+    width: '651px',
+    height: '401px',
+    backgroundColor: 'transparent',
+    filter: 'blur(15px) grayscale(100%)',
+    mixBlendMode: 'screen',
+    opacity: 0.5,
+    pointerEvents: 'none',
+  };
+
   return (
-    <motion.section
-      className="scroll-animate"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 53,
-        padding: '120px 24px',
-        maxWidth: 1200,
-        margin: '0 auto',
-        boxSizing: 'border-box',
-        fontFamily: 'var(--font-display), system-ui, sans-serif',
-      }}
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.7, ease: 'easeOut' }}
-    >
-      {/* Hero headline - spans full width above the 3 options */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24, width: '100%', textAlign: 'center' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
-          <h2
-            style={{
-              margin: 0,
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(48px, 7vw, 100px)',
-              fontWeight: 550,
-              letterSpacing: '-0.02em',
-              lineHeight: 1.1,
-              color: 'var(--color-text)',
-              maxWidth: 900,
-            }}
-          >
-            <span style={{ color: 'var(--color-text-muted)' }}>Ship fast.</span>
-            <br />
-            <span>Look credible.</span>
-            <br />
-            <span>Stand out.</span>
-          </h2>
-          <p
-            style={{
-              margin: 0,
-              fontSize: 18,
-              lineHeight: 1.5,
-              color: 'var(--color-text-muted)',
-              fontWeight: 350,
-              maxWidth: 700,
-            }}
-          >
-            Two ways to work with us. Speed, quality, and zero runaround.
-          </p>
+    <div className="pricing-card-slot pricing-card-slot--retainer">
+      <motion.article
+        className="pricing-card pricing-card--retainer pricing-card--interactive"
+        onPointerMove={(event) => handleTiltMove(event, canTilt)}
+        onPointerLeave={(event) => handleTiltLeave(event, canTilt)}
+        onPointerDown={(event) => handleTiltDown(event, canTilt)}
+        onPointerUp={handleTiltUp}
+        initial={false}
+        transition={{ type: 'spring', stiffness: 280, damping: 24 }}
+      >
+        <div className="pricing-card__face" style={cardFaceGradient}>
+          <div className="pricing-card__liquid-wrap" aria-hidden="true">
+            {!reducedMotion ? (
+              <LiquidMetal {...LIQUID_METAL_PROPS} style={liquidStyle} suspendWhenProcessingImage />
+            ) : null}
+          </div>
+
+          <div className="pricing-card__body">
+            <header className="pricing-card__header">
+              <h3 className="pricing-card__title">{PAPER_COPY.retainer.title}</h3>
+              <p className="pricing-card__summary">{PAPER_COPY.retainer.summary}</p>
+            </header>
+
+            <ul className="pricing-card__bullets">
+              {PAPER_COPY.retainer.bullets.map((text) => (
+                <li key={text} className="pricing-card__bullet">
+                  <CheckIcon />
+                  <span>{text}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="pricing-card__footer pricing-card__footer--retainer">
+              <div className="pricing-card__price-block">
+                <span className="pricing-card__price-label">Starting at</span>
+                <div className="pricing-card__price-row">
+                  <span className="pricing-card__price pricing-card__price--retainer-main">
+                    {PAPER_COPY.retainer.priceMain}
+                  </span>
+                  <span className="pricing-card__price-suffix">{PAPER_COPY.retainer.priceSuffix}</span>
+                </div>
+              </div>
+              <a
+                href={BOOK_CALL_HREF}
+                className="pricing-card__cta pricing-card__cta--pill"
+                aria-label="Book call for Retainer plan"
+                style={ctaGradient}
+              >
+                Book Call
+              </a>
+            </div>
+          </div>
+        </div>
+      </motion.article>
+    </div>
+  );
+}
+
+function ProjectCard({ reducedMotion }: { reducedMotion: boolean | null }) {
+  const canTilt = !reducedMotion;
+  const liquidStyle: CSSProperties = {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'transparent',
+    filter: 'blur(15px) grayscale(100%)',
+    mixBlendMode: 'screen',
+    opacity: 0.5,
+    pointerEvents: 'none',
+  };
+
+  return (
+    <div className="pricing-card-slot pricing-card-slot--project">
+      <motion.article
+        className="pricing-card pricing-card--project pricing-card--interactive"
+        onPointerMove={(event) => handleTiltMove(event, canTilt)}
+        onPointerLeave={(event) => handleTiltLeave(event, canTilt)}
+        onPointerDown={(event) => handleTiltDown(event, canTilt)}
+        onPointerUp={handleTiltUp}
+        initial={false}
+        transition={{ type: 'spring', stiffness: 280, damping: 24 }}
+      >
+        <div className="pricing-card__face" style={cardFaceGradient}>
+          <div className="pricing-card__liquid-wrap" aria-hidden="true">
+            {!reducedMotion ? (
+              <LiquidMetal {...LIQUID_METAL_PROPS} style={liquidStyle} suspendWhenProcessingImage />
+            ) : null}
+          </div>
+
+          <div className="pricing-card__body">
+            <header className="pricing-card__header">
+              <h3 className="pricing-card__title">{PAPER_COPY.project.title}</h3>
+              <p className="pricing-card__summary">{PAPER_COPY.project.summary}</p>
+            </header>
+
+            <ul className="pricing-card__bullets">
+              {PAPER_COPY.project.bullets.map((text) => (
+                <li key={text} className="pricing-card__bullet">
+                  <CheckIcon />
+                  <span>{text}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="pricing-card__footer pricing-card__footer--project">
+              <a
+                href={BOOK_CALL_HREF}
+                className="pricing-card__cta pricing-card__cta--full"
+                aria-label="Book call for Project plan"
+                style={ctaGradient}
+              >
+                Book Call
+              </a>
+            </div>
+          </div>
+        </div>
+      </motion.article>
+    </div>
+  );
+}
+
+export function PricingPlans() {
+  const reducedMotion = useReducedMotion() ?? true;
+
+  return (
+    <section id="pricing" className="pricing-plans pricing-plans--paper" aria-labelledby="pricing-heading">
+      <div className="pricing-plans__stage">
+        <div className="pricing-plans__shader-bg" aria-hidden="true">
+          {!reducedMotion ? (
+            <Metaballs
+              {...METABALLS_PROPS}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#000000',
+                filter: 'blur(13px)',
+              }}
+            />
+          ) : null}
+        </div>
+
+        <div className="pricing-plans__content">
+          <div className="pricing-plans__content-scale">
+            {/* Paper 15O-0: outer frame 522×364; inner column max 500px; gap 24px headline↔lede */}
+            <div className="pricing-plans__headline-shell">
+              <div className="pricing-plans__headline-block">
+                <h2 id="pricing-heading" className="pricing-plans__headline">
+                  <span className="pricing-plans__headline-lines">
+                    <span className="pricing-plans__headline-line pricing-plans__headline-line--ship">Ship fast.</span>{' '}
+                    <span className="pricing-plans__headline-line pricing-plans__headline-line--look">
+                      Look credible.
+                    </span>
+                    <br className="pricing-plans__headline-br" aria-hidden="true" />
+                    <span className="pricing-plans__headline-line pricing-plans__headline-line--stand">Stand out.</span>
+                  </span>
+                </h2>
+                <p className="pricing-plans__lede">{PAPER_COPY.lede}</p>
+              </div>
+            </div>
+
+            <div className="pricing-plans__cards-column" aria-label="Pricing options">
+              <ProjectCard reducedMotion={reducedMotion} />
+              <RetainerCard reducedMotion={reducedMotion} />
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* 3-tier cards */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 32,
-          width: '100%',
-          alignItems: 'stretch',
-        }}
-      >
-        {/* Strategy Call */}
-        <motion.div
-          style={{
-            flex: '1 1 320px',
-            minWidth: 0,
-            backgroundColor: 'var(--color-bg-secondary)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 32,
-            padding: 48,
-            display: 'flex',
-            flexDirection: 'column',
-            color: 'var(--color-text)',
-            boxSizing: 'border-box',
-          }}
-          whileHover={{ y: -8, scale: 1.02 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-        >
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 24, marginBottom: 8 }}>
-            <div>
-              <h3 style={{ margin: '0 0 8px 0', fontSize: 32, fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--color-text)' }}>
-                Strategy Call
-              </h3>
-              <p style={{ margin: 0, fontSize: 16, color: 'var(--color-text-muted)', lineHeight: 1.25 }}>
-                A focused session to unblock your next move.
-              </p>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {[
-                'Live audit of your product, funnel, or brand.',
-                'Prioritized quick wins you can implement immediately.',
-                'Clear recommendation on Retainer vs Project fit.',
-              ].map((text, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                  <CheckIcon />
-                  <span style={{ fontSize: 16, fontWeight: 300, color: 'var(--color-text-muted)', lineHeight: 1.25 }}>{text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 64, gap: 24, width: '100%' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                <span style={{ fontSize: 32, fontWeight: 600, color: 'var(--color-text)' }}>Free</span>
-              </div>
-            </div>
-            <motion.a
-              href="#contact"
-              style={{
-                background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%)',
-                color: '#FFFFFF',
-                border: 'none',
-                borderRadius: 32,
-                padding: '16px 40px',
-                fontSize: 16,
-                fontWeight: 500,
-                fontFamily: 'inherit',
-                cursor: 'pointer',
-                textDecoration: 'none',
-                width: '75%',
-                minWidth: 180,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                whiteSpace: 'nowrap',
-              }}
-              whileHover={{ scale: 1.04, y: -2 }}
-              whileTap={{ scale: 0.96 }}
-              transition={{ type: 'spring', stiffness: 320, damping: 24 }}
-            >
-              Book Strategy Call
-            </motion.a>
-          </div>
-        </motion.div>
-
-        {/* Project */}
-        <motion.div
-          style={{
-            flex: '1 1 320px',
-            minWidth: 0,
-            backgroundColor: 'var(--color-bg-secondary)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 32,
-            padding: 48,
-            display: 'flex',
-            flexDirection: 'column',
-            color: 'var(--color-text)',
-            boxSizing: 'border-box',
-          }}
-          whileHover={{ y: -8, scale: 1.02 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 22, delay: 0.02 }}
-        >
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 24, marginBottom: 8 }}>
-            <div>
-              <h3 style={{ margin: '0 0 8px 0', fontSize: 32, fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--color-text)' }}>
-                Project
-              </h3>
-              <p style={{ margin: 0, fontSize: 16, color: 'var(--color-text-muted)', lineHeight: 1.25 }}>
-                One goal. One timeline. Done right.
-              </p>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {[
-                'Scoped, quoted, and delivered in 2-4 weeks flat',
-                'Custom code, not cookie-cutter templates',
-                'Launch-ready assets that drive real results',
-              ].map((text, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                  <CheckIcon />
-                  <span style={{ fontSize: 16, fontWeight: 300, color: 'var(--color-text-muted)', lineHeight: 1.25 }}>{text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 64, gap: 24, width: '100%' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                <span style={{ fontSize: 32, fontWeight: 600, color: 'var(--color-text)' }}>$850</span>
-              </div>
-            </div>
-            <motion.a
-              href="#contact"
-              style={{
-                background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%)',
-                color: '#FFFFFF',
-                border: 'none',
-                borderRadius: 32,
-                padding: '16px 40px',
-                fontSize: 16,
-                fontWeight: 500,
-                fontFamily: 'inherit',
-                cursor: 'pointer',
-                textDecoration: 'none',
-                width: '75%',
-                minWidth: 180,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                whiteSpace: 'nowrap',
-              }}
-              whileHover={{ scale: 1.04, y: -2 }}
-              whileTap={{ scale: 0.96 }}
-              transition={{ type: 'spring', stiffness: 320, damping: 24 }}
-            >
-              Book Call
-            </motion.a>
-          </div>
-        </motion.div>
-
-        {/* Retainer (featured) */}
-        <motion.div
-          style={{
-            flex: '1 1 320px',
-            minWidth: 0,
-            background: 'radial-gradient(ellipse 80% 150% at 20% 0%, var(--color-accent) 0%, var(--color-accent-dark) 50%, var(--color-accent-darker) 100%)',
-            borderRadius: 32,
-            padding: 48,
-            display: 'flex',
-            flexDirection: 'column',
-            color: '#FFFFFF',
-            boxSizing: 'border-box',
-          }}
-          whileHover={{ y: -8, scale: 1.02 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 22, delay: 0.04 }}
-        >
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 24, marginBottom: 8 }}>
-            <div>
-              <h3 style={{ margin: '0 0 8px 0', fontSize: 32, fontWeight: 600, letterSpacing: '-0.02em', color: '#FFFFFF' }}>
-                Retainer
-              </h3>
-              <p style={{ margin: 0, fontSize: 16, color: 'rgba(255,255,255,0.9)', lineHeight: 1.25 }}>
-                Ongoing execution. Relentless output.
-              </p>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {[
-                'Design, craft and strategy — no bottlenecks',
-                'You scale, we keep up — month after month',
-                'Built to move fast and hit deadlines, period',
-              ].map((text, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                  <CheckIcon light />
-                  <span style={{ fontSize: 16, fontWeight: 300, color: '#FFFFFF', lineHeight: 1.25 }}>{text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 64, gap: 24, width: '100%' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                <span style={{ fontSize: 32, fontWeight: 600 }}>$2k</span>
-                <span style={{ fontSize: 16, opacity: 0.9, paddingBottom: 4 }}>/month</span>
-              </div>
-            </div>
-            <motion.a
-              href="#contact"
-              style={{
-                backgroundColor: '#FFFFFF',
-                color: 'var(--color-accent)',
-                border: 'none',
-                borderRadius: 32,
-                padding: '16px 40px',
-                fontSize: 16,
-                fontWeight: 500,
-                fontFamily: 'inherit',
-                cursor: 'pointer',
-                textDecoration: 'none',
-                width: '75%',
-                minWidth: 180,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                whiteSpace: 'nowrap',
-              }}
-              whileHover={{ scale: 1.04, y: -2 }}
-              whileTap={{ scale: 0.96 }}
-              transition={{ type: 'spring', stiffness: 320, damping: 24 }}
-            >
-              Book Call
-            </motion.a>
-          </div>
-        </motion.div>
-      </div>
-    </motion.section>
+    </section>
   );
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { CursorAura } from "@/components/CursorAura";
 
 export const metadata: Metadata = {
   title: "Maser Media — Creative Agency",
@@ -15,8 +16,12 @@ export default async function RootLayout({
 }>) {
   if (params) await params;
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <body>
+        <a href="#main-content" className="skip-to-content">
+          Skip to main content
+        </a>
+        <CursorAura />
         {children}
       </body>
     </html>

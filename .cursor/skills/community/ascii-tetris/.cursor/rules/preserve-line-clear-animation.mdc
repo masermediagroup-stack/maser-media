@@ -1,0 +1,55 @@
+---
+description: 
+globs: *.js
+alwaysApply: false
+---
+# Line Clearing Animation Rule
+
+<rule>
+name: preserve_line_clear_animation
+description: Ensures the line clearing animation is preserved and enhanced in the ASCII Tetris game
+filters:
+  - type: file_extension
+    pattern: "\\.js$"
+  - type: content
+    pattern: "linesToClear|flash|animation"
+
+actions:
+  - type: reject
+    conditions:
+      - pattern: "//.*remove.*flash|//.*disable.*animation"
+        message: "Line clearing animation must not be removed or disabled"
+      - pattern: "linesToClear.*=.*\[\]|linesToClear.*=.*new Set\(\[\]\)"
+        message: "Line clearing animation must be preserved"
+      - pattern: "flashStates.*=.*\[\]"
+        message: "Flash animation states must be preserved"
+
+  - type: suggest
+    message: |
+      The line clearing animation must:
+      1. Use ASCII block characters (█, ▓, ▒, ░) for the animation
+      2. Cycle through different block characters for a gradient effect
+      3. Update at least 10 times per second (100ms or faster)
+      4. Be visible for the entire duration of line clearing
+      5. Maintain the ASCII aesthetic of the game
+
+      Example implementation:
+      ```javascript
+      const flashStates = ['█ █', '▓ ▓', '▒ ▒', '░ ░'];
+      const flashIndex = Math.floor(Date.now() / 50) % flashStates.length;
+      ```
+
+examples:
+  - input: |
+      // Bad: Removing animation
+      this.linesToClear = new Set([]);
+      // Bad: Disabling flash
+      const flashStates = [];
+      // Good: Preserving animation
+      const flashStates = ['█ █', '▓ ▓', '▒ ▒', '░ ░'];
+    output: "Correctly preserved line clearing animation"
+
+metadata:
+  priority: high
+  version: 1.0
+</rule>

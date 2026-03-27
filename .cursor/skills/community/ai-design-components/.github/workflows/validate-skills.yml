@@ -1,0 +1,153 @@
+name: Validate Skills
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'skills/**'
+      - '.claude-plugin/**'
+      - '.github/workflows/validate-skills.yml'
+      - 'scripts/validation/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'skills/**'
+      - '.claude-plugin/**'
+      - '.github/workflows/validate-skills.yml'
+      - 'scripts/validation/**'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  validate-skills:
+    name: Validate Skills (Validation Package)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml rich textual
+
+      - name: Run skill validation
+        run: |
+          echo "Running skill validation package..."
+          python -m scripts.validation ci --completed --format=console
+
+      - name: Generate JUnit report
+        if: always()
+        run: |
+          python -m scripts.validation ci --completed --format=junit -o validation-results.xml
+        continue-on-error: true
+
+      - name: Upload validation results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: skill-validation-results
+          path: validation-results.xml
+          if-no-files-found: ignore
+
+  validate-marketplace:
+    name: Validate Marketplace Config
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate marketplace.json
+        run: |
+          echo "Validating marketplace.json..."
+
+          python3 << 'EOF'
+          import json
+          import sys
+          from pathlib import Path
+
+          marketplace_file = Path(".claude-plugin/marketplace.json")
+
+          if not marketplace_file.exists():
+              print("ERROR: marketplace.json not found")
+              sys.exit(1)
+
+          with open(marketplace_file) as f:
+              marketplace = json.load(f)
+
+          # Required fields
+          required = ["name", "owner", "plugins"]
+          for field in required:
+              if field not in marketplace:
+                  print(f"ERROR: Missing required field: {field}")
+                  sys.exit(1)
+
+          print(f"Marketplace: {marketplace['name']}")
+          print(f"Version: {marketplace.get('version', 'unknown')}")
+          print(f"Plugin groups: {len(marketplace['plugins'])}")
+
+          # Validate each plugin
+          errors = []
+          for plugin in marketplace["plugins"]:
+              plugin_name = plugin.get("name", "unknown")
+
+              if "skills" in plugin:
+                  for skill_path in plugin["skills"]:
+                      skill_dir = Path(skill_path.replace("./", ""))
+                      skill_md = skill_dir / "SKILL.md"
+
+                      if not skill_dir.exists():
+                          errors.append(f"{plugin_name}: skill directory not found: {skill_path}")
+                      elif not skill_md.exists():
+                          errors.append(f"{plugin_name}: SKILL.md not found in {skill_path}")
+
+          if errors:
+              print(f"\n{len(errors)} validation errors:")
+              for error in errors:
+                  print(f"  - {error}")
+              sys.exit(1)
+
+          print("\nMarketplace validated successfully!")
+          EOF
+
+  summary:
+    name: Validation Summary
+    runs-on: ubuntu-latest
+    needs: [validate-skills, validate-marketplace]
+    if: always()
+    steps:
+      - name: Check results
+        run: |
+          echo "=== Skills Validation Summary ==="
+          echo ""
+
+          FAILED=0
+
+          if [[ "${{ needs.validate-skills.result }}" == "success" ]]; then
+            echo "✓ Skills Validation: PASSED"
+          else
+            echo "✗ Skills Validation: FAILED"
+            FAILED=1
+          fi
+
+          if [[ "${{ needs.validate-marketplace.result }}" == "success" ]]; then
+            echo "✓ Marketplace: PASSED"
+          else
+            echo "✗ Marketplace: FAILED"
+            FAILED=1
+          fi
+
+          echo ""
+          echo "=== End Summary ==="
+
+          if [[ $FAILED -eq 1 ]]; then
+            exit 1
+          fi
