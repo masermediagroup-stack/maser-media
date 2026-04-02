@@ -1,50 +1,90 @@
 'use client';
 
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CONTENT } from '@/lib/content';
 import { useReducedMotionAfterMount } from '@/lib/useReducedMotionAfterMount';
+import { ShineBorder } from '@/registry/magicui/shine-border';
 
-const floatVariant = {
-  // Tiles start "off" somewhere around the canvas and swipe into place
-  initial: (index: number) => {
-    const angleDeg = (index * 37) % 360;
-    const angle = (angleDeg * Math.PI) / 180;
-    const radius = 160 + (index % 4) * 24;
-    const x = Math.cos(angle) * radius;
-    const y = Math.sin(angle) * radius;
-
-    return {
-      opacity: 0,
-      x,
-      y,
-      scale: 0.85,
-      rotate: (index % 8) - 4,
-    };
+const pillEnterVariant = {
+  initial: {
+    opacity: 0,
+    y: 28,
+    scale: 0.92,
+    rotate: -2,
   },
-  animate: (index: number) => ({
+  animate: {
     opacity: 1,
-    x: 0,
     y: 0,
     scale: 1,
     rotate: 0,
     transition: {
-      duration: 0.9 + (index % 5) * 0.08,
+      duration: 0.75,
       ease: 'easeOut' as const,
-      delay: index * 0.06,
     },
-  }),
+  },
 };
 
 const GLITCH_WORDS = ['people', 'companies', 'startups', 'creators', 'founders', 'teams'];
+
+/** White + soft white + `--color-accent` (#10A4FF) only — OKLCH gradient avoids sRGB cyan between stops */
+const SHINE_COLORS = [
+  '#FFFFFF',
+  '#10A4FF',
+  '#F5F9FF',
+  '#10A4FF',
+  '#FFFFFF',
+  '#F7FAFF',
+  '#10A4FF',
+  '#FFFFFF',
+];
+
+type TiltNode = HTMLElement & { __playgroundTiltRaf?: number };
+
+function handlePlaygroundTiltMove(event: ReactPointerEvent<HTMLElement>, enabled: boolean) {
+  if (!enabled || event.pointerType !== 'mouse') return;
+
+  const node = event.currentTarget as TiltNode;
+  const rect = node.getBoundingClientRect();
+  const x = (event.clientX - rect.left) / rect.width;
+  const y = (event.clientY - rect.top) / rect.height;
+  const rotateY = (x - 0.5) * 7;
+  const rotateX = (0.5 - y) * 6;
+
+  if (node.__playgroundTiltRaf) {
+    window.cancelAnimationFrame(node.__playgroundTiltRaf);
+  }
+
+  node.__playgroundTiltRaf = window.requestAnimationFrame(() => {
+    node.style.setProperty('--playground-pointer-x', `${Math.round(x * 100)}%`);
+    node.style.setProperty('--playground-pointer-y', `${Math.round(y * 100)}%`);
+    node.style.transform = `perspective(1100px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-2px)`;
+  });
+}
+
+function handlePlaygroundTiltLeave(event: ReactPointerEvent<HTMLElement>, enabled: boolean) {
+  if (!enabled) return;
+  const node = event.currentTarget as TiltNode;
+  if (node.__playgroundTiltRaf) {
+    window.cancelAnimationFrame(node.__playgroundTiltRaf);
+  }
+  node.style.transform = '';
+  node.style.removeProperty('--playground-pointer-x');
+  node.style.removeProperty('--playground-pointer-y');
+}
 
 export function CrashPlayground() {
   const { mounted, prefersReducedMotion } = useReducedMotionAfterMount();
   const tilesReduced = mounted && prefersReducedMotion === true;
   const tags = CONTENT.playground.tags;
   const [wordIndex, setWordIndex] = useState(0);
+  const [tagIndex, setTagIndex] = useState(0);
   const [hasEnteredView, setHasEnteredView] = useState(false);
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const currentTag = tags[tagIndex] ?? tags[0];
+
+  const tiltInteractive = mounted && prefersReducedMotion !== true;
 
   useEffect(() => {
     if (!stageRef.current) return;
@@ -77,7 +117,11 @@ export function CrashPlayground() {
   }, [prefersReducedMotion]);
 
   const currentWord = GLITCH_WORDS[wordIndex];
-  const tilesShouldAnimate = hasEnteredView && !tilesReduced;
+  const pillShouldAnimate = hasEnteredView && !tilesReduced;
+
+  const advanceTag = () => {
+    setTagIndex((i) => (i + 1) % tags.length);
+  };
 
   return (
     <motion.section
@@ -107,30 +151,57 @@ export function CrashPlayground() {
             </span>
           </h2>
         </div>
-        <div className="playground-stage" aria-hidden="true" ref={stageRef}>
-          {tags.map((tag, index) => (
+        <div className="playground-stage" ref={stageRef}>
+          <div
+            className="playground-tag-tilt-host"
+            onPointerMove={(e) => handlePlaygroundTiltMove(e, tiltInteractive)}
+            onPointerLeave={(e) => handlePlaygroundTiltLeave(e, tiltInteractive)}
+          >
             <motion.div
-              key={tag}
-              className="playground-tile"
-              custom={index}
-              initial={tilesReduced ? { opacity: 1, x: 0, y: 0 } : 'initial'}
+              className="playground-tag-card"
+              initial={tilesReduced ? { opacity: 1, y: 0, scale: 1, rotate: 0 } : 'initial'}
               animate={
                 tilesReduced
-                  ? { opacity: 1, x: 0, y: 0 }
-                  : tilesShouldAnimate
-                  ? 'animate'
-                  : 'initial'
+                  ? { opacity: 1, y: 0, scale: 1, rotate: 0 }
+                  : pillShouldAnimate
+                    ? 'animate'
+                    : 'initial'
               }
-              variants={floatVariant}
-              whileHover={{ scale: 1.06, rotate: 1 }}
-              whileTap={{ scale: 0.97 }}
+              variants={pillEnterVariant}
             >
-              <span>{tag}</span>
+              <ShineBorder
+                borderWidth={2}
+                duration={9}
+                hueSafe
+                shineColor={SHINE_COLORS}
+                className="shine-border-magic--playground"
+                aria-hidden="true"
+              />
+              <button
+                type="button"
+                className="playground-tag-cycle-btn"
+                onClick={advanceTag}
+                aria-label={`${currentTag}. Service ${tagIndex + 1} of ${tags.length}. Activate to see the next.`}
+              >
+                <span className="playground-tag-cycle-inner">
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={currentTag}
+                      className="playground-tag-cycle-label"
+                      initial={tilesReduced ? false : { opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={tilesReduced ? undefined : { opacity: 0, y: -8 }}
+                      transition={{ duration: 0.22, ease: 'easeOut' }}
+                    >
+                      {currentTag}
+                    </motion.span>
+                  </AnimatePresence>
+                </span>
+              </button>
             </motion.div>
-          ))}
+          </div>
         </div>
       </div>
     </motion.section>
   );
 }
-
