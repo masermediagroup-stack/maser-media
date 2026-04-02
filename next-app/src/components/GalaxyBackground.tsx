@@ -2,12 +2,12 @@
 
 import { useEffect, useRef } from 'react';
 
-const STAR_COUNT = 300;
-const WHITE_STAR_COUNT = 80;
-const PARTICLE_COUNT = 60;
+const STAR_COUNT = 220;
+const WHITE_STAR_COUNT = 50;
+const PARTICLE_COUNT = 34;
 const PLANET_COUNT = 3;
 const MOUSE_RADIUS = 150;
-const MOUSE_STRENGTH = 0.06;
+const MOUSE_STRENGTH = 0.04;
 
 export function GalaxyBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -59,8 +59,8 @@ export function GalaxyBackground() {
         stars.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          size: Math.random() * 1.2 + 0.3,
-          baseOpacity: 0.3 + Math.random() * 0.5,
+          size: Math.random() * 1 + 0.25,
+          baseOpacity: 0.2 + Math.random() * 0.36,
           twinklePhase: Math.random() * Math.PI * 2,
           parallax: 0.3 + Math.random() * 0.7,
           isWhite: i >= STAR_COUNT,
@@ -106,10 +106,10 @@ export function GalaxyBackground() {
 
     const drawBase = () => {
       const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      gradient.addColorStop(0, '#0a0a0a');
-      gradient.addColorStop(0.3, '#0d1520');
-      gradient.addColorStop(0.7, '#0a0f18');
-      gradient.addColorStop(1, '#0a0a0a');
+      gradient.addColorStop(0, '#020204');
+      gradient.addColorStop(0.3, '#040812');
+      gradient.addColorStop(0.7, '#03060e');
+      gradient.addColorStop(1, '#010102');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -121,7 +121,7 @@ export function GalaxyBackground() {
         canvas.height * 0.3,
         canvas.width * 0.6
       );
-      blob1.addColorStop(0, 'rgba(16, 164, 255, 0.08)');
+      blob1.addColorStop(0, 'rgba(16, 164, 255, 0.03)');
       blob1.addColorStop(1, 'transparent');
       ctx.fillStyle = blob1;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -134,7 +134,7 @@ export function GalaxyBackground() {
         canvas.height * 0.7,
         canvas.width * 0.5
       );
-      blob2.addColorStop(0, 'rgba(0, 101, 163, 0.06)');
+      blob2.addColorStop(0, 'rgba(0, 101, 163, 0.022)');
       blob2.addColorStop(1, 'transparent');
       ctx.fillStyle = blob2;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -143,8 +143,8 @@ export function GalaxyBackground() {
     const drawStars = (time: number) => {
       const blueStarColor = 'rgba(16, 164, 255, ';
       const whiteStarColor = 'rgba(255, 255, 255, ';
-      const blueMaxOpacity = 0.6;
-      const whiteMaxOpacity = 0.5;
+      const blueMaxOpacity = 0.25;
+      const whiteMaxOpacity = 0.2;
 
       stars.forEach((s) => {
         const parallaxOffset = scrollY * s.parallax * 0.1;
@@ -162,7 +162,7 @@ export function GalaxyBackground() {
     };
 
     const drawParticles = () => {
-      const particleColor = 'rgba(16, 164, 255, 0.35)';
+      const particleColor = 'rgba(16, 164, 255, 0.11)';
 
       particles.forEach((p) => {
         if (!reducedMotion) {
@@ -197,7 +197,7 @@ export function GalaxyBackground() {
     };
 
     const drawPlanets = () => {
-      const planetColor = 'rgba(0, 151, 245, 0.15)';
+      const planetColor = 'rgba(0, 151, 245, 0.06)';
 
       const centers = [
         { cx: canvas.width * 0.2, cy: canvas.height * 0.3 },
@@ -216,7 +216,7 @@ export function GalaxyBackground() {
 
         const glow = ctx.createRadialGradient(px, py, 0, px, py, pl.radius * 4);
         glow.addColorStop(0, planetColor);
-        glow.addColorStop(0.5, 'rgba(0, 151, 245, 0.05)');
+        glow.addColorStop(0.5, 'rgba(0, 151, 245, 0.02)');
         glow.addColorStop(1, 'transparent');
         ctx.fillStyle = glow;
         ctx.beginPath();
@@ -225,7 +225,7 @@ export function GalaxyBackground() {
 
         ctx.beginPath();
         ctx.arc(px, py, pl.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(16, 164, 255, 0.25)';
+        ctx.fillStyle = 'rgba(16, 164, 255, 0.1)';
         ctx.fill();
       });
     };
@@ -302,7 +302,7 @@ export function GalaxyBackground() {
         inset: 0,
         width: '100%',
         height: '100%',
-        zIndex: -1,
+        zIndex: -2,
         pointerEvents: 'none',
       }}
     />

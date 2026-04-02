@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import { MotionConfig, motion } from 'motion/react';
 import { useReducedMotionAfterMount } from '@/lib/useReducedMotionAfterMount';
+import { revealScrollAnimateInViewport } from '@/lib/scrollAnimateReveal';
 import {
   GalaxyBackground,
   Nav,
   SideRail,
   Hero,
-  PillNav,
   Clients,
   CrashPlayground,
   Work,
@@ -22,8 +22,11 @@ export default function Home() {
   const { mounted, prefersReducedMotion } = useReducedMotionAfterMount();
   const entrance = !mounted || prefersReducedMotion !== true;
 
-  // Scroll animation observer for sections
-  useEffect(() => {
+  // Scroll animation: IO for scroll-driven reveal + sync pass so SPA back/forward and
+  // already-visible sections (e.g. after hash scroll) are not stuck at opacity 0.
+  useLayoutEffect(() => {
+    const sync = () => revealScrollAnimateInViewport();
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -35,13 +38,32 @@ export default function Home() {
       {
         threshold: 0.15,
         rootMargin: '-40px 0px -40px 0px',
-      }
+      },
     );
 
     const elements = document.querySelectorAll('.scroll-animate');
     elements.forEach((el) => observer.observe(el));
 
-    return () => observer.disconnect();
+    sync();
+    requestAnimationFrame(() => {
+      sync();
+      requestAnimationFrame(sync);
+    });
+
+    const onPageShow = () => sync();
+    window.addEventListener('pageshow', onPageShow);
+
+    const t0 = window.setTimeout(sync, 0);
+    const t1 = window.setTimeout(sync, 150);
+    const t2 = window.setTimeout(sync, 400);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('pageshow', onPageShow);
+      window.clearTimeout(t0);
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+    };
   }, []);
 
   return (
@@ -63,15 +85,14 @@ export default function Home() {
           }
         >
           <Clients />
-          <CrashPlayground />
           <Work />
           <Services />
           <Testimonials />
           <Cta />
+          <CrashPlayground />
           <Footer />
         </motion.div>
       </main>
-      <PillNav entrance={entrance} />
     </MotionConfig>
   );
 }

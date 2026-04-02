@@ -50,14 +50,10 @@ export function TestimonialsCarousel() {
   const progress = ((activeIndex + 1) / n) * 100;
 
   return (
-    <motion.section
+    <section
       className="testimonials-carousel scroll-animate"
       id="testimonials"
       aria-labelledby={headingId}
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.55, ease: 'easeOut' }}
     >
       <div className="testimonials-carousel-inner">
         <header className="testimonials-carousel-header">
@@ -131,7 +127,9 @@ export function TestimonialsCarousel() {
             className="testimonials-carousel-btn testimonials-carousel-btn--muted premium-btn premium-btn--secondary"
             onClick={goPrev}
           >
-            <span className="premium-btn__label">{prevLabel}</span>
+            <span className="premium-btn__inner">
+              <span className="premium-btn__label">{prevLabel}</span>
+            </span>
           </button>
           <div
             className="testimonials-carousel-progress"
@@ -148,11 +146,13 @@ export function TestimonialsCarousel() {
             className="testimonials-carousel-btn testimonials-carousel-btn--primary premium-btn premium-btn--primary"
             onClick={goNext}
           >
-            <span className="premium-btn__label">{nextLabel}</span>
+            <span className="premium-btn__inner">
+              <span className="premium-btn__label">{nextLabel}</span>
+            </span>
           </button>
         </nav>
       </div>
-    </motion.section>
+    </section>
   );
 }
 
@@ -172,26 +172,28 @@ function SideCard({
       onClick={onActivate}
       aria-label={`Show testimonial from ${item.name}`}
     >
-      <span className="testimonial-card-quote-icon" aria-hidden>
-        &ldquo;
-      </span>
-      <div className="testimonial-card-body">
-        <p className="testimonial-card-text">{item.quote}</p>
-        <div className="testimonial-card-footer">
-          <div className="testimonial-card-meta">
-            {item.avatar ? (
-              <Image src={item.avatar} alt="" width={40} height={40} className="testimonial-card-avatar" />
-            ) : (
-              <div className="testimonial-card-avatar testimonial-card-avatar--placeholder" aria-hidden />
-            )}
-            <div className="testimonial-card-who">
-              <strong className="testimonial-card-name">{item.name}</strong>
-              <span className="testimonial-card-role">{item.role}</span>
+      <span className="premium-btn__inner">
+        <span className="testimonial-card-quote-icon" aria-hidden>
+          &ldquo;
+        </span>
+        <div className="testimonial-card-body">
+          <p className="testimonial-card-text">{item.quote}</p>
+          <div className="testimonial-card-footer">
+            <div className="testimonial-card-meta">
+              {item.avatar ? (
+                <Image src={item.avatar} alt="" width={40} height={40} className="testimonial-card-avatar" />
+              ) : (
+                <div className="testimonial-card-avatar testimonial-card-avatar--placeholder" aria-hidden />
+              )}
+              <div className="testimonial-card-who">
+                <strong className="testimonial-card-name">{item.name}</strong>
+                <span className="testimonial-card-role">{item.role}</span>
+              </div>
             </div>
+            <StarRow count={item.rating ?? 5} muted />
           </div>
-          <StarRow count={item.rating ?? 5} muted />
         </div>
-      </div>
+      </span>
     </button>
   );
 }

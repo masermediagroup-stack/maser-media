@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import { CursorAura } from "@/components/CursorAura";
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-hero",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Maser Media — Creative Agency",
@@ -17,7 +25,7 @@ export default async function RootLayout({
   if (params) await params;
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <body>
+      <body className={poppins.variable}>
         <a href="#main-content" className="skip-to-content">
           Skip to main content
         </a>

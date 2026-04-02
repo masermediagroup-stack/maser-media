@@ -6,6 +6,9 @@
 export interface SiteConfig {
   title: string;
   logo: string;
+  /** Matches the PNG’s pixel dimensions (used by next/image for aspect ratio) */
+  logoWidth: number;
+  logoHeight: number;
   logoAlt: string;
   primaryCta: { text: string; href: string };
   secondaryCta: { text: string; href: string };
@@ -109,6 +112,7 @@ export interface Content {
   };
   services: {
     title: string;
+    subtitle?: string;
     items: ServiceItem[];
   };
   playground: PlaygroundConfig;
@@ -143,7 +147,10 @@ export const CONTENT: Content = {
   // ─── Site & Nav ───────────────────────────────────────────────────
   site: {
     title: "Maser Media — Creative Agency",
-    logo: "/assets/logo-cloud-white.png",
+    // Same transparent asset as hero — logo-cloud-white.png had a solid fill behind the wordmark
+    logo: "/assets/logo-maser-cloud-white-transparent.png",
+    logoWidth: 1024,
+    logoHeight: 519,
     logoAlt: "Maser Media",
     primaryCta: { text: "Book a call", href: "/#contact" },
     secondaryCta: { text: "Send a message", href: "mailto:hello@masermedia.com" },
@@ -155,7 +162,7 @@ export const CONTENT: Content = {
     layout: 'editorial',
     badge: "One crew. Brand, product, and web.",
     storyTitle: "Need one creative team?",
-    storyHighlight: "Here we are.",
+    storyHighlight: "HERE WE ARE.",
     lead: "We work as one integrated studio so your story, visuals, and site stay aligned from first sketch to launch—fewer handoffs, clearer outcomes.",
     trustStrip: ["Startups shipping fast", "Service brands going digital", "Founder-led products"],
     trustedBy: {
@@ -199,7 +206,8 @@ export const CONTENT: Content = {
 
   // ─── Services ─────────────────────────────────────────────────────
   services: {
-    title: "How we help teams move.",
+    title: "Serious Craft. Playful Energy.",
+    subtitle: "",
     items: [
       {
         title: "Brand",
@@ -256,6 +264,26 @@ export const CONTENT: Content = {
         role: "Brand + Web design + Build",
         image: null,
         link: "https://millermorehandiwork.com",
+      },
+      {
+        title: "Riverlight Studio",
+        category: "Website",
+        description: "Portfolio and inquiry flow for a creative studio—fast loads, case-study clarity, and one clear CTA.",
+        outcome: "Higher inquiry quality and less back-and-forth before the first call.",
+        timeframe: "4 weeks",
+        role: "Web design + Build",
+        image: null,
+        link: "/#contact",
+      },
+      {
+        title: "Northline Tools",
+        category: "Website",
+        description: "Product-led marketing site with sharper positioning, spec comparison, and distributor-ready pages.",
+        outcome: "Stronger self-serve discovery for buyers comparing options online.",
+        timeframe: "5 weeks",
+        role: "UX + Web + Content",
+        image: null,
+        link: "/#contact",
       },
       {
         title: "Founder Product Narrative Sprint",
