@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { MotionConfig } from 'motion/react';
 import { GalaxyBackground, Nav, SideRail, PricingPlans, Footer, PillNav } from '@/components';
-import { CONTENT } from '@/lib/content';
 
 export default function PricingPage() {
   useEffect(() => {
@@ -16,11 +15,7 @@ export default function PricingPage() {
       <GalaxyBackground />
       <Nav />
       <SideRail />
-      <main id="main-content" className="site-main">
-        <section className="pricing-page-header">
-          <h1 className="pricing-page-title">{CONTENT.pricing.title}</h1>
-          <p className="pricing-page-subtitle">{CONTENT.pricing.subtitle}</p>
-        </section>
+      <main id="main-content" className="site-main pricing-page-main">
         <PricingPlans />
         <Footer />
       </main>
