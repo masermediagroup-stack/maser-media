@@ -2,7 +2,9 @@
 
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
 import { LiquidMetal, Metaballs } from '@paper-design/shaders-react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+
+import { useReducedMotionAfterMount } from '@/lib/useReducedMotionAfterMount';
 
 /** Paper artboard `15O-0` — copy + layout from Paper MCP `get_jsx` export (March 2025). */
 const BOOK_CALL_HREF = '/#contact';
@@ -289,7 +291,9 @@ function ProjectCard({ reducedMotion }: { reducedMotion: boolean | null }) {
 }
 
 export function PricingPlans() {
-  const reducedMotion = useReducedMotion() ?? true;
+  const { mounted, prefersReducedMotion } = useReducedMotionAfterMount();
+  // Until mount, match SSR (no shaders). After mount, same semantics as `useReducedMotion() ?? true`.
+  const reducedMotion = !mounted ? true : (prefersReducedMotion ?? true);
 
   return (
     <section id="pricing" className="pricing-plans pricing-plans--paper" aria-labelledby="pricing-heading">
