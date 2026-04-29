@@ -19,7 +19,6 @@ import {
   Zap,
 } from 'lucide-react';
 import { CONTENT } from '@/lib/content';
-import { HeroShaderGradient } from './HeroShaderGradient';
 import { HeroParticles } from './HeroParticles';
 import { LiquidNav } from './LiquidNav';
 import { ContactFlow } from './ContactFlow';
@@ -157,9 +156,6 @@ export function Hero({ entrance }: EntranceProps) {
 
   return (
     <header className="mm-hero">
-      <div className="mm-hero__shader" aria-hidden="true">
-        <HeroShaderGradient />
-      </div>
       <HeroParticles />
       <motion.div
         className="mm-hero__content"
@@ -169,28 +165,28 @@ export function Hero({ entrance }: EntranceProps) {
       >
         <div className="mm-hero__logo-wrap">
           <Image
-            src={CONTENT.site.logo}
+            src="/assets/logo-maser-cloud-white-transparent.png"
             alt={CONTENT.site.logoAlt}
             width={CONTENT.site.logoWidth}
             height={CONTENT.site.logoHeight}
-            className="mm-hero__logo"
+            className="mm-hero__logo mm-hero__logo--plain"
             priority
           />
         </div>
-        <h1 className="mm-hero__title">
-          Brand, web, and motion for teams ready to look unavoidable.
-        </h1>
-        <p className="mm-hero__lead">
-          Maser Media blends Bou-style agency craft with Visitors-style product clarity: sharp positioning,
-          polished systems, launch-ready websites, and motion that makes people keep scrolling.
-        </p>
-        <div className="mm-hero__actions">
-          <Link href="/contact" className="mm-button mm-button--primary">
-            Book a call <ArrowRight size={18} aria-hidden />
-          </Link>
-          <Link href="/work" className="mm-button mm-button--ghost">
-            View work
-          </Link>
+        <div className="mm-hero__copy">
+          <h1 className="mm-hero__title">Brand, web, and motion for teams ready to look unavoidable.</h1>
+          <p className="mm-hero__lead">
+            Maser Media blends Bou-style agency craft with Visitors-style product clarity: sharp positioning,
+            polished systems, launch-ready websites, and motion that makes people keep scrolling.
+          </p>
+          <div className="mm-hero__actions">
+            <Link href="/contact" className="mm-button mm-button--primary">
+              Book a call <ArrowRight size={18} aria-hidden />
+            </Link>
+            <Link href="/work" className="mm-button mm-button--ghost">
+              View work
+            </Link>
+          </div>
         </div>
       </motion.div>
       <motion.div
@@ -603,9 +599,6 @@ export function ContactPageExperience() {
 export function InnerHero({ eyebrow, title, copy }: { eyebrow: string; title: string; copy: string }) {
   return (
     <header className="mm-inner-hero">
-      <div className="mm-inner-hero__shader" aria-hidden="true">
-        <HeroShaderGradient />
-      </div>
       <p className="mm-kicker">{eyebrow}</p>
       <h1>{title}</h1>
       <p>{copy}</p>
