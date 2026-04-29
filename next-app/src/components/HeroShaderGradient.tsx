@@ -1,7 +1,7 @@
 'use client';
 
 import type { ComponentProps } from 'react';
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useMemo, useSyncExternalStore } from 'react';
 import { ShaderGradient, ShaderGradientCanvas } from '@shadergradient/react';
 
 type ShaderGradientProps = ComponentProps<typeof ShaderGradient>;
@@ -9,14 +9,14 @@ type ShaderGradientProps = ComponentProps<typeof ShaderGradient>;
 const HERO_SHADER_BASE_PROPS: ShaderGradientProps & Record<string, unknown> = {
   animate: 'on',
   axesHelper: 'off',
-  brightness: 0.86,
+  brightness: 1.2,
   cAzimuthAngle: 180,
   cDistance: 3.92,
   cPolarAngle: 115,
   cameraZoom: 1,
-  color1: '#0b2280',
-  color2: '#b8dcff',
-  color3: '#000000',
+  color1: '#1e54a8',
+  color2: '#d9ecff',
+  color3: '#4f8dca',
   destination: 'onCanvas',
   embedMode: 'off',
   envPreset: 'city',
@@ -31,7 +31,7 @@ const HERO_SHADER_BASE_PROPS: ShaderGradientProps & Record<string, unknown> = {
   range: 'disabled',
   rangeEnd: 40,
   rangeStart: 0,
-  reflection: 0.06,
+  reflection: 0.12,
   rotationX: 0,
   rotationY: 0,
   rotationZ: 235,
@@ -41,7 +41,7 @@ const HERO_SHADER_BASE_PROPS: ShaderGradientProps & Record<string, unknown> = {
   uDensity: 1.1,
   uFrequency: 5.5,
   uSpeed: 0.1,
-  uStrength: 2.05,
+  uStrength: 1.75,
   uTime: 0.2,
   wireframe: false,
 } as const;
@@ -71,13 +71,6 @@ export function HeroShaderGradient() {
     getReducedMotionSnapshot,
     getReducedMotionServerSnapshot
   );
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const delayMs = reducedMotion ? 0 : 140;
-    const id = window.setTimeout(() => setVisible(true), delayMs);
-    return () => window.clearTimeout(id);
-  }, [reducedMotion]);
 
   const shaderProps = useMemo(
     () => ({
@@ -89,14 +82,10 @@ export function HeroShaderGradient() {
   );
 
   return (
-    <div
-      className="hero-god-rays"
-      aria-hidden="true"
-      style={{ opacity: visible ? 1 : 0, transition: reducedMotion ? undefined : 'opacity 0.45s ease' }}
-    >
+    <div className="hero-god-rays" aria-hidden="true">
       <ShaderGradientCanvas
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
-        pixelDensity={1}
+        pixelDensity={1.25}
         fov={50}
       >
         <ShaderGradient {...shaderProps} />

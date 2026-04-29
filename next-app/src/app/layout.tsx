@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Geist } from "next/font/google";
 import "./globals.css";
 import { CursorAura } from "@/components/CursorAura";
+import { GlobalShaderLayer } from "@/components/GlobalShaderLayer";
 import { cn } from "@/lib/utils";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
@@ -29,6 +30,7 @@ export default function RootLayout({
         <a href="#main-content" className="skip-to-content">
           Skip to main content
         </a>
+        <GlobalShaderLayer />
         <CursorAura />
         {children}
       </body>
