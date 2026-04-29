@@ -2,7 +2,8 @@
 
 import { useEffect } from 'react';
 import { MotionConfig } from 'motion/react';
-import { GalaxyBackground, Nav, SideRail, PricingPlans, Footer, PillNav } from '@/components';
+import { GalaxyBackground, PricingPlans, Footer } from '@/components';
+import { LiquidNav } from '@/components/LiquidNav';
 
 export default function PricingPage() {
   useEffect(() => {
@@ -13,13 +14,11 @@ export default function PricingPage() {
   return (
     <MotionConfig reducedMotion="user">
       <GalaxyBackground />
-      <Nav />
-      <SideRail />
+      <LiquidNav />
       <main id="main-content" className="site-main pricing-page-main">
         <PricingPlans />
         <Footer />
       </main>
-      <PillNav />
     </MotionConfig>
   );
 }

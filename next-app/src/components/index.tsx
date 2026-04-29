@@ -1,305 +1,20 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { BriefcaseBusiness, ChevronDown, ChevronUp, House, Menu, Tag, X } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { CONTENT } from '@/lib/content';
-import { useSectionJump } from '@/lib/useSectionJump';
 import { HeroShaderGradient } from './HeroShaderGradient';
 import { HeroParticles } from './HeroParticles';
 import { CrashPlayground } from './CrashPlayground';
+import { LiquidNav } from './LiquidNav';
 
 type EntranceProps = { entrance?: boolean };
 
-const NAV_TOP_THRESHOLD_PX = 48;
-
 export function Nav({ entrance }: EntranceProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  /** Logo + hamburger share visibility: top of page, scroll-up, or menu open */
-  const [mobileChromeVisible, setMobileChromeVisible] = useState(true);
-  const lastScrollYRef = useRef(0);
-  const prevMenuOpenRef = useRef(false);
-  const { pathname, handleSectionJump } = useSectionJump();
-  const reduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    lastScrollYRef.current = typeof window !== 'undefined' ? window.scrollY : 0;
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (menuOpen) {
-        lastScrollYRef.current = y;
-        return;
-      }
-      const last = lastScrollYRef.current;
-      const atTop = y <= NAV_TOP_THRESHOLD_PX;
-      const scrollingUp = y < last;
-      lastScrollYRef.current = y;
-      setMobileChromeVisible(atTop || scrollingUp);
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    // Closing the menu re-runs this effect; a naive onScroll() would set y === last and
-    // hide chrome immediately. Keep logo + toggle visible until the user scrolls down.
-    if (prevMenuOpenRef.current && !menuOpen) {
-      const y = window.scrollY;
-      lastScrollYRef.current = y;
-      setMobileChromeVisible(true);
-    } else {
-      onScroll();
-    }
-    prevMenuOpenRef.current = menuOpen;
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [menuOpen]);
-
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMenuOpen(false);
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [menuOpen]);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [menuOpen]);
-
-  const closeMenu = () => setMenuOpen(false);
-
-  const chromeHidden = !menuOpen && !mobileChromeVisible;
-
-  return (
-    <>
-      <motion.nav
-        className={`nav${menuOpen ? ' nav--menu-open' : ''}`}
-        id="nav"
-        initial={entrance ? { y: '-100%' } : false}
-        animate={entrance ? { y: 0 } : false}
-        transition={entrance ? { duration: 0.58, ease: [0.22, 1, 0.36, 1] } : undefined}
-      >
-        <Link
-          href="/"
-          className={`nav-logo${chromeHidden ? ' nav-mobile-chrome--hidden' : ''}`}
-          onClick={closeMenu}
-          tabIndex={chromeHidden ? -1 : undefined}
-          aria-hidden={chromeHidden ? true : undefined}
-        >
-          <Image
-            src={CONTENT.site.logo}
-            alt={CONTENT.site.logoAlt}
-            width={CONTENT.site.logoWidth}
-            height={CONTENT.site.logoHeight}
-            className="logo-img nav-logo-wordmark"
-            priority
-          />
-        </Link>
-        <div className="nav-bar-actions">
-          <button
-            type="button"
-            className={`nav-menu-toggle${chromeHidden ? ' nav-mobile-chrome--hidden' : ''}`}
-            aria-expanded={menuOpen}
-            aria-controls="nav-mobile-menu"
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            tabIndex={chromeHidden ? -1 : 0}
-            onClick={() => setMenuOpen((o) => !o)}
-          >
-            {menuOpen ? <X className="nav-menu-toggle-icon" aria-hidden /> : <Menu className="nav-menu-toggle-icon" aria-hidden />}
-          </button>
-        </div>
-      </motion.nav>
-
-      <AnimatePresence>
-        {menuOpen ? (
-          <>
-            <motion.button
-              key="nav-mobile-backdrop"
-              type="button"
-              className="nav-mobile-backdrop"
-              aria-label="Close menu"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: reduceMotion ? 0 : 0.2 }}
-              onClick={closeMenu}
-            />
-            <motion.div
-              key="nav-mobile-panel"
-              id="nav-mobile-menu"
-              className="nav-mobile-panel"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Site navigation"
-              initial={{ x: reduceMotion ? 0 : '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: reduceMotion ? 0 : '100%' }}
-              transition={{ type: 'tween', duration: reduceMotion ? 0 : 0.32, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <nav className="nav-mobile-panel-inner" aria-label="Primary navigation">
-                <div className="nav-mobile-menu-block">
-                  <Link
-                    href="/"
-                    className={`side-rail-link premium-btn premium-btn--ghost ${pathname === '/' ? 'is-active' : ''}`}
-                    onClick={closeMenu}
-                  >
-                    <span className="premium-btn__inner">
-                      <House className="side-rail-link-icon" aria-hidden="true" />
-                      <span className="premium-btn__label">Home</span>
-                    </span>
-                  </Link>
-                  <Link
-                    href="/#work"
-                    className="side-rail-link premium-btn premium-btn--ghost"
-                    onClick={(e) => {
-                      handleSectionJump('work')(e);
-                      closeMenu();
-                    }}
-                  >
-                    <span className="premium-btn__inner">
-                      <BriefcaseBusiness className="side-rail-link-icon" aria-hidden="true" />
-                      <span className="premium-btn__label">Projects</span>
-                    </span>
-                  </Link>
-                  <Link
-                    href="/pricing"
-                    className={`side-rail-link premium-btn premium-btn--ghost ${pathname === '/pricing' ? 'is-active' : ''}`}
-                    onClick={closeMenu}
-                  >
-                    <span className="premium-btn__inner">
-                      <Tag className="side-rail-link-icon" aria-hidden="true" />
-                      <span className="premium-btn__label">Pricing</span>
-                    </span>
-                  </Link>
-                </div>
-                <div className="nav-mobile-menu-block nav-mobile-menu-actions" aria-label="Contact">
-                  <Link
-                    href={CONTENT.site.primaryCta.href}
-                    className="side-rail-action premium-btn premium-btn--secondary"
-                    onClick={(e) => {
-                      handleSectionJump('contact')(e);
-                      closeMenu();
-                    }}
-                  >
-                    <span className="premium-btn__inner">
-                      <span className="premium-btn__label">{CONTENT.site.primaryCta.text}</span>
-                    </span>
-                  </Link>
-                  <a href={CONTENT.site.secondaryCta.href} className="side-rail-action premium-btn premium-btn--secondary" onClick={closeMenu}>
-                    <span className="premium-btn__inner">
-                      <span className="premium-btn__label">{CONTENT.site.secondaryCta.text}</span>
-                    </span>
-                  </a>
-                  <Link
-                    href={CONTENT.site.startProjectCta.href}
-                    className="side-rail-action premium-btn premium-btn--secondary"
-                    onClick={(e) => {
-                      handleSectionJump('contact')(e);
-                      closeMenu();
-                    }}
-                  >
-                    <span className="premium-btn__inner">
-                      <span className="premium-btn__label">{CONTENT.site.startProjectCta.text}</span>
-                    </span>
-                  </Link>
-                </div>
-              </nav>
-            </motion.div>
-          </>
-        ) : null}
-      </AnimatePresence>
-    </>
-  );
-}
-
-export function SideRail({ entrance }: EntranceProps) {
-  const { pathname, handleSectionJump } = useSectionJump();
-
-  return (
-    <motion.aside
-      className="side-rail"
-      aria-label="Site"
-      initial={entrance ? { x: '-100%' } : false}
-      animate={entrance ? { x: 0 } : false}
-      transition={entrance ? { duration: 0.64, delay: 0.02, ease: [0.22, 1, 0.36, 1] } : undefined}
-    >
-      <nav className="side-rail-nav" aria-label="Primary navigation">
-        <Link href="/" className="side-rail-logo">
-          <Image
-            src={CONTENT.site.logo}
-            alt={CONTENT.site.logoAlt}
-            width={CONTENT.site.logoWidth}
-            height={CONTENT.site.logoHeight}
-            className="logo-img"
-          />
-        </Link>
-        <div className="side-rail-body">
-          <div className="side-rail-menu">
-            <Link
-              href="/"
-              className={`side-rail-link premium-btn premium-btn--ghost ${pathname === '/' ? 'is-active' : ''}`}
-            >
-              <span className="premium-btn__inner">
-                <House className="side-rail-link-icon" aria-hidden="true" />
-                <span className="premium-btn__label">Home</span>
-              </span>
-            </Link>
-            <Link
-              href="/#work"
-              className="side-rail-link premium-btn premium-btn--ghost"
-              onClick={handleSectionJump('work')}
-            >
-              <span className="premium-btn__inner">
-                <BriefcaseBusiness className="side-rail-link-icon" aria-hidden="true" />
-                <span className="premium-btn__label">Projects</span>
-              </span>
-            </Link>
-            <Link
-              href="/pricing"
-              className={`side-rail-link premium-btn premium-btn--ghost ${pathname === '/pricing' ? 'is-active' : ''}`}
-            >
-              <span className="premium-btn__inner">
-                <Tag className="side-rail-link-icon" aria-hidden="true" />
-                <span className="premium-btn__label">Pricing</span>
-              </span>
-            </Link>
-          </div>
-        </div>
-        <div className="side-rail-actions" aria-label="Contact">
-          <Link
-            href={CONTENT.site.primaryCta.href}
-            className="side-rail-action premium-btn premium-btn--secondary"
-            onClick={handleSectionJump('contact')}
-          >
-            <span className="premium-btn__inner">
-              <span className="premium-btn__label">{CONTENT.site.primaryCta.text}</span>
-            </span>
-          </Link>
-          <a href={CONTENT.site.secondaryCta.href} className="side-rail-action premium-btn premium-btn--secondary">
-            <span className="premium-btn__inner">
-              <span className="premium-btn__label">{CONTENT.site.secondaryCta.text}</span>
-            </span>
-          </a>
-          <Link
-            href={CONTENT.site.startProjectCta.href}
-            className="side-rail-action premium-btn premium-btn--secondary"
-            onClick={handleSectionJump('contact')}
-          >
-            <span className="premium-btn__inner">
-              <span className="premium-btn__label">{CONTENT.site.startProjectCta.text}</span>
-            </span>
-          </Link>
-        </div>
-      </nav>
-    </motion.aside>
-  );
+  return <LiquidNav entrance={entrance} />;
 }
 
 export function Hero({ entrance }: EntranceProps) {
@@ -408,29 +123,6 @@ export function Hero({ entrance }: EntranceProps) {
   );
 }
 
-export function PillNav({ entrance }: EntranceProps) {
-  return (
-    <motion.nav
-      className="pill-nav"
-      aria-label="Quick actions"
-      initial={entrance ? { y: '120%', opacity: 0 } : false}
-      animate={entrance ? { y: 0, opacity: 1 } : false}
-      transition={entrance ? { duration: 0.52, delay: 0.28, ease: [0.22, 1, 0.36, 1] } : undefined}
-    >
-      <a href={CONTENT.hero.pillNav.showWork.href} className="pill-nav-item premium-btn premium-btn--ghost">
-        <span className="premium-btn__inner">
-          <span className="premium-btn__label">{CONTENT.hero.pillNav.showWork.text}</span>
-        </span>
-      </a>
-      <div className="pill-nav-divider" />
-      <a href={CONTENT.hero.pillNav.bookCall.href} className="pill-nav-item premium-btn premium-btn--ghost">
-        <span className="premium-btn__inner">
-          <span className="premium-btn__label">{CONTENT.hero.pillNav.bookCall.text}</span>
-        </span>
-      </a>
-    </motion.nav>
-  );
-}
 
 export function Clients() {
   return (
@@ -569,11 +261,16 @@ export function Work() {
   );
 
   useEffect(() => {
-    setProjectIndex(0);
+    const id = window.setTimeout(() => setProjectIndex(0), 0);
+    return () => clearTimeout(id);
   }, [activeCategory]);
 
   useEffect(() => {
-    setProjectIndex((i) => Math.min(i, Math.max(0, filteredProjects.length - 1)));
+    const id = window.setTimeout(
+      () => setProjectIndex((i) => Math.min(i, Math.max(0, filteredProjects.length - 1))),
+      0,
+    );
+    return () => clearTimeout(id);
   }, [filteredProjects.length]);
 
   const project = filteredProjects[projectIndex];

@@ -152,9 +152,9 @@ export const CONTENT: Content = {
     logoWidth: 1024,
     logoHeight: 519,
     logoAlt: "Maser Media",
-    primaryCta: { text: "Book a call", href: "/#contact" },
+    primaryCta: { text: "Book a call", href: "/contact" },
     secondaryCta: { text: "Send a message", href: "mailto:hello@masermedia.com" },
-    startProjectCta: { text: "Start project", href: "/#contact" },
+    startProjectCta: { text: "Start project", href: "/contact" },
   },
 
   // ─── Hero ─────────────────────────────────────────────────────────
@@ -187,7 +187,7 @@ export const CONTENT: Content = {
     },
     pillNav: {
       showWork: { text: "View work", href: "/#work" },
-      bookCall: { text: "Book a call", href: "/#contact" },
+      bookCall: { text: "Book a call", href: "/contact" },
     },
   },
 
@@ -372,16 +372,18 @@ export const CONTENT: Content = {
   cta: {
     title: "Need a team that can think and execute?",
     subtitle: "Choose the path that fits your style. We reply fast and move faster once aligned.",
-    primaryButton: { text: "Book a call", href: "/#contact" },
+    primaryButton: { text: "Book a call", href: "/contact" },
     secondaryButton: { text: "Send a message", href: "mailto:hello@masermedia.com" },
   },
 
   // ─── Footer ───────────────────────────────────────────────────────
   footer: {
     nav: [
-      { text: "Services", href: "/#services" },
-      { text: "Work", href: "/#work" },
-      { text: "Contact", href: "/#contact" },
+      { text: "Home", href: "/" },
+      { text: "Projects", href: "/#work" },
+      { text: "Pricing", href: "/pricing" },
+      { text: "About", href: "/#about" },
+      { text: "Contact", href: "/contact" },
     ],
     copyright: "Maser Media Group. All rights reserved.",
   },
@@ -401,7 +403,7 @@ export const CONTENT: Content = {
           "Custom code, not cookie-cutter templates",
           "Launch ready assets that will drive real results",
         ],
-        primaryCta: { text: "Book Call", href: "/#contact" },
+        primaryCta: { text: "Book Call", href: "/contact" },
         secondaryCta: { text: "Email", href: "mailto:hello@masermedia.com" },
       },
       {
@@ -415,7 +417,7 @@ export const CONTENT: Content = {
           "You scale, we keep up - month after month",
           "Built to move fast and hit deadlines, period",
         ],
-        primaryCta: { text: "Book Call", href: "/#contact" },
+        primaryCta: { text: "Book Call", href: "/contact" },
         secondaryCta: { text: "Email", href: "mailto:hello@masermedia.com" },
         featured: true,
       },

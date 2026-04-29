@@ -1,4 +1,11 @@
 {
+  "scripts": {
+    "dev": "npm run dev --prefix next-app",
+    "build": "npm run build --prefix next-app",
+    "start": "npm run start --prefix next-app",
+    "lint": "npm run lint --prefix next-app",
+    "typecheck": "npm run typecheck --prefix next-app"
+  },
   "dependencies": {
     "@vercel/analytics": "^1.6.1",
     "motion": "^12.35.1",

@@ -126,7 +126,7 @@ export function CrashPlayground() {
   return (
     <motion.section
       className="playground-section"
-      id="playground"
+      id="about"
       aria-label="Internet playground"
       initial={{ opacity: 0, y: 24 }}
       animate={hasEnteredView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}

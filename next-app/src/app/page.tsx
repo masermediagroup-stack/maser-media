@@ -1,13 +1,12 @@
 'use client';
 
-import { useEffect, useLayoutEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import { MotionConfig, motion } from 'motion/react';
 import { useReducedMotionAfterMount } from '@/lib/useReducedMotionAfterMount';
 import { revealScrollAnimateInViewport } from '@/lib/scrollAnimateReveal';
 import {
   GalaxyBackground,
   Nav,
-  SideRail,
   Hero,
   Clients,
   CrashPlayground,
@@ -70,7 +69,6 @@ export default function Home() {
     <MotionConfig reducedMotion="user">
       <GalaxyBackground />
       <Nav entrance={entrance} />
-      <SideRail entrance={entrance} />
       {/* Hero shader + galaxy read as static; only body sections use a soft entrance */}
       <main id="main-content" className="site-main">
         <Hero entrance={entrance} />
