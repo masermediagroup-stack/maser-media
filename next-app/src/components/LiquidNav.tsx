@@ -8,9 +8,10 @@ import { ContactFlow } from "@/components/ContactFlow";
 
 const NAV_ITEMS = [
   { label: "Home", href: "/" },
-  { label: "Projects", href: "/#work" },
+  { label: "Work", href: "/work" },
+  { label: "Services", href: "/services" },
   { label: "Pricing", href: "/pricing" },
-  { label: "About", href: "/#about" },
+  { label: "About", href: "/about" },
 ] as const;
 
 const FOCUSABLE = 'a[href],button:not([disabled]),input,textarea,select,[tabindex]:not([tabindex="-1"])';
@@ -125,9 +126,12 @@ export function LiquidNav({ entrance }: Props) {
               {item.label}
             </Link>
           ))}
+          <button type="button" className="liquid-nav-contact liquid-nav-contact--inline" onClick={() => setContactOpen(true)}>
+            Contact
+          </button>
         </div>
 
-        <button type="button" className="liquid-nav-contact" onClick={() => setContactOpen(true)}>
+        <button type="button" className="liquid-nav-contact liquid-nav-contact--mobile" onClick={() => setContactOpen(true)}>
           Contact
         </button>
 
@@ -230,4 +234,3 @@ export function LiquidNav({ entrance }: Props) {
     </>
   );
 }
-

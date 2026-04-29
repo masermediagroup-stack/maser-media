@@ -7,7 +7,7 @@ import { motion } from 'motion/react';
 import { useReducedMotionAfterMount } from '@/lib/useReducedMotionAfterMount';
 
 /** Paper artboard `15O-0` — copy + layout from Paper MCP `get_jsx` export (March 2025). */
-const BOOK_CALL_HREF = '/#contact';
+const BOOK_CALL_HREF = '/contact';
 
 const METABALLS_COLORS = [
   '#0097F5',
