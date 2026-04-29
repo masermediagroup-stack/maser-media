@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Geist } from "next/font/google";
 import "./globals.css";
 import { CursorAura } from "@/components/CursorAura";
+import { PreloaderShell } from "@/components/preloader/PreloaderShell";
 import { cn } from "@/lib/utils";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
@@ -33,7 +34,9 @@ export default async function RootLayout({
           Skip to main content
         </a>
         <CursorAura />
-        {children}
+        <PreloaderShell mode={process.env.NODE_ENV === "development" ? "always" : "session"}>
+          {children}
+        </PreloaderShell>
       </body>
     </html>
   );
