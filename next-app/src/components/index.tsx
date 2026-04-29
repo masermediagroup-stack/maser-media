@@ -1,144 +1,226 @@
 'use client';
 
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
+import {
+  ArrowRight,
+  BadgeCheck,
+  BarChart3,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  CircleDot,
+  Layers3,
+  MousePointer2,
+  Sparkles,
+  Zap,
+} from 'lucide-react';
 import { CONTENT } from '@/lib/content';
 import { HeroShaderGradient } from './HeroShaderGradient';
 import { HeroParticles } from './HeroParticles';
-import { CrashPlayground } from './CrashPlayground';
 import { LiquidNav } from './LiquidNav';
+import { ContactFlow } from './ContactFlow';
 
 type EntranceProps = { entrance?: boolean };
+type InnerPageKind = 'work' | 'services' | 'about';
+
+const HERO_IMAGE = '/assets/generated/maser-hero-studio.png';
+const CASE_IMAGE = '/assets/generated/maser-case-wall.png';
+
+const studioStats = [
+  { value: '2-4w', label: 'Launch sprints' },
+  { value: '$2k', label: 'Retainer entry' },
+  { value: '1', label: 'Integrated crew' },
+];
+
+const processSteps = [
+  {
+    title: 'Narrative lock',
+    text: 'Positioning, hierarchy, and conversion intent get sharpened before pixels start moving.',
+  },
+  {
+    title: 'Visual system',
+    text: 'Brand, web, and campaign materials share one language instead of feeling stitched together.',
+  },
+  {
+    title: 'Launch build',
+    text: 'Custom code, fast iteration, and handoff-ready assets keep the path from approval to launch tight.',
+  },
+];
+
+const motionPanels = [
+  'Realtime launch board',
+  'Conversion-first storytelling',
+  'Brand systems that travel',
+  'Motion assets for rollout',
+];
 
 export function Nav({ entrance }: EntranceProps) {
   return <LiquidNav entrance={entrance} />;
 }
 
+function useGsapLandingMotion(rootRef: React.RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    if (!rootRef.current) return;
+
+    let cleanup = () => {};
+    let cancelled = false;
+
+    const run = async () => {
+      const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+        import('gsap'),
+        import('gsap/ScrollTrigger'),
+      ]);
+      if (cancelled || !rootRef.current) return;
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      const ctx = gsap.context(() => {
+        gsap.utils.toArray<HTMLElement>('.motion-rise').forEach((el) => {
+          gsap.fromTo(
+            el,
+            { y: 70, opacity: 0, scale: 0.96 },
+            {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: el,
+                start: 'top 84%',
+                end: 'top 48%',
+                scrub: 0.7,
+              },
+            },
+          );
+        });
+
+        gsap.to('.marquee-row--primary', {
+          xPercent: -35,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '.marquee-system',
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1.1,
+          },
+        });
+
+        gsap.to('.marquee-row--secondary', {
+          xPercent: 28,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '.marquee-system',
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1.1,
+          },
+        });
+
+        gsap.utils.toArray<HTMLElement>('.stack-card').forEach((card, index) => {
+          gsap.fromTo(
+            card,
+            { y: 120 + index * 24, opacity: 0.35, rotate: index % 2 === 0 ? -2 : 2 },
+            {
+              y: index * -18,
+              opacity: 1,
+              rotate: 0,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: '.stack-motion',
+                start: 'top 76%',
+                end: 'bottom 38%',
+                scrub: true,
+              },
+            },
+          );
+        });
+      }, rootRef);
+
+      cleanup = () => ctx.revert();
+    };
+
+    run();
+
+    return () => {
+      cancelled = true;
+      cleanup();
+    };
+  }, [rootRef]);
+}
+
 export function Hero({ entrance }: EntranceProps) {
-  const soften = Boolean(entrance);
   const reduceMotion = useReducedMotion();
-  const [curtainDone, setCurtainDone] = useState(false);
-  const heroLogo = CONTENT.hero.heroLogo;
-  const logoVars = heroLogo
-    ? ({
-        '--hero-logo-ratio': `${heroLogo.width} / ${heroLogo.height}`,
-      } as CSSProperties)
-    : undefined;
 
   return (
-    <header className={`hero hero--logo-centered${soften ? ' hero--entrance' : ''}`}>
-      {/* Shader stack stays static — not inside page-translate; avoids blocky sliding canvas */}
-      <div className="hero-bg" aria-hidden="true">
+    <header className="mm-hero">
+      <div className="mm-hero__shader" aria-hidden="true">
         <HeroShaderGradient />
       </div>
       <HeroParticles />
-      {soften ? (
-        <motion.div
-          className={`hero-load-curtain${curtainDone ? ' hero-load-curtain--done' : ''}`}
-          aria-hidden
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 0 }}
-          transition={{ duration: 0.55, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          onAnimationComplete={() => setCurtainDone(true)}
-        />
-      ) : null}
       <motion.div
-        className="hero-content hero-content--logo-centered"
-        initial={
-          soften
-            ? {
-                opacity: 0,
-                y: 18,
-                ...(reduceMotion === true ? {} : { filter: 'blur(14px)' }),
-              }
-            : {
-                opacity: 0,
-                scale: 0.98,
-                ...(reduceMotion === true ? {} : { filter: 'blur(12px)' }),
-              }
-        }
-        animate={
-          soften
-            ? {
-                opacity: 1,
-                y: 0,
-                ...(reduceMotion === true ? {} : { filter: 'blur(0px)' }),
-              }
-            : {
-                opacity: 1,
-                scale: 1,
-                ...(reduceMotion === true ? {} : { filter: 'blur(0px)' }),
-              }
-        }
-        transition={
-          soften
-            ? { duration: 0.78, delay: 0.42, ease: [0.22, 1, 0.36, 1] }
-            : { duration: 1.1, ease: 'easeOut' }
-        }
+        className="mm-hero__content"
+        initial={entrance ? { opacity: 0, y: 24, filter: reduceMotion ? 'none' : 'blur(14px)' } : false}
+        animate={entrance ? { opacity: 1, y: 0, filter: 'blur(0px)' } : false}
+        transition={entrance ? { duration: 0.8, ease: [0.22, 1, 0.36, 1] } : undefined}
       >
-        {heroLogo ? (
-          <div className="hero-logo-stage" style={logoVars}>
-            <div className="hero-brand hero-brand--center" aria-hidden="true">
-              <div className="hero-brand__light hero-brand__light--core" aria-hidden="true" />
-              <div className="hero-brand__light hero-brand__light--seep" aria-hidden="true" />
-            </div>
-            <div className="hero-copy-frame">
-              {soften ? (
-                <h1 className="hero-title hero-title--story" id="hero-title">
-                  <span className="hero-title__primary">{CONTENT.hero.storyTitle}</span>
-                </h1>
-              ) : (
-                <motion.h1
-                  className="hero-title hero-title--story"
-                  id="hero-title"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
-                >
-                  <span className="hero-title__primary">{CONTENT.hero.storyTitle}</span>
-                </motion.h1>
-              )}
-              <Image
-                src={heroLogo.src}
-                alt={heroLogo.alt}
-                width={heroLogo.width}
-                height={heroLogo.height}
-                className="hero-copy-logo"
-                priority
-              />
-              <p className="hero-badge" id="hero-badge">
-                {CONTENT.hero.badge}
-              </p>
-              <p className="hero-lead" id="hero-subtitle">
-                {CONTENT.hero.lead}
-              </p>
-            </div>
-          </div>
-        ) : null}
+        <div className="mm-hero__logo-wrap">
+          <Image
+            src={CONTENT.site.logo}
+            alt={CONTENT.site.logoAlt}
+            width={CONTENT.site.logoWidth}
+            height={CONTENT.site.logoHeight}
+            className="mm-hero__logo"
+            priority
+          />
+        </div>
+        <h1 className="mm-hero__title">
+          Brand, web, and motion for teams ready to look unavoidable.
+        </h1>
+        <p className="mm-hero__lead">
+          Maser Media blends Bou-style agency craft with Visitors-style product clarity: sharp positioning,
+          polished systems, launch-ready websites, and motion that makes people keep scrolling.
+        </p>
+        <div className="mm-hero__actions">
+          <Link href="/contact" className="mm-button mm-button--primary">
+            Book a call <ArrowRight size={18} aria-hidden />
+          </Link>
+          <Link href="/work" className="mm-button mm-button--ghost">
+            View work
+          </Link>
+        </div>
+      </motion.div>
+      <motion.div
+        className="mm-hero__media motion-rise"
+        initial={entrance ? { opacity: 0, y: 42, scale: 0.94 } : false}
+        animate={entrance ? { opacity: 1, y: 0, scale: 1 } : false}
+        transition={entrance ? { duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] } : undefined}
+      >
+        <Image src={HERO_IMAGE} alt="" fill priority sizes="(max-width: 768px) 92vw, 1120px" />
+        <div className="mm-hero__dashboard" aria-hidden="true">
+          <span>Live launch velocity</span>
+          <strong>98%</strong>
+          <small>clarity score</small>
+        </div>
       </motion.div>
     </header>
   );
 }
 
-
 export function Clients() {
+  const logos = [...CONTENT.clients.items, ...CONTENT.clients.items];
+
   return (
-    <section className="clients scroll-animate" aria-label="Trusted by">
-      <p className="clients-label" id="clients-label">
-        {CONTENT.clients.label}
-      </p>
-      <div className="clients-grid" id="clients-grid">
-        {CONTENT.clients.items.map((item, index) => (
-          <div key={index} className="client-logo">
-            {item.logo ? (
-              <Image src={item.logo} alt={item.name} width={120} height={40} />
-            ) : (
-              item.name
-            )}
-          </div>
+    <section className="mm-section mm-clients motion-rise" aria-label="Trusted by">
+      <p className="mm-kicker">{CONTENT.clients.label}</p>
+      <div className="mm-client-strip">
+        {logos.map((item, index) => (
+          <span key={`${item.name}-${index}`} className="mm-client-pill">
+            {item.name}
+          </span>
         ))}
       </div>
     </section>
@@ -146,104 +228,48 @@ export function Clients() {
 }
 
 export function Services() {
-  const [activeService, setActiveService] = useState<string | null>(null);
-  const reduceMotion = useReducedMotion();
-
-  const onToggleService = (title: string) => {
-    if (activeService === title) {
-      setActiveService(null);
-      return;
-    }
-    setActiveService(title);
-  };
+  const [active, setActive] = useState(CONTENT.services.items[0]?.title ?? '');
+  const activeService = CONTENT.services.items.find((item) => item.title === active) ?? CONTENT.services.items[0];
 
   return (
-    <section className="services scroll-animate" id="services">
-      <div className="services-layout">
-        <div className="services-copy">
-          <motion.h2
-            className="section-title"
-            id="services-title"
-            initial={reduceMotion ? { y: 0 } : { y: 36 }}
-            whileInView={{ y: 0 }}
-            viewport={{ once: true, amount: 0.45, margin: '0px 0px -10% 0px' }}
-            transition={{
-              duration: reduceMotion ? 0 : 0.65,
-              ease: [0.22, 1, 0.36, 1],
-              delay: reduceMotion ? 0 : 0.04,
-            }}
-          >
-            {CONTENT.services.title}
-          </motion.h2>
-          {CONTENT.services.subtitle ? <p className="services-subtitle">{CONTENT.services.subtitle}</p> : null}
+    <section className="mm-section mm-services motion-rise" id="services">
+      <div className="mm-section-heading">
+        <p className="mm-kicker">Services</p>
+        <h2>One studio for the whole launch surface.</h2>
+        <p>
+          Strategy, identity, web, content, and motion stay connected so the experience feels built by one
+          opinionated team.
+        </p>
+      </div>
+      <div className="mm-service-board">
+        <div className="mm-service-tabs" role="tablist" aria-label="Service categories">
+          {CONTENT.services.items.map((service) => (
+            <button
+              key={service.title}
+              type="button"
+              role="tab"
+              aria-selected={active === service.title}
+              className="mm-service-tab"
+              onClick={() => setActive(service.title)}
+            >
+              {service.title}
+            </button>
+          ))}
         </div>
-        <div
-          className="services-accordion"
-          id="services-grid"
-          data-state={activeService ? 'expanded' : 'idle'}
-          aria-label="Service categories"
-        >
-          <ul className="services-categories">
-            {CONTENT.services.items.map((svc) => {
-              const isActive = activeService === svc.title;
-              const isDimmed = Boolean(activeService) && !isActive;
-              const slug = svc.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-              const panelId = `service-panel-${slug}`;
-              const buttonId = `service-button-${slug}`;
-
-              return (
-                <li key={svc.title} className={`service-item${isActive ? ' is-active' : ''}${isDimmed ? ' is-dimmed' : ''}`}>
-                  <button
-                    id={buttonId}
-                    type="button"
-                    className="service-trigger"
-                    aria-expanded={isActive}
-                    aria-controls={panelId}
-                    onClick={() => onToggleService(svc.title)}
-                    disabled={isDimmed}
-                  >
-                    <span className="service-trigger-text">{svc.title}</span>
-                    <span className="service-trigger-arrow-wrap" aria-hidden="true">
-                      <ChevronDown className={`service-trigger-arrow service-trigger-arrow-down${isActive ? ' is-hidden' : ''}`} size={18} />
-                      <ChevronUp className={`service-trigger-arrow service-trigger-arrow-up${isActive ? ' is-visible' : ''}`} size={18} />
-                    </span>
-                  </button>
-                  <AnimatePresence initial={false}>
-                    {isActive ? (
-                      <motion.div
-                        key={panelId}
-                        id={panelId}
-                        role="region"
-                        aria-labelledby={buttonId}
-                        className="service-panel"
-                        initial={{ opacity: 0, y: reduceMotion ? 0 : 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{
-                          opacity: 0,
-                          y: 0,
-                          transition: {
-                            duration: reduceMotion ? 0.12 : 0.2,
-                            ease: [0.4, 0, 1, 1],
-                          },
-                        }}
-                        transition={{
-                          duration: reduceMotion ? 0.16 : 0.3,
-                          ease: [0.22, 1, 0.36, 1],
-                        }}
-                      >
-                        <p className="service-panel-lines">
-                          {svc.items.map((line, lineIndex) => (
-                            <span key={`${svc.title}-${lineIndex}`} className="service-panel-line">
-                              {line}
-                            </span>
-                          ))}
-                        </p>
-                      </motion.div>
-                    ) : null}
-                  </AnimatePresence>
-                </li>
-              );
-            })}
+        <div className="mm-service-panel">
+          <div>
+            <span className="mm-panel-icon">
+              <Layers3 size={20} aria-hidden />
+            </span>
+            <h3>{activeService.title}</h3>
+          </div>
+          <ul>
+            {activeService.items.map((item) => (
+              <li key={item}>
+                <Check size={18} aria-hidden />
+                {item}
+              </li>
+            ))}
           </ul>
         </div>
       </div>
@@ -251,116 +277,194 @@ export function Services() {
   );
 }
 
-export { CrashPlayground };
 export function Work() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [projectIndex, setProjectIndex] = useState(0);
+  const [transitionKey, setTransitionKey] = useState(0);
+  const touchStartX = useRef<number | null>(null);
   const filteredProjects = useMemo(
     () => CONTENT.work.items.filter((project) => activeCategory === 'All' || project.category === activeCategory),
-    [activeCategory]
+    [activeCategory],
   );
+  const activeProject = filteredProjects[projectIndex] ?? filteredProjects[0];
+  const hasMultipleProjects = filteredProjects.length > 1;
 
-  useEffect(() => {
-    const id = window.setTimeout(() => setProjectIndex(0), 0);
-    return () => clearTimeout(id);
-  }, [activeCategory]);
+  const switchProject = (direction: -1 | 1) => {
+    setProjectIndex((index) => {
+      if (filteredProjects.length === 0) return 0;
+      return (index + direction + filteredProjects.length) % filteredProjects.length;
+    });
+    setTransitionKey((key) => key + 1);
+  };
 
-  useEffect(() => {
-    const id = window.setTimeout(
-      () => setProjectIndex((i) => Math.min(i, Math.max(0, filteredProjects.length - 1))),
-      0,
-    );
-    return () => clearTimeout(id);
-  }, [filteredProjects.length]);
+  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    touchStartX.current = event.touches[0]?.clientX ?? null;
+  };
 
-  const project = filteredProjects[projectIndex];
+  const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (touchStartX.current === null || !hasMultipleProjects) return;
+    const endX = event.changedTouches[0]?.clientX ?? touchStartX.current;
+    const deltaX = endX - touchStartX.current;
+    touchStartX.current = null;
+
+    if (Math.abs(deltaX) < 44) return;
+    switchProject(deltaX < 0 ? 1 : -1);
+  };
 
   return (
-    <section className="work scroll-animate" id="work">
-      <h2 className="section-title" id="work-title">
-        {CONTENT.work.title}
-      </h2>
-      <p className="work-subtitle">{CONTENT.work.subtitle}</p>
-      <div className="work-tabs" aria-label="Project categories">
-        {CONTENT.work.categories.map((category) => {
-          const isActive = activeCategory === category;
-          return (
-            <button
-              key={category}
-              type="button"
-              aria-pressed={isActive}
-              className={`work-tab premium-btn premium-btn--chip ${isActive ? 'is-active' : ''}`}
-              onClick={() => setActiveCategory(category)}
-            >
-              <span className="premium-btn__inner">
-                <span className="premium-btn__label">{category}</span>
-              </span>
-            </button>
-          );
-        })}
+    <section className="mm-section mm-work motion-rise" id="work">
+      <div className="mm-section-heading mm-section-heading--wide">
+        <p className="mm-kicker">Work</p>
+        <h2>{CONTENT.work.title}</h2>
+        <p>{CONTENT.work.subtitle}</p>
       </div>
-      <div className="work-showcase">
-        <div
-          className="work-grid"
-          id="work-grid"
-          role="region"
-          aria-roledescription="carousel"
-          aria-label="Projects in the selected category"
+      <div className="mm-work-tabs" aria-label="Project categories">
+        {CONTENT.work.categories.map((category) => (
+          <button
+            key={category}
+            type="button"
+            className="mm-work-tab"
+            aria-pressed={activeCategory === category}
+            onClick={() => {
+              setProjectIndex(0);
+              setActiveCategory(category);
+            }}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+      <div className="mm-work-carousel" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+        <button
+          type="button"
+          className="mm-work-arrow mm-work-arrow--prev"
+          onClick={() => switchProject(-1)}
+          aria-label="Show previous project"
+          disabled={!hasMultipleProjects}
         >
-          {filteredProjects.length === 0 ? (
-            <p className="work-empty">No projects match this category yet.</p>
-          ) : project ? (
-            <a
-              key={`${project.title}-${projectIndex}`}
-              href={project.link}
-              className="work-card"
-              target={project.link.startsWith('http') ? '_blank' : undefined}
-              rel={project.link.startsWith('http') ? 'noopener noreferrer' : undefined}
-            >
-              <div
-                className="work-card-image"
-                style={
-                  project.image
-                    ? { background: `url(${project.image}) center/cover` }
-                    : { background: 'linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg-tertiary) 100%)' }
-                }
+          <ChevronLeft size={24} aria-hidden />
+        </button>
+
+        {activeProject ? (
+          <Link
+            key={activeProject.title}
+            href={activeProject.link}
+            className="mm-work-card mm-work-card--single"
+            target={activeProject.link.startsWith('http') ? '_blank' : undefined}
+            rel={activeProject.link.startsWith('http') ? 'noopener noreferrer' : undefined}
+          >
+            <span key={transitionKey} className="mm-work-card__blue-transition" aria-hidden />
+            <div className="mm-work-card__image">
+              <Image
+                src={activeProject.image ?? CASE_IMAGE}
+                alt=""
+                fill
+                sizes="(max-width: 900px) 92vw, 980px"
               />
-              <div className="work-card-content">
-                <span className="work-card-category">{project.category}</span>
-                <h3>{project.title}</h3>
-                <p>{project.description}</p>
-                <dl className="work-card-meta">
-                  <div>
-                    <dt>Outcome</dt>
-                    <dd>{project.outcome}</dd>
-                  </div>
-                  <div>
-                    <dt>Timeline</dt>
-                    <dd>{project.timeframe}</dd>
-                  </div>
-                  <div>
-                    <dt>Role</dt>
-                    <dd>{project.role}</dd>
-                  </div>
-                </dl>
-              </div>
-            </a>
-          ) : null}
-        </div>
-        {filteredProjects.length > 1 ? (
-          <nav className="work-dots" aria-label="Switch project">
-            {filteredProjects.map((p, i) => (
-              <button
-                key={`${p.title}-${i}`}
-                type="button"
-                className={`work-dot ${i === projectIndex ? 'is-active' : ''}`}
-                onClick={() => setProjectIndex(i)}
-                aria-label={`Show project: ${p.title}`}
-                aria-current={i === projectIndex ? true : undefined}
-              />
-            ))}
-          </nav>
+            </div>
+            <div className="mm-work-card__body">
+              <span>{activeProject.category}</span>
+              <h3>{activeProject.title}</h3>
+              <p>{activeProject.description}</p>
+              <dl>
+                <div>
+                  <dt>Timeline</dt>
+                  <dd>{activeProject.timeframe}</dd>
+                </div>
+                <div>
+                  <dt>Role</dt>
+                  <dd>{activeProject.role}</dd>
+                </div>
+                <div>
+                  <dt>Project</dt>
+                  <dd>
+                    {projectIndex + 1} / {filteredProjects.length}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </Link>
         ) : null}
+
+        <button
+          type="button"
+          className="mm-work-arrow mm-work-arrow--next"
+          onClick={() => switchProject(1)}
+          aria-label="Show next project"
+          disabled={!hasMultipleProjects}
+        >
+          <ChevronRight size={24} aria-hidden />
+        </button>
+      </div>
+    </section>
+  );
+}
+
+export function MotionSystem() {
+  return (
+    <section className="mm-section marquee-system" aria-label="Creative system">
+      <div className="marquee-row marquee-row--primary">
+        {motionPanels.concat(motionPanels).map((item, index) => (
+          <span key={`primary-${item}-${index}`}>{item}</span>
+        ))}
+      </div>
+      <div className="marquee-row marquee-row--secondary">
+        {['Brand', 'Web', 'Motion', 'Strategy', 'Content', 'Launch', 'Systems', 'Conversion'].map((item, index) => (
+          <span key={`secondary-${item}-${index}`}>{item}</span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function ProcessStack() {
+  return (
+    <section className="mm-section stack-motion">
+      <div className="mm-section-heading">
+        <p className="mm-kicker">How it moves</p>
+        <h2>Fast does not have to feel thin.</h2>
+        <p>
+          The process is built around decisive creative direction, clear delivery rhythms, and enough motion
+          detail to make the launch feel expensive.
+        </p>
+      </div>
+      <div className="stack-grid">
+        {processSteps.map((step, index) => (
+          <article key={step.title} className="stack-card" style={{ ['--stack-index' as string]: index }}>
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <h3>{step.title}</h3>
+            <p>{step.text}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function AboutPreview() {
+  return (
+    <section className="mm-section mm-about-preview motion-rise" id="about">
+      <div className="mm-about-preview__media">
+        <Image src={CASE_IMAGE} alt="" fill sizes="(max-width: 900px) 92vw, 520px" />
+      </div>
+      <div>
+        <p className="mm-kicker">About</p>
+        <h2>Small enough to care. Senior enough to call the shot.</h2>
+        <p>
+          We are a direct creative partner for founders, operators, and service brands that need one crew
+          across story, design, web, and launch content.
+        </p>
+        <div className="mm-stat-grid">
+          {studioStats.map((stat) => (
+            <div key={stat.label}>
+              <strong>{stat.value}</strong>
+              <span>{stat.label}</span>
+            </div>
+          ))}
+        </div>
+        <Link href="/about" className="mm-button mm-button--ghost">
+          Meet the studio <ArrowRight size={18} aria-hidden />
+        </Link>
       </div>
     </section>
   );
@@ -368,60 +472,273 @@ export function Work() {
 
 export function Cta() {
   return (
-    <section className="cta scroll-animate" id="contact">
-      <h2 className="cta-title" id="cta-title">
-        {CONTENT.cta.title}
-      </h2>
-      <p className="cta-subtitle" id="cta-subtitle">
-        {CONTENT.cta.subtitle}
-      </p>
-      <motion.a
-        href={CONTENT.cta.primaryButton.href}
-        className="premium-btn premium-btn--primary"
-        id="cta-button"
-      >
-        <span className="premium-btn__inner">
-          <span className="premium-btn__label">{CONTENT.cta.primaryButton.text}</span>
-        </span>
-      </motion.a>
-      <a href={CONTENT.cta.secondaryButton.href} className="cta-secondary-link">
-        {CONTENT.cta.secondaryButton.text}
-      </a>
+    <section className="mm-section mm-cta motion-rise" id="contact">
+      <p className="mm-kicker">Contact</p>
+      <h2>{CONTENT.cta.title}</h2>
+      <p>{CONTENT.cta.subtitle}</p>
+      <div className="mm-cta__actions">
+        <Link href={CONTENT.cta.primaryButton.href} className="mm-button mm-button--primary">
+          {CONTENT.cta.primaryButton.text} <ArrowRight size={18} aria-hidden />
+        </Link>
+        <a href={CONTENT.cta.secondaryButton.href} className="mm-button mm-button--ghost">
+          {CONTENT.cta.secondaryButton.text}
+        </a>
+      </div>
     </section>
   );
 }
 
 export function Footer() {
   return (
-    <footer className="footer scroll-animate">
-      <div className="footer-content">
-        <Link href="/" className="footer-logo">
-          <Image
-            src={CONTENT.site.logo}
-            alt={CONTENT.site.logoAlt}
-            width={CONTENT.site.logoWidth}
-            height={CONTENT.site.logoHeight}
-            className="logo-img"
-            id="footer-logo"
-            style={{ objectFit: 'contain' }}
-          />
-        </Link>
-        <nav className="footer-nav" id="footer-nav">
-          {CONTENT.footer.nav.map((n, index) => (
-            <a key={index} href={n.href}>
-              {n.text}
-            </a>
-          ))}
-        </nav>
-        <p className="footer-copy" id="footer-copy">
-          © {CONTENT.footer.copyright}
-        </p>
+    <footer className="mm-footer">
+      <div className="mm-footer__brand">
+        <Image
+          src={CONTENT.site.logo}
+          alt={CONTENT.site.logoAlt}
+          width={CONTENT.site.logoWidth}
+          height={CONTENT.site.logoHeight}
+        />
+        <p>Creative systems for brands that need to ship, sell, and stand out.</p>
       </div>
+      <nav className="mm-footer__nav" aria-label="Footer navigation">
+        {CONTENT.footer.nav.map((item) => (
+          <Link key={item.href} href={item.href}>
+            {item.text}
+          </Link>
+        ))}
+      </nav>
+      <p className="mm-footer__copy">© {CONTENT.footer.copyright}</p>
     </footer>
   );
 }
 
-export * from './PricingPlans';
-export { GalaxyBackground } from './GalaxyBackground';
-export { TestimonialsCarousel as Testimonials } from './TestimonialsCarousel';
+export function LandingPage() {
+  const rootRef = useRef<HTMLElement>(null);
+  useGsapLandingMotion(rootRef);
 
+  return (
+    <main ref={rootRef} id="main-content" className="site-main mm-main">
+      <Hero entrance />
+      <Clients />
+      <Work />
+      <Services />
+      <MotionSystem />
+      <ProcessStack />
+      <Testimonials />
+      <AboutPreview />
+      <Cta />
+      <Footer />
+    </main>
+  );
+}
+
+export function PricingPlans() {
+  return (
+    <section id="pricing" className="mm-pricing-page" aria-labelledby="pricing-heading">
+      <InnerHero
+        eyebrow={CONTENT.pricing.eyebrow}
+        title="Pricing built for clear decisions."
+        copy="Two ways to work with us. Both built for speed, backed by senior talent, and designed to get you results - not excuses."
+      />
+      <div className="mm-pricing-grid">
+        {CONTENT.pricing.plans.map((plan) => (
+          <article key={plan.name} className={`mm-price-card ${plan.featured ? 'mm-price-card--featured' : ''}`}>
+            <div className="mm-price-card__top">
+              <span>{plan.featured ? 'Ongoing partner' : 'Scoped sprint'}</span>
+              <h2>{plan.name}</h2>
+              <p>{plan.summary}</p>
+            </div>
+            <div className="mm-price-card__price">{plan.price}</div>
+            <div className="mm-price-card__notes">
+              <p>{plan.bestFor}</p>
+              <p>{plan.cadence}</p>
+            </div>
+            <ul>
+              {plan.bullets.map((bullet) => (
+                <li key={bullet}>
+                  <BadgeCheck size={18} aria-hidden />
+                  {bullet}
+                </li>
+              ))}
+            </ul>
+            <div className="mm-price-card__actions">
+              <Link href={plan.primaryCta.href} className="mm-button mm-button--primary">
+                {plan.primaryCta.text}
+              </Link>
+              <a href={plan.secondaryCta.href} className="mm-button mm-button--ghost">
+                {plan.secondaryCta.text}
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function ContactPageExperience() {
+  return (
+    <main id="main-content" className="site-main mm-inner-main">
+      <InnerHero
+        eyebrow="Contact"
+        title="Start with the shape of the problem. We will handle the path."
+        copy="Use the quick intake below. It keeps the first conversation focused and gives us enough signal to respond with a useful next step."
+      />
+      <section className="mm-contact-layout">
+        <div className="mm-contact-card">
+          <CircleDot size={20} aria-hidden />
+          <h2>Direct and focused.</h2>
+          <p>
+            Tell us what you are building, what is blocked, and how soon you want to move. We will reply with
+            the cleanest way to start.
+          </p>
+        </div>
+        <ContactFlow />
+      </section>
+      <Footer />
+    </main>
+  );
+}
+
+export function InnerHero({ eyebrow, title, copy }: { eyebrow: string; title: string; copy: string }) {
+  return (
+    <header className="mm-inner-hero">
+      <div className="mm-inner-hero__shader" aria-hidden="true">
+        <HeroShaderGradient />
+      </div>
+      <p className="mm-kicker">{eyebrow}</p>
+      <h1>{title}</h1>
+      <p>{copy}</p>
+    </header>
+  );
+}
+
+export function InnerPage({ kind }: { kind: InnerPageKind }) {
+  const config = {
+    work: {
+      eyebrow: 'Work',
+      title: 'Proof that clarity can still feel cinematic.',
+      copy: 'A focused look at the launch surfaces we shape: websites, product stories, identities, and motion systems.',
+      body: <Work />,
+    },
+    services: {
+      eyebrow: 'Services',
+      title: 'Strategy, design, web, content, and motion under one roof.',
+      copy: 'Use us when the brand, landing page, product story, and launch assets need to feel like they came from one confident source.',
+      body: (
+        <>
+          <Services />
+          <ProcessStack />
+        </>
+      ),
+    },
+    about: {
+      eyebrow: 'About',
+      title: 'A lean creative crew for teams that need senior taste and real output.',
+      copy: 'Maser Media works close to the decision makers, keeps the process direct, and builds brand experiences that are clear enough to sell.',
+      body: (
+        <>
+          <AboutPreview />
+          <MotionSystem />
+        </>
+      ),
+    },
+  } satisfies Record<InnerPageKind, { eyebrow: string; title: string; copy: string; body: React.ReactNode }>;
+
+  const page = config[kind];
+
+  return (
+    <main id="main-content" className="site-main mm-inner-main">
+      <InnerHero eyebrow={page.eyebrow} title={page.title} copy={page.copy} />
+      {page.body}
+      <Cta />
+      <Footer />
+    </main>
+  );
+}
+
+function Stars({ muted = false }: { muted?: boolean }) {
+  return (
+    <div className={`testimonial-stars ${muted ? 'testimonial-stars--muted' : ''}`} aria-hidden>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <span key={i} className="testimonial-star">
+          ★
+        </span>
+      ))}
+    </div>
+  );
+}
+
+export function Testimonials() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const { title, prevLabel, nextLabel, items } = CONTENT.testimonials;
+  const active = items[activeIndex];
+
+  const go = (direction: -1 | 1) => {
+    setActiveIndex((index) => (index + direction + items.length) % items.length);
+  };
+
+  return (
+    <section className="testimonials-carousel mm-section motion-rise" id="testimonials" aria-labelledby="testimonials-title">
+      <div className="testimonials-carousel-inner">
+        <header className="testimonials-carousel-header">
+          <p className="testimonials-carousel-eyebrow">Client notes</p>
+          <h2 className="testimonials-carousel-title" id="testimonials-title">
+            {title}
+          </h2>
+        </header>
+        <div className="mm-testimonial-stage">
+          <button
+            type="button"
+            className="testimonials-carousel-btn testimonials-carousel-btn--muted"
+            onClick={() => go(-1)}
+            aria-label={prevLabel}
+          >
+            <ChevronLeft size={20} aria-hidden />
+          </button>
+          <article className="testimonial-card testimonial-card--active testimonial-card--center" aria-current="true">
+            <Sparkles className="testimonial-card-quote-icon" size={24} aria-hidden />
+            <Stars />
+            <p className="testimonial-card-text">{active.quote}</p>
+            <div className="testimonial-card-footer">
+              <div className="testimonial-card-avatar testimonial-card-avatar--placeholder" aria-hidden />
+              <div className="testimonial-card-who">
+                <strong className="testimonial-card-name">{active.name}</strong>
+                <span className="testimonial-card-role">{active.role}</span>
+              </div>
+            </div>
+          </article>
+          <button
+            type="button"
+            className="testimonials-carousel-btn testimonials-carousel-btn--primary"
+            onClick={() => go(1)}
+            aria-label={nextLabel}
+          >
+            <ChevronRight size={20} aria-hidden />
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function CrashPlayground() {
+  return (
+    <section className="mm-section mm-signal-panel" aria-label="Studio signals">
+      <div>
+        <MousePointer2 size={20} aria-hidden />
+        <span>Interactive briefs</span>
+      </div>
+      <div>
+        <BarChart3 size={20} aria-hidden />
+        <span>Launch metrics</span>
+      </div>
+      <div>
+        <Zap size={20} aria-hidden />
+        <span>Fast production</span>
+      </div>
+    </section>
+  );
+}
+
+export { GalaxyBackground } from './GalaxyBackground';

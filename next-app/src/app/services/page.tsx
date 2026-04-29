@@ -1,14 +1,14 @@
 'use client';
 
 import { MotionConfig } from 'motion/react';
-import { ContactPageExperience, GalaxyBackground, Nav } from '@/components';
+import { GalaxyBackground, InnerPage, Nav } from '@/components';
 
-export default function ContactPage() {
+export default function ServicesPage() {
   return (
     <MotionConfig reducedMotion="user">
       <GalaxyBackground />
       <Nav />
-      <ContactPageExperience />
+      <InnerPage kind="services" />
     </MotionConfig>
   );
 }

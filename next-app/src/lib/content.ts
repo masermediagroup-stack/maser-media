@@ -186,7 +186,7 @@ export const CONTENT: Content = {
       interactive: true,
     },
     pillNav: {
-      showWork: { text: "View work", href: "/#work" },
+      showWork: { text: "View work", href: "/work" },
       bookCall: { text: "Book a call", href: "/contact" },
     },
   },
@@ -273,7 +273,7 @@ export const CONTENT: Content = {
         timeframe: "4 weeks",
         role: "Web design + Build",
         image: null,
-        link: "/#contact",
+        link: "/contact",
       },
       {
         title: "Northline Tools",
@@ -283,7 +283,7 @@ export const CONTENT: Content = {
         timeframe: "5 weeks",
         role: "UX + Web + Content",
         image: null,
-        link: "/#contact",
+        link: "/contact",
       },
       {
         title: "Founder Product Narrative Sprint",
@@ -293,7 +293,7 @@ export const CONTENT: Content = {
         timeframe: "10 days",
         role: "Narrative strategy + identity system",
         image: null,
-        link: "/#contact",
+        link: "/contact",
       },
       {
         title: "SaaS Landing Refresh",
@@ -303,7 +303,7 @@ export const CONTENT: Content = {
         timeframe: "2 weeks",
         role: "UI/UX + conversion copy",
         image: null,
-        link: "/#contact",
+        link: "/contact",
       },
       {
         title: "Launch Motion Kit",
@@ -313,7 +313,7 @@ export const CONTENT: Content = {
         timeframe: "2 weeks",
         role: "Motion direction + asset library",
         image: null,
-        link: "/#contact",
+        link: "/contact",
       },
     ],
   },
@@ -380,9 +380,10 @@ export const CONTENT: Content = {
   footer: {
     nav: [
       { text: "Home", href: "/" },
-      { text: "Projects", href: "/#work" },
+      { text: "Work", href: "/work" },
+      { text: "Services", href: "/services" },
       { text: "Pricing", href: "/pricing" },
-      { text: "About", href: "/#about" },
+      { text: "About", href: "/about" },
       { text: "Contact", href: "/contact" },
     ],
     copyright: "Maser Media Group. All rights reserved.",
