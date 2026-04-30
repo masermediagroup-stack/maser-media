@@ -174,7 +174,7 @@ export function Hero({ entrance }: EntranceProps) {
           />
         </div>
         <div className="mm-hero__copy">
-          <h1 className="mm-hero__title">Brand, web, and motion for teams ready to look unavoidable.</h1>
+          <h1 className="mm-hero__title">Brand, web and products for teams ready to look unavoidable to the world.</h1>
           <p className="mm-hero__lead">
             Maser Media blends Bou-style agency craft with Visitors-style product clarity: sharp positioning,
             polished systems, launch-ready websites, and motion that makes people keep scrolling.
