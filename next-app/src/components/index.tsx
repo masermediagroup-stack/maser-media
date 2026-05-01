@@ -163,22 +163,8 @@ export function Hero({ entrance }: EntranceProps) {
         animate={entrance ? { opacity: 1, y: 0, filter: 'blur(0px)' } : false}
         transition={entrance ? { duration: 0.8, ease: [0.22, 1, 0.36, 1] } : undefined}
       >
-        <div className="mm-hero__logo-wrap">
-          <Image
-            src="/assets/logo-maser-cloud-white-transparent.png"
-            alt={CONTENT.site.logoAlt}
-            width={CONTENT.site.logoWidth}
-            height={CONTENT.site.logoHeight}
-            className="mm-hero__logo mm-hero__logo--plain"
-            priority
-          />
-        </div>
         <div className="mm-hero__copy">
           <h1 className="mm-hero__title">Brand, web and products for teams ready to look unavoidable to the world.</h1>
-          <p className="mm-hero__lead">
-            Maser Media blends Bou-style agency craft with Visitors-style product clarity: sharp positioning,
-            polished systems, launch-ready websites, and motion that makes people keep scrolling.
-          </p>
           <div className="mm-hero__actions">
             <Link href="/contact" className="mm-button mm-button--primary">
               Book a call <ArrowRight size={18} aria-hidden />

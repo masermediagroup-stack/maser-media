@@ -26,6 +26,7 @@ export function LiquidNav({ entrance }: Props) {
   const reduceMotion = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const drawerCloseRef = useRef<HTMLButtonElement>(null);
   const modalCloseRef = useRef<HTMLButtonElement>(null);
@@ -52,6 +53,24 @@ export function LiquidNav({ entrance }: Props) {
       document.body.style.overflow = "";
     };
   }, [open, contactOpen]);
+
+  /* Expand nav bubble while scrolling (desktop/tablet only) */
+  useEffect(() => {
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const scrolled = window.scrollY > 20;
+        setIsScrolled(scrolled);
+      });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
 
   /* Focus management — drawer */
   useEffect(() => {
@@ -114,13 +133,16 @@ export function LiquidNav({ entrance }: Props) {
   return (
     <>
       <motion.nav
-        className="liquid-nav"
+        className={`liquid-nav${isScrolled ? " liquid-nav--expanded" : ""}`}
         aria-label="Primary navigation"
         initial={entrance ? { y: -36, opacity: 0 } : false}
         animate={entrance ? { y: 0, opacity: 1 } : false}
         transition={entrance ? { duration: 0.5, ease: [0.22, 1, 0.36, 1] } : undefined}
       >
         <div className="liquid-nav-bubble">
+          <Link href="/" className="liquid-nav-logo" aria-label="Maser Media home">
+            <img src="/assets/MaserMedia-White-SVG_1.svg" alt="" className="liquid-nav-logo-img" />
+          </Link>
           {NAV_ITEMS.map((item) => (
             <Link key={item.label} href={item.href} className="liquid-nav-link">
               {item.label}
