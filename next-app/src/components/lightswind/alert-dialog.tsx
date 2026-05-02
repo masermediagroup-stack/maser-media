@@ -77,11 +77,14 @@ const AlertDialogTrigger = React.forwardRef<HTMLButtonElement, AlertDialogTrigge
         <>
           {React.Children.map(children, child => {
             if (React.isValidElement(child)) {
-              return React.cloneElement(child, {
-                ...child.props,
-                ref,
-                onClick: handleClick
-              });
+              return React.cloneElement(
+                child,
+                {
+                  ...(child.props as object),
+                  ref,
+                  onClick: handleClick,
+                } as React.HTMLAttributes<HTMLElement> & { ref?: typeof ref }
+              );
             }
             return child;
           })}

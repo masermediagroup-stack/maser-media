@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 export interface GlowingCardProps {
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
   glowColor?: string;
   hoverEffect?: boolean;
   /**
@@ -204,19 +205,22 @@ export const GlowingCards: React.FC<GlowingCardsProps> = ({
               {React.Children.map(children, (child) => {
                 if (React.isValidElement<GlowingCardProps>(child) && child.type === GlowingCard) {
                   const cardGlowColor = child.props.glowColor ?? "#3b82f6";
-                  return React.cloneElement(child, {
-                    className: cn(
-                      child.props.className,
-                      "bg-opacity-15 dark:bg-opacity-15",
-                      "border-opacity-100 dark:border-opacity-100",
-                    ),
-                    style: {
-                      ...child.props.style,
-                      backgroundColor: cardGlowColor + "15",
-                      borderColor: cardGlowColor,
-                      boxShadow: "0 0 0 1px inset " + cardGlowColor,
-                    },
-                  });
+                  return React.cloneElement(
+                    child,
+                    {
+                      className: cn(
+                        child.props.className,
+                        "bg-opacity-15 dark:bg-opacity-15",
+                        "border-opacity-100 dark:border-opacity-100",
+                      ),
+                      style: {
+                        ...child.props.style,
+                        backgroundColor: cardGlowColor + "15",
+                        borderColor: cardGlowColor,
+                        boxShadow: "0 0 0 1px inset " + cardGlowColor,
+                      },
+                    } satisfies Partial<GlowingCardProps>,
+                  );
                 }
                 return child;
               })}

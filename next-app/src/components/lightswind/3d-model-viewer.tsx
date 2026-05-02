@@ -11,7 +11,7 @@ import {
   ContactShadows,
   Center,
 } from "@react-three/drei";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import * as THREE from "three";
 
 // ---
@@ -113,7 +113,7 @@ const ObjContent: FC<{ url: string; onLoaded: () => void }> = ({
   const obj = useLoader(OBJLoader as unknown as any, url);
   useLayoutEffect(() => {
     if (obj) {
-      obj.traverse((o) => {
+      obj.traverse((o: THREE.Object3D) => {
         if ((o as THREE.Mesh).isMesh) {
           o.castShadow = true;
           o.receiveShadow = true;

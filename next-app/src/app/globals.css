@@ -5318,6 +5318,8 @@ body {
   align-self: center;
   max-width: min(18ch, 100%);
   padding-right: clamp(0.5rem, 2vw, 1.5rem);
+  /* Descenders + bg-clip text must not be cropped by tight stacks / section overflow */
+  overflow: visible;
 }
 
 .mm-testimonials-wave__title {
@@ -5331,8 +5333,11 @@ body {
   /* Hero / h1-style weight (page h1 stays in hero; this is visual scale only) */
   font-weight: 800;
   letter-spacing: 0.04em;
-  line-height: 0.92;
+  /* >1 so descenders (y,g,p,q) are not clipped; 0.92 was cropping AuroraText “you” */
+  line-height: 1.08;
   font-size: clamp(3rem, 6.8vw + 0.5rem, 7.25rem);
+  padding-block-end: 0.06em;
+  overflow: visible;
   /* Color lives on `.title-anim` so AuroraText children are not forced to `currentColor: white`,
      which fights `background-clip: text` + transparent fill. */
   color: inherit;
@@ -5343,6 +5348,7 @@ body {
   flex-direction: column;
   align-items: flex-start;
   color: rgba(255, 255, 255, 0.97);
+  overflow: visible;
   /* Shadow stays on this wrapper only; do not inherit onto `background-clip: text` layer. */
   text-shadow:
     0 1px 0 rgba(0, 24, 48, 0.35),
@@ -5411,6 +5417,7 @@ body {
    (Avoid transform on this layer: it interacts badly with `background-clip: text` + section overflow.) */
 .mm-aurora-text-gradient {
   text-shadow: none;
+  overflow: visible;
 }
 
 .mm-aurora-text-gradient * {
@@ -5555,7 +5562,7 @@ body {
 
   .mm-testimonials-wave__title {
     font-size: clamp(1.65rem, 5.5vw + 0.2rem, 2.35rem);
-    line-height: 1.02;
+    line-height: 1.12;
     letter-spacing: 0.025em;
   }
 

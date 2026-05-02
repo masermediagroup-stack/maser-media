@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored Lightswind demos: not part of the app TS graph (see tsconfig exclude); lint only imported files explicitly if needed.
+    "src/components/lightswind/**",
+    "!src/components/lightswind/glowing-cards.tsx",
+    "!src/components/lightswind/smokey-background.tsx",
+    "!src/components/lightswind/ascii-wave.tsx",
   ]),
 ]);
 

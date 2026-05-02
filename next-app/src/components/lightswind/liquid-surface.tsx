@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
-import { cn } from "@/app/component2/lib/utils";
+import { cn } from "@/lib/utils";
 
 // --- Types ---
 export interface LiquidSurfaceProps {

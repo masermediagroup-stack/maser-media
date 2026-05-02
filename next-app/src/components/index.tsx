@@ -597,7 +597,8 @@ function TestimonialsWaveMarquee({ loopItems }: { loopItems: TestimonialCarousel
     const el = trackRef.current;
     if (!el) return;
 
-    let debounceTimer: ReturnType<typeof window.setTimeout> | undefined;
+    // Browser timers are `number`; avoid `NodeJS.Timeout` from merged `setTimeout` typings.
+    let debounceTimer: number | undefined;
 
     const syncLoopDistance = (restartAnimation: boolean) => {
       const { scrollHeight } = el;
@@ -683,7 +684,7 @@ export function Testimonials() {
                 ) : (
                   <AuroraText
                     className="relative z-10 flex flex-col items-start"
-                    colors={['#fffef0', '#fff9c4', '#fde047', '#fbbf24', '#ca8a04']}
+                    colors={['#ffffff', '#f8fafc', '#f1f5f9', '#e2e8f0', '#cbd5e1']}
                     speed={1.15}
                   >
                     {titleWords.map((word, i) => (
