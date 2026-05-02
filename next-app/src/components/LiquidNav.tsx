@@ -1,20 +1,32 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Menu, X } from "lucide-react";
+import { ChevronRight, Menu, X } from "lucide-react";
 import { ContactFlow } from "@/components/ContactFlow";
+import { OPEN_CONTACT_MODAL_EVENT } from "@/lib/contactModalEvents";
 
 const NAV_ITEMS = [
-  { label: "Home", href: "/" },
-  { label: "Work", href: "/work" },
-  { label: "Services", href: "/services" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "About", href: "/about" },
+  { label: "OUR WORK", href: "/work" },
+  { label: "OUR SOLUTIONS", href: "/services" },
+  { label: "ABOUT US", href: "/about" },
+  { label: "THE COST", href: "/pricing" },
 ] as const;
 
+/** Match `.liquid-nav-bubble` / drawer breakpoint in `globals.css`. */
+const NAV_NARROW_MAX_PX = 920;
+/** Same default as Lightswind `MorphingNavigation` — compact pill after this scroll. */
+const MORPH_SCROLL_THRESHOLD = 100;
+
 const FOCUSABLE = 'a[href],button:not([disabled]),input,textarea,select,[tabindex]:not([tabindex="-1"])';
+
+/** Ease-out–heavy cubic-bezier for expand flip (matches gentler bar morph feel). */
+const LIQUID_NAV_FLIP_EASE = [0.16, 1, 0.3, 1] as const;
+const LIQUID_NAV_FLIP_DURATION = 0.5;
+/** Stagger between logo → links → contact (~70ms). */
+const LIQUID_NAV_FLIP_STAGGER = 0.072;
 
 function getFocusable(container: HTMLElement) {
   return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE));
@@ -27,12 +39,27 @@ export function LiquidNav({ entrance }: Props) {
   const [open, setOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isNarrow, setIsNarrow] = useState(false);
+  const [morphCompact, setMorphCompact] = useState(false);
+  /** Increments when leaving morph on wide viewports (batched with `morphCompact` in scroll) so flip runs on first paint. */
+  const [expandFlipNonce, setExpandFlipNonce] = useState(0);
 
   const drawerCloseRef = useRef<HTMLButtonElement>(null);
   const modalCloseRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
+  /** Mirrors `morphCompact` for scroll handler (avoids nested setState + strict double-invoke). */
+  const morphCompactRef = useRef(morphCompact);
+  useEffect(() => {
+    morphCompactRef.current = morphCompact;
+  }, [morphCompact]);
+
+  useEffect(() => {
+    const onOpenFromApp = () => setContactOpen(true);
+    window.addEventListener(OPEN_CONTACT_MODAL_EVENT, onOpenFromApp);
+    return () => window.removeEventListener(OPEN_CONTACT_MODAL_EVENT, onOpenFromApp);
+  }, []);
 
   useEffect(() => {
     if (!open && !contactOpen) return;
@@ -54,14 +81,33 @@ export function LiquidNav({ entrance }: Props) {
     };
   }, [open, contactOpen]);
 
-  /* Expand nav bubble while scrolling (desktop/tablet only) */
+  /* Wide layout hint + Lightswind-style morph on wide viewports after scroll */
+  useEffect(() => {
+    const onResize = () => {
+      setIsNarrow(window.innerWidth <= NAV_NARROW_MAX_PX);
+    };
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   useEffect(() => {
     let raf = 0;
     const onScroll = () => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
-        const scrolled = window.scrollY > 20;
-        setIsScrolled(scrolled);
+        const y = window.scrollY;
+        setIsScrolled(y > 20);
+        const nextCompact = !isNarrow && y >= MORPH_SCROLL_THRESHOLD;
+        const prevCompact = morphCompactRef.current;
+        if (prevCompact && !nextCompact && !isNarrow) {
+          setExpandFlipNonce((n) => n + 1);
+        }
+        if (prevCompact && !nextCompact) {
+          setOpen(false);
+        }
+        morphCompactRef.current = nextCompact;
+        setMorphCompact(nextCompact);
       });
     };
     onScroll();
@@ -70,7 +116,7 @@ export function LiquidNav({ entrance }: Props) {
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
     };
-  }, []);
+  }, [isNarrow]);
 
   /* Focus management — drawer */
   useEffect(() => {
@@ -130,27 +176,88 @@ export function LiquidNav({ entrance }: Props) {
     return () => document.removeEventListener("keydown", onTab);
   }, [open]);
 
+  const morphing = morphCompact && !isNarrow;
+  const morphFullscreenOpen = open && morphing && !isNarrow;
+
+  /** After first wide expand-from-morph (`expandFlipNonce`), play 3D flip; `prefers-reduced-motion` skips rotation. */
+  const flipFromMorphExit = expandFlipNonce > 0 && !reduceMotion;
+  const flipInitial = flipFromMorphExit ? { opacity: 0, rotateX: -55 } : false;
+  const flipAnimate = { opacity: 1, rotateX: 0 };
+  const flipTransition = (delay: number) =>
+    reduceMotion
+      ? { duration: 0 }
+      : {
+          delay,
+          duration: LIQUID_NAV_FLIP_DURATION,
+          ease: LIQUID_NAV_FLIP_EASE,
+        };
+
   return (
     <>
       <motion.nav
-        className={`liquid-nav${isScrolled ? " liquid-nav--expanded" : ""}`}
+        className={`liquid-nav${isScrolled && !morphing ? " liquid-nav--expanded" : ""}${morphing ? " liquid-nav--morph" : ""}`}
         aria-label="Primary navigation"
         initial={entrance ? { y: -36, opacity: 0 } : false}
         animate={entrance ? { y: 0, opacity: 1 } : false}
         transition={entrance ? { duration: 0.5, ease: [0.22, 1, 0.36, 1] } : undefined}
       >
-        <div className="liquid-nav-bubble">
-          <Link href="/" className="liquid-nav-logo" aria-label="Maser Media home">
-            <img src="/assets/MaserMedia-White-SVG_1.svg" alt="" className="liquid-nav-logo-img" />
-          </Link>
-          {NAV_ITEMS.map((item) => (
-            <Link key={item.label} href={item.href} className="liquid-nav-link">
-              {item.label}
-            </Link>
-          ))}
-          <button type="button" className="liquid-nav-contact liquid-nav-contact--inline" onClick={() => setContactOpen(true)}>
-            Contact
-          </button>
+        <div className="liquid-nav-bubble-shell">
+          <div className="liquid-nav-bubble">
+            <motion.div
+              className="liquid-nav-bubble-wide"
+              style={{
+                perspective: reduceMotion ? undefined : 1000,
+              }}
+            >
+              <Link href="/" className="liquid-nav-logo" aria-label="Maser Media home">
+                <motion.span
+                  className="liquid-nav-flip-inner"
+                  initial={flipInitial}
+                  animate={flipAnimate}
+                  transition={flipTransition(0)}
+                  style={{ transformOrigin: "50% 0%" }}
+                >
+                  <Image src="/assets/MaserMedia-White-SVG_1.svg" alt="" width={120} height={32} className="liquid-nav-logo-img" priority />
+                </motion.span>
+              </Link>
+              <div className="liquid-nav-bubble-main" inert={morphing ? true : undefined}>
+                {NAV_ITEMS.map((item, index) => (
+                  <Link key={item.label} href={item.href} className="liquid-nav-link">
+                    <motion.span
+                      className="liquid-nav-flip-inner"
+                      initial={flipInitial}
+                      animate={flipAnimate}
+                      transition={flipTransition(0.04 + (index + 1) * LIQUID_NAV_FLIP_STAGGER)}
+                      style={{ transformOrigin: "50% 0%" }}
+                    >
+                      {item.label}
+                    </motion.span>
+                  </Link>
+                ))}
+                <button type="button" className="liquid-nav-contact liquid-nav-contact--inline" onClick={() => setContactOpen(true)}>
+                  <motion.span
+                    className="liquid-nav-flip-inner"
+                    initial={flipInitial}
+                    animate={flipAnimate}
+                    transition={flipTransition(0.04 + (NAV_ITEMS.length + 1) * LIQUID_NAV_FLIP_STAGGER)}
+                    style={{ transformOrigin: "50% 0%" }}
+                  >
+                    Contact
+                  </motion.span>
+                </button>
+              </div>
+              <button
+                type="button"
+                className="liquid-nav-bubble-toggle"
+                aria-label={open ? "Close menu" : "Open menu"}
+                aria-expanded={open}
+                aria-controls="mobile-nav-drawer"
+                onClick={() => setOpen((v) => !v)}
+              >
+                {open ? <X size={20} aria-hidden /> : <Menu size={20} aria-hidden />}
+              </button>
+            </motion.div>
+          </div>
         </div>
 
         <button type="button" className="liquid-nav-contact liquid-nav-contact--mobile" onClick={() => setContactOpen(true)}>
@@ -174,7 +281,7 @@ export function LiquidNav({ entrance }: Props) {
           <>
             <motion.button
               type="button"
-              className="liquid-nav-backdrop"
+              className={`liquid-nav-backdrop${morphing ? " liquid-nav-backdrop--morph" : ""}`}
               onClick={() => setOpen(false)}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -188,28 +295,100 @@ export function LiquidNav({ entrance }: Props) {
               role="dialog"
               aria-modal="true"
               aria-label="Navigation menu"
-              className="liquid-nav-drawer"
-              initial={{ x: reduceMotion ? 0 : "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: reduceMotion ? 0 : "100%" }}
-              transition={{ duration: reduceMotion ? 0 : 0.3, ease: [0.22, 1, 0.36, 1] }}
+              layout={false}
+              className={
+                morphFullscreenOpen
+                  ? "liquid-nav-drawer liquid-nav-drawer--fullscreen"
+                  : "liquid-nav-drawer"
+              }
+              initial={
+                morphFullscreenOpen
+                  ? { opacity: reduceMotion ? 1 : 0 }
+                  : { x: reduceMotion ? 0 : "100%" }
+              }
+              animate={morphFullscreenOpen ? { opacity: 1 } : { x: 0 }}
+              exit={
+                morphFullscreenOpen
+                  ? { opacity: reduceMotion ? 1 : 0 }
+                  : { x: reduceMotion ? 0 : "100%" }
+              }
+              transition={{
+                duration: reduceMotion ? 0 : morphFullscreenOpen ? 0.24 : 0.3,
+                ease: [0.22, 1, 0.36, 1],
+              }}
             >
               <button
                 ref={drawerCloseRef}
                 type="button"
-                className="liquid-nav-drawer-contact"
-                onClick={() => {
-                  setOpen(false);
-                  setContactOpen(true);
-                }}
+                className="liquid-nav-drawer-close"
+                onClick={() => setOpen(false)}
+                aria-label="Close menu"
               >
-                Contact
+                <X size={22} strokeWidth={2} aria-hidden />
               </button>
-              {NAV_ITEMS.map((item) => (
-                <Link key={item.label} href={item.href} className="liquid-nav-drawer-link" onClick={() => setOpen(false)}>
-                  {item.label}
-                </Link>
-              ))}
+              {morphFullscreenOpen ? (
+                <div className="liquid-nav-drawer-fs-inner">
+                  <Link
+                    href="/"
+                    className="liquid-nav-drawer-fs-logo"
+                    aria-label="Maser Media home"
+                    onClick={() => setOpen(false)}
+                  >
+                    <Image
+                      src="/assets/MaserMedia-White-SVG_1.svg"
+                      alt=""
+                      width={120}
+                      height={32}
+                      className="liquid-nav-drawer-fs-logo-img"
+                    />
+                  </Link>
+                  <div className="liquid-nav-drawer-fs-links">
+                    {NAV_ITEMS.map((item) => (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        className="liquid-nav-drawer-link liquid-nav-drawer-link--fullscreen"
+                        onClick={() => setOpen(false)}
+                      >
+                        <ChevronRight
+                          className="liquid-nav-fs-inline-arrow"
+                          aria-hidden
+                          strokeWidth={2.25}
+                        />
+                        <span className="liquid-nav-fs-link-label">{item.label}</span>
+                      </Link>
+                    ))}
+                    <button
+                      type="button"
+                      className="liquid-nav-drawer-contact liquid-nav-drawer-contact--fullscreen"
+                      onClick={() => {
+                        setOpen(false);
+                        setContactOpen(true);
+                      }}
+                    >
+                      <span className="liquid-nav-fs-link-label">Contact</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {NAV_ITEMS.map((item) => (
+                    <Link key={item.label} href={item.href} className="liquid-nav-drawer-link" onClick={() => setOpen(false)}>
+                      {item.label}
+                    </Link>
+                  ))}
+                  <button
+                    type="button"
+                    className="liquid-nav-drawer-contact"
+                    onClick={() => {
+                      setOpen(false);
+                      setContactOpen(true);
+                    }}
+                  >
+                    Contact
+                  </button>
+                </>
+              )}
             </motion.aside>
           </>
         ) : null}

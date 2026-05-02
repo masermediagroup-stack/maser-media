@@ -88,8 +88,8 @@ export interface TestimonialsConfig {
 export interface CtaConfig {
   title: string;
   subtitle: string;
-  primaryButton: { text: string; href: string };
-  secondaryButton: { text: string; href: string };
+  /** Label for the CTA control that opens the same contact modal as the nav. */
+  contactButtonLabel: string;
 }
 
 export interface PlaygroundConfig {
@@ -193,14 +193,17 @@ export const CONTENT: Content = {
 
   // ─── Clients (logos or names) ──────────────────────────────────────
   clients: {
-    label: "Trusted by teams that care about craft and conversion:",
+    label: "They Trust Us",
     items: [
       { name: "Miller More Handiwork", logo: null },
       { name: "Local service brands", logo: null },
       { name: "Early-stage SaaS teams", logo: null },
       { name: "Founder-led eCommerce", logo: null },
       { name: "Marketing consultants", logo: null },
-      { name: "Growth agencies", logo: null },
+      { name: "BrParadox", logo: null },
+      { name: "Regional retail partners", logo: null },
+      { name: "B2B product launches", logo: null },
+      { name: "Nonprofit campaigns", logo: null },
     ],
   },
 
@@ -208,18 +211,24 @@ export const CONTENT: Content = {
   services: {
     title: "Serious Craft. Playful Energy.",
     subtitle: "",
+    /** Three pillars: index + label + stacked lines (home + /services). */
     items: [
       {
         title: "Brand",
         items: ["Brand Strategy", "Logo & Identity", "Brand Guidelines", "Visual Systems"],
       },
       {
-        title: "Product",
-        items: ["Web Design", "UI/UX", "Pitch Decks", "Marketing Assets"],
-      },
-      {
-        title: "Web",
-        items: ["Websites", "Landing Pages", "E-commerce", "Portfolios"],
+        title: "Build",
+        items: [
+          "Web Design",
+          "UI/UX",
+          "Pitch Decks",
+          "Marketing Assets",
+          "Websites",
+          "Landing Pages",
+          "E-commerce",
+          "Portfolios",
+        ],
       },
       {
         title: "Content",
@@ -370,10 +379,10 @@ export const CONTENT: Content = {
 
   // ─── CTA ──────────────────────────────────────────────────────────
   cta: {
-    title: "Need a team that can think and execute?",
-    subtitle: "Choose the path that fits your style. We reply fast and move faster once aligned.",
-    primaryButton: { text: "Book a call", href: "/contact" },
-    secondaryButton: { text: "Send a message", href: "mailto:hello@masermedia.com" },
+    title: "Start my project",
+    subtitle:
+      "Let's build. Every standout project begins with one conversation. Tell us your vision and we'll reach back with a clear next step.",
+    contactButtonLabel: "Contact",
   },
 
   // ─── Footer ───────────────────────────────────────────────────────

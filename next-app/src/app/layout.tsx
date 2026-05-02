@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins, Geist } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { CursorAura } from "@/components/CursorAura";
 import { GlobalShaderLayer } from "@/components/GlobalShaderLayer";
@@ -33,6 +34,7 @@ export default function RootLayout({
         <GlobalShaderLayer />
         <CursorAura />
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
