@@ -1,39 +1,38 @@
-'use client';
+﻿'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useInView } from 'framer-motion';
 import { motion, useReducedMotion } from 'motion/react';
 import {
-  ArrowRight,
   BadgeCheck,
   BarChart3,
-  Check,
   ChevronLeft,
   ChevronRight,
   CircleDot,
-  Layers3,
   MousePointer2,
   Sparkles,
   Zap,
 } from 'lucide-react';
-import { CONTENT } from '@/lib/content';
-import { HeroParticles } from './HeroParticles';
+import { CONTENT, type TestimonialCarouselItem } from '@/lib/content';
+import { openContactModalFromApp } from '@/lib/contactModalEvents';
+import SmokeyBackground from '@/components/lightswind/smokey-background';
+import { GlowingCard } from '@/components/lightswind/glowing-cards';
+import TestimonialsWaveBackground from '@/components/TestimonialsWaveBackground';
+import { AuroraText } from '@/registry/magicui/aurora-text';
+import { Ripple } from '@/registry/magicui/ripple';
+import { useGsapLandingMotion } from '@/hooks/useGsapLandingMotion';
 import { LiquidNav } from './LiquidNav';
 import { ContactFlow } from './ContactFlow';
+import { AsciiWaveFooter } from './AsciiWaveFooter';
+import { FooterCoolButton } from './FooterCoolButton';
 
 type EntranceProps = { entrance?: boolean };
 type InnerPageKind = 'work' | 'services' | 'about';
 
-const HERO_IMAGE = '/assets/generated/maser-hero-studio.png';
 const CASE_IMAGE = '/assets/generated/maser-case-wall.png';
-
-const studioStats = [
-  { value: '2-4w', label: 'Launch sprints' },
-  { value: '$2k', label: 'Retainer entry' },
-  { value: '1', label: 'Integrated crew' },
-];
 
 const processSteps = [
   {
@@ -57,98 +56,24 @@ const motionPanels = [
   'Motion assets for rollout',
 ];
 
+/** Long strip so scrubbing `xPercent` left never opens a gap on the trailing (right) edge. */
+const primaryMarqueeItems = Array.from({ length: 10 }, () => motionPanels).flat();
+
+const secondaryMotionPanels = ['Brand', 'Web', 'Motion', 'Strategy', 'Content', 'Launch', 'Systems', 'Conversion'];
+
+/** Tiles immediately left of "Brand" in an infinite strip: â€¦ â†’ Web â†’ Brand */
+const secondaryMotionBeforeBrand = [...secondaryMotionPanels.slice(1)].reverse();
+
+/**
+ * Long lead-in (left in LTR) + many full cycles so scrubbing right never opens a gap on the leading (left) edge.
+ */
+const secondaryMarqueeItems = [
+  ...Array.from({ length: 18 }, () => secondaryMotionBeforeBrand).flat(),
+  ...Array.from({ length: 10 }, () => secondaryMotionPanels).flat(),
+];
+
 export function Nav({ entrance }: EntranceProps) {
   return <LiquidNav entrance={entrance} />;
-}
-
-function useGsapLandingMotion(rootRef: React.RefObject<HTMLElement | null>) {
-  useEffect(() => {
-    if (!rootRef.current) return;
-
-    let cleanup = () => {};
-    let cancelled = false;
-
-    const run = async () => {
-      const [{ gsap }, { ScrollTrigger }] = await Promise.all([
-        import('gsap'),
-        import('gsap/ScrollTrigger'),
-      ]);
-      if (cancelled || !rootRef.current) return;
-
-      gsap.registerPlugin(ScrollTrigger);
-
-      const ctx = gsap.context(() => {
-        gsap.utils.toArray<HTMLElement>('.motion-rise').forEach((el) => {
-          gsap.fromTo(
-            el,
-            { y: 70, opacity: 0, scale: 0.96 },
-            {
-              y: 0,
-              opacity: 1,
-              scale: 1,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: el,
-                start: 'top 84%',
-                end: 'top 48%',
-                scrub: 0.7,
-              },
-            },
-          );
-        });
-
-        gsap.to('.marquee-row--primary', {
-          xPercent: -35,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: '.marquee-system',
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: 1.1,
-          },
-        });
-
-        gsap.to('.marquee-row--secondary', {
-          xPercent: 28,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: '.marquee-system',
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: 1.1,
-          },
-        });
-
-        gsap.utils.toArray<HTMLElement>('.stack-card').forEach((card, index) => {
-          gsap.fromTo(
-            card,
-            { y: 120 + index * 24, opacity: 0.35, rotate: index % 2 === 0 ? -2 : 2 },
-            {
-              y: index * -18,
-              opacity: 1,
-              rotate: 0,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: '.stack-motion',
-                start: 'top 76%',
-                end: 'bottom 38%',
-                scrub: true,
-              },
-            },
-          );
-        });
-      }, rootRef);
-
-      cleanup = () => ctx.revert();
-    };
-
-    run();
-
-    return () => {
-      cancelled = true;
-      cleanup();
-    };
-  }, [rootRef]);
 }
 
 export function Hero({ entrance }: EntranceProps) {
@@ -156,36 +81,26 @@ export function Hero({ entrance }: EntranceProps) {
 
   return (
     <header className="mm-hero">
-      <HeroParticles />
+      <div className="mm-hero__bg-scale" aria-hidden>
+        <div className="mm-hero__smokey">
+          <SmokeyBackground color="#10A4FF" backdropBlurAmount="none" className="h-full min-h-0 w-full" />
+        </div>
+        <div className="mm-hero__grain" aria-hidden />
+      </div>
+      <div className="mm-hero__exit-splash" aria-hidden />
       <motion.div
         className="mm-hero__content"
         initial={entrance ? { opacity: 0, y: 24, filter: reduceMotion ? 'none' : 'blur(14px)' } : false}
         animate={entrance ? { opacity: 1, y: 0, filter: 'blur(0px)' } : false}
         transition={entrance ? { duration: 0.8, ease: [0.22, 1, 0.36, 1] } : undefined}
       >
-        <div className="mm-hero__copy">
-          <h1 className="mm-hero__title">Brand, web and products for teams ready to look unavoidable to the world.</h1>
-          <div className="mm-hero__actions">
-            <Link href="/contact" className="mm-button mm-button--primary">
-              Book a call <ArrowRight size={18} aria-hidden />
-            </Link>
-            <Link href="/work" className="mm-button mm-button--ghost">
-              View work
-            </Link>
+        <div className="mm-hero__content-shift">
+          <div className="mm-hero__copy">
+            <h1 className="mm-hero__title">Maser Media brings brands, stories, and experiences to life.</h1>
+            <p className="mm-hero__lead">
+              A creative team shaping culture-forward ideas through design and technology.
+            </p>
           </div>
-        </div>
-      </motion.div>
-      <motion.div
-        className="mm-hero__media motion-rise"
-        initial={entrance ? { opacity: 0, y: 42, scale: 0.94 } : false}
-        animate={entrance ? { opacity: 1, y: 0, scale: 1 } : false}
-        transition={entrance ? { duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] } : undefined}
-      >
-        <Image src={HERO_IMAGE} alt="" fill priority sizes="(max-width: 768px) 92vw, 1120px" />
-        <div className="mm-hero__dashboard" aria-hidden="true">
-          <span>Live launch velocity</span>
-          <strong>98%</strong>
-          <small>clarity score</small>
         </div>
       </motion.div>
     </header>
@@ -193,66 +108,74 @@ export function Hero({ entrance }: EntranceProps) {
 }
 
 export function Clients() {
-  const logos = [...CONTENT.clients.items, ...CONTENT.clients.items];
+  const items = CONTENT.clients.items;
 
   return (
-    <section className="mm-section mm-clients motion-rise" aria-label="Trusted by">
-      <p className="mm-kicker">{CONTENT.clients.label}</p>
+    <section className="mm-section mm-section--clients mm-clients" aria-labelledby="clients-heading">
+      <h2 id="clients-heading" className="mm-clients__headline">
+        {CONTENT.clients.label}
+      </h2>
       <div className="mm-client-strip">
-        {logos.map((item, index) => (
-          <span key={`${item.name}-${index}`} className="mm-client-pill">
-            {item.name}
-          </span>
-        ))}
+        <div className="mm-client-strip__track">
+          <div className="mm-client-strip__segment">
+            {items.map((item) => (
+              <span key={item.name} className="mm-client-pill">
+                {item.name}
+              </span>
+            ))}
+          </div>
+          <div className="mm-client-strip__segment" aria-hidden="true">
+            {items.map((item) => (
+              <span key={`${item.name}-dup`} className="mm-client-pill">
+                {item.name}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
 }
 
 export function Services() {
-  const [active, setActive] = useState(CONTENT.services.items[0]?.title ?? '');
-  const activeService = CONTENT.services.items.find((item) => item.title === active) ?? CONTENT.services.items[0];
+  const pillars = CONTENT.services.items;
 
   return (
-    <section className="mm-section mm-services motion-rise" id="services">
-      <div className="mm-section-heading">
-        <p className="mm-kicker">Services</p>
-        <h2>One studio for the whole launch surface.</h2>
-        <p>
-          Strategy, identity, web, content, and motion stay connected so the experience feels built by one
-          opinionated team.
-        </p>
-      </div>
-      <div className="mm-service-board">
-        <div className="mm-service-tabs" role="tablist" aria-label="Service categories">
-          {CONTENT.services.items.map((service) => (
-            <button
-              key={service.title}
-              type="button"
-              role="tab"
-              aria-selected={active === service.title}
-              className="mm-service-tab"
-              onClick={() => setActive(service.title)}
-            >
-              {service.title}
-            </button>
-          ))}
+    <section className="mm-section mm-section--services mm-services" id="services" aria-labelledby="services-heading">
+      <div className="mm-services__layout">
+        <div className="mm-services__intro">
+          {/* h2 + .mm-type-display: matches hero display scale without a second h1 on the landing page. If this section is ever the sole top-level heading on a route, promote to h1 and drop .mm-type-display from the hero (or split layouts) so the document has one h1. */}
+          <h2 id="services-heading" className="mm-type-display">
+            One studio for the whole launch surface.
+          </h2>
         </div>
-        <div className="mm-service-panel">
-          <div>
-            <span className="mm-panel-icon">
-              <Layers3 size={20} aria-hidden />
-            </span>
-            <h3>{activeService.title}</h3>
-          </div>
-          <ul>
-            {activeService.items.map((item) => (
-              <li key={item}>
-                <Check size={18} aria-hidden />
-                {item}
-              </li>
+        <div className="mm-services__grid-scroll">
+          <div className="mm-services__grid">
+            {pillars.map((pillar, index) => (
+              <div
+                key={pillar.title}
+                className={`mm-services__row${index === 0 ? ' mm-services__row--active' : ' mm-services__row--muted'}`}
+              >
+                <div className="mm-services__head">
+                  <span className="mm-services__index" aria-hidden="true">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <h3 className="mm-services__pillar" id={`services-pillar-${index}`}>
+                    {pillar.title}
+                  </h3>
+                </div>
+                <div className="mm-services__body" id={`services-body-${index}`}>
+                  <ul className="mm-services__lines" aria-labelledby={`services-pillar-${index}`}>
+                    {pillar.items.map((line) => (
+                      <li key={line} className="mm-services__line">
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       </div>
     </section>
@@ -294,89 +217,97 @@ export function Work() {
   };
 
   return (
-    <section className="mm-section mm-work motion-rise" id="work">
-      <div className="mm-section-heading mm-section-heading--wide">
-        <p className="mm-kicker">Work</p>
-        <h2>{CONTENT.work.title}</h2>
-        <p>{CONTENT.work.subtitle}</p>
+    <section className="mm-section mm-section--work mm-work relative overflow-hidden" id="work">
+      <div className="mm-work__ripple-layer absolute inset-0 z-0" aria-hidden>
+        <Ripple />
       </div>
-      <div className="mm-work-tabs" aria-label="Project categories">
-        {CONTENT.work.categories.map((category) => (
+      <div
+        className="pointer-events-none absolute inset-0 z-[1] bg-sky-400/20"
+        aria-hidden
+      />
+      <div className="relative z-10">
+        <div className="mm-section-heading mm-section-heading--wide">
+          <h2 className="mm-work__title">{CONTENT.work.title}</h2>
+          <p>{CONTENT.work.subtitle}</p>
+        </div>
+        <div className="mm-work-tabs" aria-label="Project categories">
+          {CONTENT.work.categories.map((category) => (
+            <button
+              key={category}
+              type="button"
+              className="mm-work-tab"
+              aria-pressed={activeCategory === category}
+              onClick={() => {
+                setProjectIndex(0);
+                setActiveCategory(category);
+              }}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+        <div className="mm-work-carousel" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
           <button
-            key={category}
             type="button"
-            className="mm-work-tab"
-            aria-pressed={activeCategory === category}
-            onClick={() => {
-              setProjectIndex(0);
-              setActiveCategory(category);
-            }}
+            className="mm-work-arrow mm-work-arrow--prev"
+            onClick={() => switchProject(-1)}
+            aria-label="Show previous project"
+            disabled={!hasMultipleProjects}
           >
-            {category}
+            <ChevronLeft size={24} aria-hidden />
           </button>
-        ))}
-      </div>
-      <div className="mm-work-carousel" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-        <button
-          type="button"
-          className="mm-work-arrow mm-work-arrow--prev"
-          onClick={() => switchProject(-1)}
-          aria-label="Show previous project"
-          disabled={!hasMultipleProjects}
-        >
-          <ChevronLeft size={24} aria-hidden />
-        </button>
 
-        {activeProject ? (
-          <Link
-            key={activeProject.title}
-            href={activeProject.link}
-            className="mm-work-card mm-work-card--single"
-            target={activeProject.link.startsWith('http') ? '_blank' : undefined}
-            rel={activeProject.link.startsWith('http') ? 'noopener noreferrer' : undefined}
+          {activeProject ? (
+            <Link
+              key={activeProject.title}
+              href={activeProject.link}
+              className="mm-work-card mm-work-card--single"
+              target={activeProject.link.startsWith('http') ? '_blank' : undefined}
+              rel={activeProject.link.startsWith('http') ? 'noopener noreferrer' : undefined}
+            >
+              <span key={transitionKey} className="mm-work-card__blue-transition" aria-hidden />
+              <div className="mm-work-card__image">
+                <Image
+                  src={activeProject.image ?? CASE_IMAGE}
+                  alt=""
+                  fill
+                  sizes="(max-width: 900px) 92vw, 980px"
+                />
+              </div>
+              <div className="mm-work-card__body">
+                <span>{activeProject.category}</span>
+                <h3>{activeProject.title}</h3>
+                <p>{activeProject.description}</p>
+                <dl>
+                  <div>
+                    <dt>Timeline</dt>
+                    <dd>{activeProject.timeframe}</dd>
+                  </div>
+                  <div>
+                    <dt>Role</dt>
+                    <dd>{activeProject.role}</dd>
+                  </div>
+                  <div>
+                    <dt>Project</dt>
+                    <dd>
+                      {projectIndex + 1} / {filteredProjects.length}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </Link>
+          ) : null}
+
+          <button
+            type="button"
+            className="mm-work-arrow mm-work-arrow--next"
+            onClick={() => switchProject(1)}
+            aria-label="Show next project"
+            disabled={!hasMultipleProjects}
           >
-            <span key={transitionKey} className="mm-work-card__blue-transition" aria-hidden />
-            <div className="mm-work-card__image">
-              <Image
-                src={activeProject.image ?? CASE_IMAGE}
-                alt=""
-                fill
-                sizes="(max-width: 900px) 92vw, 980px"
-              />
-            </div>
-            <div className="mm-work-card__body">
-              <span>{activeProject.category}</span>
-              <h3>{activeProject.title}</h3>
-              <p>{activeProject.description}</p>
-              <dl>
-                <div>
-                  <dt>Timeline</dt>
-                  <dd>{activeProject.timeframe}</dd>
-                </div>
-                <div>
-                  <dt>Role</dt>
-                  <dd>{activeProject.role}</dd>
-                </div>
-                <div>
-                  <dt>Project</dt>
-                  <dd>
-                    {projectIndex + 1} / {filteredProjects.length}
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </Link>
-        ) : null}
-
-        <button
-          type="button"
-          className="mm-work-arrow mm-work-arrow--next"
-          onClick={() => switchProject(1)}
-          aria-label="Show next project"
-          disabled={!hasMultipleProjects}
-        >
-          <ChevronRight size={24} aria-hidden />
-        </button>
+            <ChevronRight size={24} aria-hidden />
+          </button>
+        </div>
       </div>
     </section>
   );
@@ -384,14 +315,14 @@ export function Work() {
 
 export function MotionSystem() {
   return (
-    <section className="mm-section marquee-system" aria-label="Creative system">
+    <section className="mm-section mm-section--marquee marquee-system" aria-label="Creative system">
       <div className="marquee-row marquee-row--primary">
-        {motionPanels.concat(motionPanels).map((item, index) => (
+        {primaryMarqueeItems.map((item, index) => (
           <span key={`primary-${item}-${index}`}>{item}</span>
         ))}
       </div>
       <div className="marquee-row marquee-row--secondary">
-        {['Brand', 'Web', 'Motion', 'Strategy', 'Content', 'Launch', 'Systems', 'Conversion'].map((item, index) => (
+        {secondaryMarqueeItems.map((item, index) => (
           <span key={`secondary-${item}-${index}`}>{item}</span>
         ))}
       </div>
@@ -401,9 +332,8 @@ export function MotionSystem() {
 
 export function ProcessStack() {
   return (
-    <section className="mm-section stack-motion">
+    <section className="mm-section mm-section--process stack-motion">
       <div className="mm-section-heading">
-        <p className="mm-kicker">How it moves</p>
         <h2>Fast does not have to feel thin.</h2>
         <p>
           The process is built around decisive creative direction, clear delivery rhythms, and enough motion
@@ -412,10 +342,16 @@ export function ProcessStack() {
       </div>
       <div className="stack-grid">
         {processSteps.map((step, index) => (
-          <article key={step.title} className="stack-card" style={{ ['--stack-index' as string]: index }}>
-            <span>{String(index + 1).padStart(2, '0')}</span>
-            <h3>{step.title}</h3>
-            <p>{step.text}</p>
+          <article
+            key={step.title}
+            className="stack-card flex flex-col"
+            style={{ ['--stack-index' as string]: index }}
+          >
+            <GlowingCard glowColor="#ffea00" hoverEffect={false} surface="plain">
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <h3>{step.title}</h3>
+              <p>{step.text}</p>
+            </GlowingCard>
           </article>
         ))}
       </div>
@@ -423,48 +359,29 @@ export function ProcessStack() {
   );
 }
 
-export function AboutPreview() {
-  return (
-    <section className="mm-section mm-about-preview motion-rise" id="about">
-      <div className="mm-about-preview__media">
-        <Image src={CASE_IMAGE} alt="" fill sizes="(max-width: 900px) 92vw, 520px" />
-      </div>
-      <div>
-        <p className="mm-kicker">About</p>
-        <h2>Small enough to care. Senior enough to call the shot.</h2>
-        <p>
-          We are a direct creative partner for founders, operators, and service brands that need one crew
-          across story, design, web, and launch content.
-        </p>
-        <div className="mm-stat-grid">
-          {studioStats.map((stat) => (
-            <div key={stat.label}>
-              <strong>{stat.value}</strong>
-              <span>{stat.label}</span>
-            </div>
-          ))}
-        </div>
-        <Link href="/about" className="mm-button mm-button--ghost">
-          Meet the studio <ArrowRight size={18} aria-hidden />
-        </Link>
-      </div>
-    </section>
-  );
-}
-
 export function Cta() {
   return (
-    <section className="mm-section mm-cta motion-rise" id="contact">
-      <p className="mm-kicker">Contact</p>
-      <h2>{CONTENT.cta.title}</h2>
-      <p>{CONTENT.cta.subtitle}</p>
-      <div className="mm-cta__actions">
-        <Link href={CONTENT.cta.primaryButton.href} className="mm-button mm-button--primary">
-          {CONTENT.cta.primaryButton.text} <ArrowRight size={18} aria-hidden />
-        </Link>
-        <a href={CONTENT.cta.secondaryButton.href} className="mm-button mm-button--ghost">
-          {CONTENT.cta.secondaryButton.text}
-        </a>
+    <section className="mm-cta mm-section--cta" id="contact" aria-labelledby="contact-heading">
+      <div className="mm-cta__surface">
+        <div className="mm-cta__inner">
+          <div className="mm-cta__shell">
+            <div className="mm-cta__column">
+              <h2 id="contact-heading" className="mm-cta__title">
+                {CONTENT.cta.title}
+              </h2>
+              <p className="mm-cta__lead">{CONTENT.cta.subtitle}</p>
+              <div className="mm-cta__actions mm-cta__actions--contact">
+                <button
+                  type="button"
+                  className="liquid-nav-contact liquid-nav-contact--inline mm-cta__contact-btn"
+                  onClick={() => openContactModalFromApp()}
+                >
+                  {CONTENT.cta.contactButtonLabel}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -472,7 +389,7 @@ export function Cta() {
 
 export function Footer() {
   return (
-    <footer className="mm-footer">
+    <footer className="mm-footer relative">
       <div className="mm-footer__brand">
         <Image
           src={CONTENT.site.logo}
@@ -480,7 +397,6 @@ export function Footer() {
           width={CONTENT.site.logoWidth}
           height={CONTENT.site.logoHeight}
         />
-        <p>Creative systems for brands that need to ship, sell, and stand out.</p>
       </div>
       <nav className="mm-footer__nav" aria-label="Footer navigation">
         {CONTENT.footer.nav.map((item) => (
@@ -490,6 +406,8 @@ export function Footer() {
         ))}
       </nav>
       <p className="mm-footer__copy">© {CONTENT.footer.copyright}</p>
+      <AsciiWaveFooter color="#10A4FF" speed={1} />
+      <FooterCoolButton />
     </footer>
   );
 }
@@ -502,12 +420,11 @@ export function LandingPage() {
     <main ref={rootRef} id="main-content" className="site-main mm-main">
       <Hero entrance />
       <Clients />
-      <Work />
       <Services />
+      <Work />
       <MotionSystem />
       <ProcessStack />
       <Testimonials />
-      <AboutPreview />
       <Cta />
       <Footer />
     </main>
@@ -615,12 +532,7 @@ export function InnerPage({ kind }: { kind: InnerPageKind }) {
       eyebrow: 'About',
       title: 'A lean creative crew for teams that need senior taste and real output.',
       copy: 'Maser Media works close to the decision makers, keeps the process direct, and builds brand experiences that are clear enough to sell.',
-      body: (
-        <>
-          <AboutPreview />
-          <MotionSystem />
-        </>
-      ),
+      body: <MotionSystem />,
     },
   } satisfies Record<InnerPageKind, { eyebrow: string; title: string; copy: string; body: React.ReactNode }>;
 
@@ -641,60 +553,161 @@ function Stars({ muted = false }: { muted?: boolean }) {
     <div className={`testimonial-stars ${muted ? 'testimonial-stars--muted' : ''}`} aria-hidden>
       {Array.from({ length: 5 }).map((_, i) => (
         <span key={i} className="testimonial-star">
-          ★
+          â˜…
         </span>
       ))}
     </div>
   );
 }
 
-export function Testimonials() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const { title, prevLabel, nextLabel, items } = CONTENT.testimonials;
-  const active = items[activeIndex];
+function TestimonialCardArticle({
+  quote,
+  name,
+  role,
+  className = '',
+}: {
+  quote: string;
+  name: string;
+  role: string;
+  className?: string;
+}) {
+  return (
+    <article
+      className={`testimonial-card mm-testimonials-wave__card${className ? ` ${className}` : ''}`}
+    >
+      <Sparkles className="testimonial-card-quote-icon" size={22} aria-hidden />
+      <Stars />
+      <p className="testimonial-card-text">{quote}</p>
+      <div className="testimonial-card-footer">
+        <div className="testimonial-card-avatar testimonial-card-avatar--placeholder" aria-hidden />
+        <div className="testimonial-card-who">
+          <strong className="testimonial-card-name">{name}</strong>
+          <span className="testimonial-card-role">{role}</span>
+        </div>
+      </div>
+    </article>
+  );
+}
 
-  const go = (direction: -1 | 1) => {
-    setActiveIndex((index) => (index + direction + items.length) % items.length);
-  };
+/** Syncs CSS marquee loop to measured half-height (fonts/resize/viewport reflow) to avoid end-of-loop jumps. */
+function TestimonialsWaveMarquee({ loopItems }: { loopItems: TestimonialCarouselItem[] }) {
+  const trackRef = useRef<HTMLUListElement>(null);
+
+  useLayoutEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+
+    let debounceTimer: ReturnType<typeof window.setTimeout> | undefined;
+
+    const syncLoopDistance = (restartAnimation: boolean) => {
+      const { scrollHeight } = el;
+      if (scrollHeight < 4) return;
+      const halfPx = scrollHeight / 2;
+      const prevRaw = el.style.getPropertyValue('--mm-testimonials-marquee-loop-px');
+      const prev = prevRaw.endsWith('px') ? Number.parseFloat(prevRaw) : NaN;
+      const next = `${halfPx}px`;
+      if (prevRaw === next) return;
+
+      el.style.setProperty('--mm-testimonials-marquee-loop-px', next);
+
+      if (restartAnimation && !Number.isNaN(prev) && Math.abs(prev - halfPx) > 0.5) {
+        el.style.animation = 'none';
+        void el.offsetHeight;
+        el.style.removeProperty('animation');
+      }
+    };
+
+    const schedule = () => {
+      window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(() => syncLoopDistance(true), 100);
+    };
+
+    syncLoopDistance(false);
+
+    const ro = new ResizeObserver(schedule);
+    ro.observe(el);
+
+    const fonts = typeof document !== 'undefined' ? document.fonts : undefined;
+    const fontsDone = fonts?.ready?.then(() => syncLoopDistance(true));
+
+    return () => {
+      ro.disconnect();
+      window.clearTimeout(debounceTimer);
+      void fontsDone;
+    };
+  }, [loopItems]);
 
   return (
-    <section className="testimonials-carousel mm-section motion-rise" id="testimonials" aria-labelledby="testimonials-title">
-      <div className="testimonials-carousel-inner">
-        <header className="testimonials-carousel-header">
-          <p className="testimonials-carousel-eyebrow">Client notes</p>
-          <h2 className="testimonials-carousel-title" id="testimonials-title">
-            {title}
-          </h2>
-        </header>
-        <div className="mm-testimonial-stage">
-          <button
-            type="button"
-            className="testimonials-carousel-btn testimonials-carousel-btn--muted"
-            onClick={() => go(-1)}
-            aria-label={prevLabel}
-          >
-            <ChevronLeft size={20} aria-hidden />
-          </button>
-          <article className="testimonial-card testimonial-card--active testimonial-card--center" aria-current="true">
-            <Sparkles className="testimonial-card-quote-icon" size={24} aria-hidden />
-            <Stars />
-            <p className="testimonial-card-text">{active.quote}</p>
-            <div className="testimonial-card-footer">
-              <div className="testimonial-card-avatar testimonial-card-avatar--placeholder" aria-hidden />
-              <div className="testimonial-card-who">
-                <strong className="testimonial-card-name">{active.name}</strong>
-                <span className="testimonial-card-role">{active.role}</span>
-              </div>
-            </div>
-          </article>
-          <button
-            type="button"
-            className="testimonials-carousel-btn testimonials-carousel-btn--primary"
-            onClick={() => go(1)}
-            aria-label={nextLabel}
-          >
-            <ChevronRight size={20} aria-hidden />
-          </button>
+    <div className="mm-testimonials-wave__marquee" aria-label="Client testimonials, scrolling">
+      <div className="mm-testimonials-wave__marquee-mask">
+        <ul ref={trackRef} className="mm-testimonials-wave__marquee-track">
+          {loopItems.map((item, index) => (
+            <li className="mm-testimonials-wave__marquee-cell" key={`${item.name}-${index}`}>
+              <TestimonialCardArticle quote={item.quote} name={item.name} role={item.role} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+export function Testimonials() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const waveRunning = useInView(sectionRef, { amount: 0.12, margin: '0px 0px -8% 0px' });
+  const { title, items } = CONTENT.testimonials;
+  const reduceMotion = useReducedMotion();
+  const titleWords = useMemo(() => title.trim().split(/\s+/).filter(Boolean), [title]);
+  const loopItems = useMemo(() => [...items, ...items], [items]);
+
+  return (
+    <section
+      ref={sectionRef}
+      className="testimonials-carousel mm-section mm-section--testimonials mm-testimonials-wave"
+      id="testimonials"
+      aria-labelledby="testimonials-title"
+    >
+      <TestimonialsWaveBackground running={waveRunning} />
+      <div className="mm-testimonials-wave__gradient" aria-hidden />
+      <div className="testimonials-carousel-inner mm-testimonials-wave__inner">
+        <div className="mm-testimonials-wave__grid">
+          <header className="mm-testimonials-wave__head">
+            <h2 className="mm-testimonials-wave__title" id="testimonials-title">
+              <span className="mm-testimonials-wave__title-anim">
+                {reduceMotion ? (
+                  titleWords.map((word, i) => (
+                    <span className="mm-testimonials-wave__title-line" key={`${i}-${word}`}>
+                      {word}
+                    </span>
+                  ))
+                ) : (
+                  <AuroraText
+                    className="relative z-10 flex flex-col items-start"
+                    colors={['#fffef0', '#fff9c4', '#fde047', '#fbbf24', '#ca8a04']}
+                    speed={1.15}
+                  >
+                    {titleWords.map((word, i) => (
+                      <span className="mm-testimonials-wave__title-line" key={`${i}-${word}`}>
+                        {word}
+                      </span>
+                    ))}
+                  </AuroraText>
+                )}
+              </span>
+            </h2>
+          </header>
+
+          {reduceMotion ? (
+            <ul className="mm-testimonials-wave__static">
+              {items.map((item, index) => (
+                <li key={`${item.name}-${index}`}>
+                  <TestimonialCardArticle quote={item.quote} name={item.name} role={item.role} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <TestimonialsWaveMarquee loopItems={loopItems} />
+          )}
         </div>
       </div>
     </section>

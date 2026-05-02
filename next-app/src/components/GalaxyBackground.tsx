@@ -2,9 +2,6 @@
 
 import { useEffect, useRef } from 'react';
 
-import { AnimatedGridPattern } from '@/components/ui/animated-grid-pattern';
-import { cn } from '@/lib/utils';
-
 const STAR_COUNT = 220;
 const WHITE_STAR_COUNT = 50;
 const PARTICLE_COUNT = 34;
@@ -295,40 +292,19 @@ export function GalaxyBackground() {
   }, []);
 
   return (
-    <>
-      <canvas
-        ref={canvasRef}
-        className="galaxy-background"
-        id="galaxy-background"
-        aria-hidden="true"
-        style={{
-          position: 'fixed',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: -2,
-          pointerEvents: 'none',
-        }}
-      />
-      {/* Magic UI animated grid — same stack as former body.galaxy-active::before; off on small screens */}
-      <div
-        className="fixed inset-0 z-[-1] hidden pointer-events-none md:block"
-        aria-hidden
-      >
-        <div className="relative h-full w-full bg-black/[0.22]">
-          <AnimatedGridPattern
-            width={80}
-            height={80}
-            numSquares={48}
-            maxOpacity={0.14}
-            duration={3}
-            repeatDelay={0.75}
-            className={cn(
-              'fill-white/[0.12] stroke-white/[0.12] text-white/[0.12]'
-            )}
-          />
-        </div>
-      </div>
-    </>
+    <canvas
+      ref={canvasRef}
+      className="galaxy-background"
+      id="galaxy-background"
+      aria-hidden="true"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: -2,
+        pointerEvents: 'none',
+      }}
+    />
   );
 }
