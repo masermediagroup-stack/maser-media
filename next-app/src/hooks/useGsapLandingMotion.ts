@@ -201,62 +201,15 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
             const workCard = workSection?.querySelector<HTMLElement>('.mm-work-card--single');
 
             if (workHeading) {
-              gsap.fromTo(
-                workHeading,
-                { autoAlpha: 0, x: isNarrow ? 0 : -28, y: isNarrow ? 22 : 0 },
-                {
-                  autoAlpha: 1,
-                  x: 0,
-                  y: 0,
-                  ease: 'power2.out',
-                  scrollTrigger: {
-                    trigger: workHeading,
-                    start: 'top 86%',
-                    end: 'top 58%',
-                    scrub: 0.55,
-                    ...stToggleActive(workHeading),
-                    ...scrollTriggerDefaults,
-                  },
-                },
-              );
+              gsap.set(workHeading, { autoAlpha: 1, x: 0, y: 0 });
             }
 
-            if (workCard && isWide) {
-              gsap.fromTo(
-                workCard,
-                { clipPath: 'inset(8% 8% 8% 8% round 12px)', autoAlpha: 0.85 },
-                {
-                  clipPath: 'inset(0% 0% 0% 0% round 12px)',
-                  autoAlpha: 1,
-                  ease: 'power2.inOut',
-                  scrollTrigger: {
-                    trigger: workSection,
-                    start: 'top 72%',
-                    end: 'top 36%',
-                    scrub: 0.65,
-                    ...stToggleActive(workCard),
-                    ...scrollTriggerDefaults,
-                  },
-                },
-              );
-            } else if (workCard && isNarrow) {
-              gsap.fromTo(
-                workCard,
-                { autoAlpha: 0, y: 24 },
-                {
-                  autoAlpha: 1,
-                  y: 0,
-                  ease: 'power2.out',
-                  scrollTrigger: {
-                    trigger: workSection,
-                    start: 'top 78%',
-                    end: 'top 52%',
-                    scrub: 0.45,
-                    ...stToggleActive(workCard),
-                    ...scrollTriggerDefaults,
-                  },
-                },
-              );
+            if (workCard) {
+              gsap.set(workCard, {
+                autoAlpha: 1,
+                y: 0,
+                clipPath: 'inset(0% 0% 0% 0% round 12px)',
+              });
             }
 
             const servicesSection = root.querySelector<HTMLElement>('#services');
@@ -364,6 +317,25 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
                 '--services-pack': 0,
                 maxHeight: 'none',
               });
+
+              if (servicesIntro) {
+                gsap.fromTo(
+                  servicesIntro,
+                  { y: -44 },
+                  {
+                    y: 74,
+                    ease: 'none',
+                    scrollTrigger: {
+                      trigger: servicesGrid,
+                      start: 'top 72%',
+                      end: 'bottom 34%',
+                      scrub: 0.85,
+                      invalidateOnRefresh: true,
+                      ...scrollTriggerDefaults,
+                    },
+                  },
+                );
+              }
             } else if (servicesScroll && isNarrow) {
               gsap.fromTo(
                 servicesScroll,

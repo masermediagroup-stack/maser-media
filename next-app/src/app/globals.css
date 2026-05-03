@@ -3748,8 +3748,8 @@ body {
 }
 
 .mm-section.mm-section--services.mm-services {
-  padding-top: 500px;
-  padding-bottom: 500px;
+  padding-top: clamp(34rem, 40vw, 43rem);
+  padding-bottom: clamp(36rem, 43vw, 46rem);
   background: linear-gradient(198deg, #020509 0%, #06111d 48%, #03070f 100%);
 }
 
@@ -4306,7 +4306,9 @@ body {
   position: relative;
   display: inline-block;
   overflow: hidden;
-  line-height: 0.86;
+  line-height: 1.12;
+  padding-block: 0.16em;
+  margin-block: -0.16em;
   cursor: default;
 }
 
@@ -4725,7 +4727,8 @@ body {
 @media (min-width: 1025px) {
   .mm-services__intro {
     position: sticky;
-    top: clamp(5rem, 12vh, 8rem);
+    top: clamp(7rem, 18vh, 11rem);
+    will-change: transform;
   }
 }
 
