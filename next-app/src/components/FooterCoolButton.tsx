@@ -5,7 +5,7 @@ import { CoolMode } from '@/registry/magicui/cool-mode';
 
 export function FooterCoolButton() {
   return (
-    <div className="pointer-events-auto absolute right-4 bottom-[calc(clamp(4.5rem,8vw,6rem)+1rem)] z-10 sm:right-6 sm:bottom-[calc(clamp(4.5rem,8vw,6rem)+1.25rem)]">
+    <div className="mm-footer-cool-button pointer-events-auto absolute z-10">
       <CoolMode>
         <Button
           type="button"

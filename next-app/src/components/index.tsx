@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -16,10 +16,9 @@ import {
   Sparkles,
   Zap,
 } from 'lucide-react';
-import { CONTENT, type TestimonialCarouselItem } from '@/lib/content';
+import { CONTENT } from '@/lib/content';
 import { openContactModalFromApp } from '@/lib/contactModalEvents';
 import SmokeyBackground from '@/components/lightswind/smokey-background';
-import { GlowingCard } from '@/components/lightswind/glowing-cards';
 import TestimonialsWaveBackground from '@/components/TestimonialsWaveBackground';
 import { AuroraText } from '@/registry/magicui/aurora-text';
 import { Ripple } from '@/registry/magicui/ripple';
@@ -72,6 +71,87 @@ const secondaryMarqueeItems = [
   ...Array.from({ length: 10 }, () => secondaryMotionPanels).flat(),
 ];
 
+const textRollStagger = 0.035;
+
+function TextRoll({ children, className = '', center = false }: { children: string; className?: string; center?: boolean }) {
+  const letters = children.split('');
+
+  return (
+    <motion.span
+      initial="initial"
+      whileHover="hovered"
+      className={`mm-text-roll ${className}`}
+      aria-label={children}
+    >
+      <span className="mm-text-roll__row" aria-hidden>
+        {letters.map((letter, index) => {
+          const delay = center ? textRollStagger * Math.abs(index - (letters.length - 1) / 2) : textRollStagger * index;
+          return (
+            <motion.span
+              className="mm-text-roll__char"
+              variants={{ initial: { y: '0%' }, hovered: { y: '-100%' } }}
+              transition={{ ease: 'easeInOut', delay }}
+              key={`top-${letter}-${index}`}
+            >
+              {letter === ' ' ? '\u00a0' : letter}
+            </motion.span>
+          );
+        })}
+      </span>
+      <span className="mm-text-roll__row mm-text-roll__row--clone" aria-hidden>
+        {letters.map((letter, index) => {
+          const delay = center ? textRollStagger * Math.abs(index - (letters.length - 1) / 2) : textRollStagger * index;
+          return (
+            <motion.span
+              className="mm-text-roll__char"
+              variants={{ initial: { y: '100%' }, hovered: { y: '0%' } }}
+              transition={{ ease: 'easeInOut', delay }}
+              key={`clone-${letter}-${index}`}
+            >
+              {letter === ' ' ? '\u00a0' : letter}
+            </motion.span>
+          );
+        })}
+      </span>
+    </motion.span>
+  );
+}
+
+function FlipText({ text, className = '', stagger = 0.04 }: { text: string; className?: string; stagger?: number }) {
+  const parts = text.split(/(\s+)/);
+
+  return (
+    <motion.span
+      className={`mm-flip-text ${className}`}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, amount: 0.65 }}
+      aria-label={text}
+    >
+      {parts.map((part, index) => {
+        if (/^\s+$/.test(part)) {
+          return <span aria-hidden key={`space-${index}`}> </span>;
+        }
+
+        return (
+          <motion.span
+            className="mm-flip-text__word"
+            variants={{
+              hidden: { opacity: 0, y: 18, rotateX: -86 },
+              show: { opacity: 1, y: 0, rotateX: 0 },
+            }}
+            transition={{ duration: 0.62, ease: [0.22, 1, 0.36, 1], delay: index * stagger }}
+            key={`${part}-${index}`}
+            aria-hidden
+          >
+            {part}
+          </motion.span>
+        );
+      })}
+    </motion.span>
+  );
+}
+
 export function Nav({ entrance }: EntranceProps) {
   return <LiquidNav entrance={entrance} />;
 }
@@ -96,6 +176,14 @@ export function Hero({ entrance }: EntranceProps) {
       >
         <div className="mm-hero__content-shift">
           <div className="mm-hero__copy">
+            <Image
+              src="/assets/MaserMedia-White-SVG_1.svg"
+              alt="Maser Media"
+              width={320}
+              height={162}
+              className="mm-hero__mobile-logo"
+              priority
+            />
             <h1 className="mm-hero__title">Maser Media brings brands, stories, and experiences to life.</h1>
             <p className="mm-hero__lead">
               A creative team shaping culture-forward ideas through design and technology.
@@ -113,7 +201,7 @@ export function Clients() {
   return (
     <section className="mm-section mm-section--clients mm-clients" aria-labelledby="clients-heading">
       <h2 id="clients-heading" className="mm-clients__headline">
-        {CONTENT.clients.label}
+        <TextRoll center>{CONTENT.clients.label}</TextRoll>
       </h2>
       <div className="mm-client-strip">
         <div className="mm-client-strip__track">
@@ -222,7 +310,7 @@ export function Work() {
         <Ripple />
       </div>
       <div
-        className="pointer-events-none absolute inset-0 z-[1] bg-sky-400/20"
+        className="mm-work__blue-wash pointer-events-none absolute inset-0 z-[1]"
         aria-hidden
       />
       <div className="relative z-10">
@@ -331,6 +419,9 @@ export function MotionSystem() {
 }
 
 export function ProcessStack() {
+  const [activeStep, setActiveStep] = useState(0);
+  const nextStep = () => setActiveStep((index) => (index + 1) % processSteps.length);
+
   return (
     <section className="mm-section mm-section--process stack-motion">
       <div className="mm-section-heading">
@@ -340,20 +431,35 @@ export function ProcessStack() {
           detail to make the launch feel expensive.
         </p>
       </div>
-      <div className="stack-grid">
-        {processSteps.map((step, index) => (
-          <article
-            key={step.title}
-            className="stack-card flex flex-col"
-            style={{ ['--stack-index' as string]: index }}
-          >
-            <GlowingCard glowColor="#ffea00" hoverEffect={false} surface="plain">
+      <div className="stack-grid stack-grid--interactive" role="list" aria-label="Process steps">
+        {processSteps.map((step, index) => {
+          const offset = (index - activeStep + processSteps.length) % processSteps.length;
+          const isActive = offset === 0;
+
+          return (
+            <motion.button
+              key={step.title}
+              type="button"
+              role="listitem"
+              className={`stack-card stack-card--flip flex flex-col${isActive ? ' is-active' : ''}`}
+              style={{ ['--stack-index' as string]: index }}
+              animate={{
+                y: offset * 34,
+                scale: 1 - offset * 0.055,
+                rotateX: isActive ? 0 : -7,
+                opacity: offset > 2 ? 0 : 1,
+                zIndex: processSteps.length - offset,
+              }}
+              transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
+              onClick={nextStep}
+              aria-label={`Show next process card. Current card: ${step.title}`}
+            >
               <span>{String(index + 1).padStart(2, '0')}</span>
               <h3>{step.title}</h3>
               <p>{step.text}</p>
-            </GlowingCard>
-          </article>
-        ))}
+            </motion.button>
+          );
+        })}
       </div>
     </section>
   );
@@ -367,9 +473,11 @@ export function Cta() {
           <div className="mm-cta__shell">
             <div className="mm-cta__column">
               <h2 id="contact-heading" className="mm-cta__title">
-                {CONTENT.cta.title}
+                <FlipText text={CONTENT.cta.title} />
               </h2>
-              <p className="mm-cta__lead">{CONTENT.cta.subtitle}</p>
+              <p className="mm-cta__lead">
+                <FlipText text={CONTENT.cta.subtitle} className="mm-flip-text--lead" stagger={0.014} />
+              </p>
               <div className="mm-cta__actions mm-cta__actions--contact">
                 <button
                   type="button"
@@ -589,77 +697,12 @@ function TestimonialCardArticle({
   );
 }
 
-/** Syncs CSS marquee loop to measured half-height (fonts/resize/viewport reflow) to avoid end-of-loop jumps. */
-function TestimonialsWaveMarquee({ loopItems }: { loopItems: TestimonialCarouselItem[] }) {
-  const trackRef = useRef<HTMLUListElement>(null);
-
-  useLayoutEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-
-    // Browser timers are `number`; avoid `NodeJS.Timeout` from merged `setTimeout` typings.
-    let debounceTimer: number | undefined;
-
-    const syncLoopDistance = (restartAnimation: boolean) => {
-      const { scrollHeight } = el;
-      if (scrollHeight < 4) return;
-      const halfPx = scrollHeight / 2;
-      const prevRaw = el.style.getPropertyValue('--mm-testimonials-marquee-loop-px');
-      const prev = prevRaw.endsWith('px') ? Number.parseFloat(prevRaw) : NaN;
-      const next = `${halfPx}px`;
-      if (prevRaw === next) return;
-
-      el.style.setProperty('--mm-testimonials-marquee-loop-px', next);
-
-      if (restartAnimation && !Number.isNaN(prev) && Math.abs(prev - halfPx) > 0.5) {
-        el.style.animation = 'none';
-        void el.offsetHeight;
-        el.style.removeProperty('animation');
-      }
-    };
-
-    const schedule = () => {
-      window.clearTimeout(debounceTimer);
-      debounceTimer = window.setTimeout(() => syncLoopDistance(true), 100);
-    };
-
-    syncLoopDistance(false);
-
-    const ro = new ResizeObserver(schedule);
-    ro.observe(el);
-
-    const fonts = typeof document !== 'undefined' ? document.fonts : undefined;
-    const fontsDone = fonts?.ready?.then(() => syncLoopDistance(true));
-
-    return () => {
-      ro.disconnect();
-      window.clearTimeout(debounceTimer);
-      void fontsDone;
-    };
-  }, [loopItems]);
-
-  return (
-    <div className="mm-testimonials-wave__marquee" aria-label="Client testimonials, scrolling">
-      <div className="mm-testimonials-wave__marquee-mask">
-        <ul ref={trackRef} className="mm-testimonials-wave__marquee-track">
-          {loopItems.map((item, index) => (
-            <li className="mm-testimonials-wave__marquee-cell" key={`${item.name}-${index}`}>
-              <TestimonialCardArticle quote={item.quote} name={item.name} role={item.role} />
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
 export function Testimonials() {
   const sectionRef = useRef<HTMLElement>(null);
-  const waveRunning = useInView(sectionRef, { amount: 0.12, margin: '0px 0px -8% 0px' });
+  const waveRunning = useInView(sectionRef, { amount: 0.01, margin: '55% 0px 55% 0px' });
   const { title, items } = CONTENT.testimonials;
   const reduceMotion = useReducedMotion();
   const titleWords = useMemo(() => title.trim().split(/\s+/).filter(Boolean), [title]);
-  const loopItems = useMemo(() => [...items, ...items], [items]);
 
   return (
     <section
@@ -698,17 +741,13 @@ export function Testimonials() {
             </h2>
           </header>
 
-          {reduceMotion ? (
-            <ul className="mm-testimonials-wave__static">
-              {items.map((item, index) => (
-                <li key={`${item.name}-${index}`}>
-                  <TestimonialCardArticle quote={item.quote} name={item.name} role={item.role} />
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <TestimonialsWaveMarquee loopItems={loopItems} />
-          )}
+          <ul className="mm-testimonials-wave__static mm-testimonials-wave__static--live">
+            {items.map((item, index) => (
+              <li key={`${item.name}-${index}`}>
+                <TestimonialCardArticle quote={item.quote} name={item.name} role={item.role} />
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>

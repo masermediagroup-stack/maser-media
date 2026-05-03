@@ -265,23 +265,14 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
             const servicesGrid = servicesScroll?.querySelector<HTMLElement>('.mm-services__grid');
 
             if (servicesIntro) {
-              gsap.fromTo(
-                servicesIntro,
-                { autoAlpha: 0, y: isNarrow ? 16 : 40 },
-                {
-                  autoAlpha: 1,
-                  y: 0,
-                  ease: 'power2.out',
-                  scrollTrigger: {
-                    trigger: servicesIntro,
-                    start: 'top 88%',
-                    end: 'top 62%',
-                    scrub: 0.5,
-                    ...stToggleActive(servicesIntro),
-                    ...scrollTriggerDefaults,
-                  },
-                },
-              );
+              gsap.set(servicesIntro, { autoAlpha: 1, y: 0 });
+              ScrollTrigger.create({
+                trigger: servicesIntro,
+                start: 'top 88%',
+                toggleActions: 'play none none none',
+                ...stToggleActive(servicesIntro),
+                ...scrollTriggerDefaults,
+              });
             }
 
             const serviceRows = servicesSection?.querySelectorAll<HTMLElement>('.mm-services__row');
@@ -369,27 +360,10 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
             }
 
             if (servicesScroll && servicesGrid && isWide) {
-              gsap.fromTo(
-                servicesScroll,
-                {
-                  '--services-pack': 0,
-                  maxHeight: () => servicesGrid.scrollHeight,
-                },
-                {
-                  '--services-pack': 1,
-                  maxHeight: () => Math.max(200, Math.round(servicesGrid.scrollHeight * 0.38)),
-                  ease: 'power2.inOut',
-                  scrollTrigger: {
-                    trigger: servicesSection,
-                    start: 'bottom 90%',
-                    end: 'bottom 32%',
-                    scrub: 0.45,
-                    invalidateOnRefresh: true,
-                    ...stToggleActive(servicesScroll),
-                    ...scrollTriggerDefaults,
-                  },
-                },
-              );
+              gsap.set(servicesScroll, {
+                '--services-pack': 0,
+                maxHeight: 'none',
+              });
             } else if (servicesScroll && isNarrow) {
               gsap.fromTo(
                 servicesScroll,
@@ -462,8 +436,7 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
                   scrollTrigger: {
                     trigger: testimonialsSection,
                     start: 'top 86%',
-                    end: 'top 62%',
-                    scrub: 0.45,
+                    toggleActions: 'play none none none',
                     ...scrollTriggerDefaults,
                   },
                 },
@@ -481,8 +454,7 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
                   scrollTrigger: {
                     trigger: testimonialsSection,
                     start: 'top 78%',
-                    end: 'top 48%',
-                    scrub: 0.5,
+                    toggleActions: 'play none none none',
                     ...stToggleActive(testimonialGrid),
                     ...scrollTriggerDefaults,
                   },
