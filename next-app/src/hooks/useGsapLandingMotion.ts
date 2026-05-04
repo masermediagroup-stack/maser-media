@@ -230,7 +230,7 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
 
             const serviceRows = servicesSection?.querySelectorAll<HTMLElement>('.mm-services__row');
             if (servicesSection && serviceRows && serviceRows.length > 0) {
-              const focalRatio = isNarrow ? 0.46 : 0.42;
+              const focalRatio = isNarrow ? 0.46 : 0.5;
               let previousActive = -1;
 
               const measureServiceBodies = () => {
@@ -321,14 +321,14 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
               if (servicesIntro) {
                 gsap.fromTo(
                   servicesIntro,
-                  { y: -44 },
+                  { y: -96 },
                   {
-                    y: 74,
+                    y: 132,
                     ease: 'none',
                     scrollTrigger: {
                       trigger: servicesGrid,
-                      start: 'top 72%',
-                      end: 'bottom 34%',
+                      start: 'top 80%',
+                      end: 'bottom 24%',
                       scrub: 0.85,
                       invalidateOnRefresh: true,
                       ...scrollTriggerDefaults,

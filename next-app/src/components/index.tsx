@@ -89,8 +89,8 @@ function TextRoll({ children, className = '', center = false }: { children: stri
           return (
             <motion.span
               className="mm-text-roll__char"
-              variants={{ initial: { y: '0%' }, hovered: { y: '-100%' } }}
-              transition={{ ease: 'easeInOut', delay }}
+              variants={{ initial: { y: '0%', opacity: 1 }, hovered: { y: '-112%', opacity: 0 } }}
+              transition={{ duration: 0.42, ease: 'easeInOut', delay }}
               key={`top-${letter}-${index}`}
             >
               {letter === ' ' ? '\u00a0' : letter}
@@ -104,8 +104,8 @@ function TextRoll({ children, className = '', center = false }: { children: stri
           return (
             <motion.span
               className="mm-text-roll__char"
-              variants={{ initial: { y: '100%' }, hovered: { y: '0%' } }}
-              transition={{ ease: 'easeInOut', delay }}
+              variants={{ initial: { y: '112%', opacity: 0 }, hovered: { y: '0%', opacity: 1 } }}
+              transition={{ duration: 0.42, ease: 'easeInOut', delay }}
               key={`clone-${letter}-${index}`}
             >
               {letter === ' ' ? '\u00a0' : letter}
@@ -447,7 +447,7 @@ export function ProcessStack() {
                 y: offset * 34,
                 scale: 1 - offset * 0.055,
                 rotateX: isActive ? 0 : -7,
-                opacity: offset > 2 ? 0 : 1,
+                opacity: 1,
                 zIndex: processSteps.length - offset,
               }}
               transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
