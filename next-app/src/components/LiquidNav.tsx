@@ -177,7 +177,12 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
   }, [open]);
 
   const morphing = morphCompact && !isNarrow;
-  const morphFullscreenOpen = open && morphing && !isNarrow;
+  const fullscreenMenuOpen = open && (morphing || isNarrow);
+  const fullscreenClipOrigin = isNarrow
+    ? "calc(100% - 3rem) 3rem"
+    : "50% 3.1rem";
+  const closedFullscreenClip = `circle(0px at ${fullscreenClipOrigin})`;
+  const openFullscreenClip = `circle(150% at ${fullscreenClipOrigin})`;
 
   /** After first wide expand-from-morph (`expandFlipNonce`), play 3D flip; `prefers-reduced-motion` skips rotation. */
   const flipFromMorphExit = expandFlipNonce > 0 && !reduceMotion;
@@ -299,24 +304,34 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
               aria-label="Navigation menu"
               layout={false}
               className={
-                morphFullscreenOpen
+                fullscreenMenuOpen
                   ? "liquid-nav-drawer liquid-nav-drawer--fullscreen"
                   : "liquid-nav-drawer"
               }
               initial={
-                morphFullscreenOpen
-                  ? { opacity: reduceMotion ? 1 : 0 }
+                fullscreenMenuOpen
+                  ? {
+                      opacity: reduceMotion ? 1 : 0,
+                      clipPath: reduceMotion ? openFullscreenClip : closedFullscreenClip,
+                    }
                   : { x: reduceMotion ? 0 : "100%" }
               }
-              animate={morphFullscreenOpen ? { opacity: 1 } : { x: 0 }}
+              animate={
+                fullscreenMenuOpen
+                  ? { opacity: 1, clipPath: openFullscreenClip }
+                  : { x: 0 }
+              }
               exit={
-                morphFullscreenOpen
-                  ? { opacity: reduceMotion ? 1 : 0 }
+                fullscreenMenuOpen
+                  ? {
+                      opacity: reduceMotion ? 1 : 0,
+                      clipPath: reduceMotion ? openFullscreenClip : closedFullscreenClip,
+                    }
                   : { x: reduceMotion ? 0 : "100%" }
               }
               transition={{
-                duration: reduceMotion ? 0 : morphFullscreenOpen ? 0.24 : 0.3,
-                ease: [0.22, 1, 0.36, 1],
+                duration: reduceMotion ? 0 : fullscreenMenuOpen ? 0.95 : 0.3,
+                ease: fullscreenMenuOpen ? [0.25, 0.46, 0.45, 0.94] : [0.22, 1, 0.36, 1],
               }}
             >
               <button
@@ -328,7 +343,7 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
               >
                 <X size={22} strokeWidth={2} aria-hidden />
               </button>
-              {morphFullscreenOpen ? (
+              {fullscreenMenuOpen ? (
                 <div className="liquid-nav-drawer-fs-inner">
                   <Link
                     href="/"
@@ -345,12 +360,15 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
                     />
                   </Link>
                   <div className="liquid-nav-drawer-fs-links">
-                    {NAV_ITEMS.map((item) => (
+                    {NAV_ITEMS.map((item, index) => (
                       <Link
                         key={item.label}
                         href={item.href}
                         className="liquid-nav-drawer-link liquid-nav-drawer-link--fullscreen"
                         onClick={() => setOpen(false)}
+                        style={{
+                          transitionDelay: reduceMotion ? "0s" : `${0.22 + index * 0.08}s`,
+                        }}
                       >
                         <ChevronRight
                           className="liquid-nav-fs-inline-arrow"
@@ -363,6 +381,9 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
                     <button
                       type="button"
                       className="liquid-nav-drawer-contact liquid-nav-drawer-contact--fullscreen"
+                      style={{
+                        transitionDelay: reduceMotion ? "0s" : `${0.22 + NAV_ITEMS.length * 0.08}s`,
+                      }}
                       onClick={() => {
                         setOpen(false);
                         setContactOpen(true);
