@@ -5,7 +5,7 @@ import type React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useInView } from 'framer-motion';
-import { motion, useAnimationFrame, useReducedMotion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { createPortal } from 'react-dom';
 import {
   ArrowUpRight,
@@ -102,35 +102,28 @@ function getAuroraBarHeight(index: number, total: number, time: number, minHeigh
 }
 
 function ServicesAuroraBars() {
-  const shouldReduceMotion = useReducedMotion();
-  const timeRef = useRef(0);
-  const [heights, setHeights] = useState(() =>
-    Array.from({ length: serviceAuroraBars }, (_, index) =>
-      getAuroraBarHeight(index, serviceAuroraBars, 0, 0.16, 0.82),
-    ),
+  const bars = useMemo(
+    () =>
+      Array.from({ length: serviceAuroraBars }, (_, index) => ({
+        height: getAuroraBarHeight(index, serviceAuroraBars, 0, 0.16, 0.82),
+        delay: index * -0.18,
+        drift: 0.82 + ((index % 7) * 0.045),
+      })),
+    [],
   );
-
-  useAnimationFrame((_, delta) => {
-    if (shouldReduceMotion) {
-      return;
-    }
-
-    timeRef.current += (delta / 1000) * 0.28;
-    setHeights(
-      Array.from({ length: serviceAuroraBars }, (_, index) =>
-        getAuroraBarHeight(index, serviceAuroraBars, timeRef.current, 0.16, 0.82),
-      ),
-    );
-  });
 
   return (
     <div className="mm-services__aurora" aria-hidden="true">
       <div className="mm-services__aurora-bars">
-        {heights.map((height, index) => (
+        {bars.map((bar, index) => (
           <div className="mm-services__aurora-bar-wrap" key={`service-aurora-${index}`}>
-            <motion.div
+            <div
               className="mm-services__aurora-bar"
-              style={{ height: `${height * 100}%` }}
+              style={{
+                ['--service-bar-height' as string]: `${bar.height * 100}%`,
+                ['--service-bar-delay' as string]: `${bar.delay}s`,
+                ['--service-bar-drift' as string]: bar.drift,
+              }}
             />
           </div>
         ))}
@@ -435,6 +428,9 @@ export function Services() {
 }
 
 export function Work() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const reduceMotion = useReducedMotion();
+  const rippleVisible = useInView(sectionRef, { amount: 0.01, margin: '45% 0px 45% 0px' });
   const [activeCategory, setActiveCategory] = useState('All');
   const [previewCategory, setPreviewCategory] = useState<string | null>(null);
   const [projectIndex, setProjectIndex] = useState(0);
@@ -482,9 +478,9 @@ export function Work() {
   };
 
   return (
-    <section className="mm-section mm-section--work mm-work relative overflow-hidden" id="work">
+    <section ref={sectionRef} className="mm-section mm-section--work mm-work relative overflow-hidden" id="work">
       <div className="mm-work__ripple-layer absolute inset-0 z-0" aria-hidden>
-        <Ripple />
+        {rippleVisible && !reduceMotion ? <Ripple numCircles={6} /> : null}
       </div>
       <div
         className="mm-work__blue-wash pointer-events-none absolute inset-0 z-[1]"

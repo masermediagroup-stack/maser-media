@@ -4522,6 +4522,19 @@ body.mm-intro-complete .mm-preload-fallback {
   box-shadow: none;
 }
 
+.hero-god-rays--static {
+  background:
+    radial-gradient(ellipse 72% 54% at 20% 24%, rgba(30, 84, 168, 0.28), transparent 62%),
+    radial-gradient(ellipse 64% 58% at 78% 64%, rgba(16, 164, 255, 0.18), transparent 66%),
+    linear-gradient(180deg, #020408 0%, #06101c 48%, #03060d 100%);
+}
+
+@media (max-width: 767px), (pointer: coarse) {
+  .mm-global-shader {
+    opacity: 0.85;
+  }
+}
+
 .mm-hero::after {
   content: '';
   position: absolute;
@@ -5259,6 +5272,7 @@ body.mm-intro-complete .mm-preload-fallback {
 }
 
 .mm-services__aurora-bar {
+  height: var(--service-bar-height);
   width: 100%;
   border-radius: 999rem 999rem 0 0;
   background:
@@ -5270,6 +5284,22 @@ body.mm-intro-complete .mm-preload-fallback {
       rgba(255, 255, 255, 0) 100%
     );
   filter: blur(0.25px);
+  transform: scaleY(var(--service-bar-drift));
+  transform-origin: 50% 100%;
+  animation: mm-services-aurora-breathe 7.5s ease-in-out infinite;
+  animation-delay: var(--service-bar-delay);
+  will-change: transform;
+}
+
+@keyframes mm-services-aurora-breathe {
+  0%,
+  100% {
+    transform: scaleY(calc(var(--service-bar-drift) * 0.92));
+  }
+
+  50% {
+    transform: scaleY(calc(var(--service-bar-drift) * 1.08));
+  }
 }
 
 .mm-services__aurora-mask {
@@ -5563,6 +5593,19 @@ body.mm-intro-complete .mm-preload-fallback {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .mm-services__aurora-bars {
+    gap: 0.34rem;
+    opacity: 0.2;
+  }
+
+  .mm-services__aurora-bar-wrap:nth-child(2n) {
+    display: none;
+  }
+
+  .mm-services__aurora-bar {
+    animation-duration: 10s;
+  }
+
   .mm-services__contact {
     min-height: 4rem;
     padding-inline: 1.15rem;
@@ -5570,6 +5613,12 @@ body.mm-intro-complete .mm-preload-fallback {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .mm-services__aurora-bar {
+    animation: none;
+    transform: none;
+    will-change: auto;
+  }
+
   .mm-services__contact,
   .mm-services__contact-icon {
     transition: none;

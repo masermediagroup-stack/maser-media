@@ -1,5 +1,3 @@
-'use client';
-
 import { HeroShaderGradient } from './HeroShaderGradient';
 
 export function GlobalShaderLayer() {

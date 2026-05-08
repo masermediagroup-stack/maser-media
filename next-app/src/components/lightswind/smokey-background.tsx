@@ -150,9 +150,18 @@ function SmokeyBackground({
     const startTime = Date.now();
     let rafId = 0;
     let cancelled = false;
+    let running = false;
+    let inView = true;
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    const reducedMotionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const pixelRatio = coarsePointer ? 0.85 : Math.min(window.devicePixelRatio || 1, 1.25);
 
     const render = () => {
       if (cancelled) return;
+      if (!inView || document.hidden) {
+        running = false;
+        return;
+      }
 
       const width = canvas.clientWidth;
       const height = canvas.clientHeight;
@@ -161,24 +170,44 @@ function SmokeyBackground({
         return;
       }
 
-      canvas.width = width;
-      canvas.height = height;
-      gl.viewport(0, 0, width, height);
+      const bufferWidth = Math.max(1, Math.floor(width * pixelRatio));
+      const bufferHeight = Math.max(1, Math.floor(height * pixelRatio));
+      if (canvas.width !== bufferWidth || canvas.height !== bufferHeight) {
+        canvas.width = bufferWidth;
+        canvas.height = bufferHeight;
+        gl.viewport(0, 0, bufferWidth, bufferHeight);
+      }
       gl.useProgram(program);
 
       const currentTime = (Date.now() - startTime) / 1000;
       const [r, g, b] = hexToRgb(colorRef.current);
       gl.uniform3f(uColorLocation, r, g, b);
-      gl.uniform2f(iResolutionLocation, width, height);
-      gl.uniform1f(iTimeLocation, currentTime);
+      gl.uniform2f(iResolutionLocation, bufferWidth, bufferHeight);
+      gl.uniform1f(iTimeLocation, reducedMotionMedia.matches ? 0 : currentTime);
       gl.uniform2f(
         iMouseLocation,
-        hoveringRef.current ? mouseRef.current.x : 0,
-        hoveringRef.current ? height - mouseRef.current.y : 0,
+        hoveringRef.current ? mouseRef.current.x * pixelRatio : 0,
+        hoveringRef.current ? (height - mouseRef.current.y) * pixelRatio : 0,
       );
 
       gl.drawArrays(gl.TRIANGLES, 0, 6);
+      if (reducedMotionMedia.matches) {
+        running = false;
+        return;
+      }
       rafId = requestAnimationFrame(render);
+    };
+
+    const start = () => {
+      if (running || cancelled || !inView || document.hidden) return;
+      running = true;
+      rafId = requestAnimationFrame(render);
+    };
+
+    const stop = () => {
+      if (!running) return;
+      cancelAnimationFrame(rafId);
+      running = false;
     };
 
     const handleMouseMove = (event: MouseEvent) => {
@@ -198,18 +227,38 @@ function SmokeyBackground({
       mouseRef.current = { x: 0, y: 0 };
     };
 
-    canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("mouseenter", handleMouseEnter);
-    canvas.addEventListener("mouseleave", handleMouseLeave);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        inView = Boolean(entry?.isIntersecting);
+        if (inView) start();
+        else stop();
+      },
+      { rootMargin: "35% 0px 35% 0px", threshold: 0 },
+    );
+    observer.observe(canvas);
 
-    rafId = requestAnimationFrame(render);
+    const handleVisibilityChange = () => {
+      if (document.hidden) stop();
+      else start();
+    };
+
+    if (!coarsePointer) {
+      canvas.addEventListener("mousemove", handleMouseMove);
+      canvas.addEventListener("mouseenter", handleMouseEnter);
+      canvas.addEventListener("mouseleave", handleMouseLeave);
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    start();
 
     return () => {
       cancelled = true;
-      cancelAnimationFrame(rafId);
+      stop();
+      observer.disconnect();
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseenter", handleMouseEnter);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       gl.deleteProgram(program);
       gl.deleteShader(vertexShader);
       gl.deleteShader(fragmentShader);

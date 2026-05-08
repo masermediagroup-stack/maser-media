@@ -8,6 +8,7 @@ const PARTICLE_COUNT = 34;
 const PLANET_COUNT = 3;
 const MOUSE_RADIUS = 150;
 const MOUSE_STRENGTH = 0.04;
+const ACTIVE_SCROLL_VH = 1.8;
 
 export function GalaxyBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -35,9 +36,12 @@ export function GalaxyBackground() {
     let planets: { x: number; y: number; radius: number; orbitRadius: number; orbitSpeed: number; angle: number }[] = [];
 
     const mouse = { x: null as number | null, y: null as number | null };
-    let animationId: number;
+    let animationId = 0;
     let scrollY = 0;
     let reducedMotion = false;
+    let visible = true;
+    let running = false;
+    let lastDrawTime = 0;
 
     const checkReducedMotion = () => {
       reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -233,21 +237,49 @@ export function GalaxyBackground() {
     let lastReducedDraw = 0;
     const REDUCED_FRAME_MS = 320;
 
-    const animate = (time: number = 0) => {
-      if (reducedMotion) {
-        const now = performance.now();
-        if (now - lastReducedDraw < REDUCED_FRAME_MS) {
-          animationId = requestAnimationFrame(animate);
-          return;
-        }
-        lastReducedDraw = now;
-      }
-
+    const drawScene = (time: number = 0) => {
       drawBase();
       drawStars(time);
       drawParticles();
       drawPlanets();
+      lastDrawTime = time;
+    };
+
+    const shouldAnimate = () =>
+      visible && !document.hidden && scrollY < window.innerHeight * ACTIVE_SCROLL_VH;
+
+    const animate = (time: number = 0) => {
+      if (!shouldAnimate()) {
+        running = false;
+        return;
+      }
+
+      if (!reducedMotion || time - lastReducedDraw >= REDUCED_FRAME_MS) {
+        lastReducedDraw = time;
+        drawScene(time);
+      }
+
       animationId = requestAnimationFrame(animate);
+    };
+
+    const startAnimation = () => {
+      if (running || !shouldAnimate()) return;
+      running = true;
+      animationId = requestAnimationFrame(animate);
+    };
+
+    const stopAnimation = () => {
+      if (!running) return;
+      cancelAnimationFrame(animationId);
+      running = false;
+    };
+
+    const syncAnimation = () => {
+      if (shouldAnimate()) {
+        startAnimation();
+      } else {
+        stopAnimation();
+      }
     };
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -262,10 +294,17 @@ export function GalaxyBackground() {
 
     const handleScroll = () => {
       scrollY = window.scrollY;
+      syncAnimation();
     };
 
     const handleResize = () => {
       resize();
+      drawScene(lastDrawTime);
+      syncAnimation();
+    };
+
+    const handleVisibilityChange = () => {
+      syncAnimation();
     };
 
     const reducedMotionMedia = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -273,21 +312,25 @@ export function GalaxyBackground() {
 
     checkReducedMotion();
     resize();
-    animate();
+    drawScene();
+    startAnimation();
 
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseleave', handleMouseLeave);
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', handleResize);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      cancelAnimationFrame(animationId);
+      visible = false;
+      stopAnimation();
       document.body.classList.remove('galaxy-active');
       reducedMotionMedia.removeEventListener('change', checkReducedMotion);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseleave', handleMouseLeave);
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
