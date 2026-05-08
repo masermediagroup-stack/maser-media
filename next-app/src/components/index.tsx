@@ -1,12 +1,14 @@
 ﻿'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import type React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useInView } from 'framer-motion';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion, useAnimationFrame, useReducedMotion } from 'motion/react';
+import { createPortal } from 'react-dom';
 import {
+  ArrowUpRight,
   BadgeCheck,
   BarChart3,
   ChevronLeft,
@@ -19,16 +21,19 @@ import {
 import { CONTENT } from '@/lib/content';
 import { openContactModalFromApp } from '@/lib/contactModalEvents';
 import SmokeyBackground from '@/components/lightswind/smokey-background';
-import TestimonialsWaveBackground from '@/components/TestimonialsWaveBackground';
+import AuroraShader from '@/components/lightswind/aurora-shader';
 import { AuroraText } from '@/registry/magicui/aurora-text';
 import { Ripple } from '@/registry/magicui/ripple';
 import { useGsapLandingMotion } from '@/hooks/useGsapLandingMotion';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { LiquidNav } from './LiquidNav';
 import { ContactFlow } from './ContactFlow';
 import { AsciiWaveFooter } from './AsciiWaveFooter';
 import { FooterCoolButton } from './FooterCoolButton';
 
 type EntranceProps = { entrance?: boolean };
+type NavProps = EntranceProps & { introReady?: boolean };
+type HeroProps = EntranceProps & { onIntroDone?: () => void };
 type InnerPageKind = 'work' | 'services' | 'about';
 
 const CASE_IMAGE = '/assets/generated/maser-case-wall.png';
@@ -71,7 +76,85 @@ const secondaryMarqueeItems = [
   ...Array.from({ length: 10 }, () => secondaryMotionPanels).flat(),
 ];
 
+const serviceSummaries: Record<string, string> = {
+  Brand:
+    'The foundation of every system we build: positioning, identity, and visual rules that hold up across every surface.',
+  Web:
+    'Where your brand becomes interactive: clear, polished pages and product surfaces built to convert without losing craft.',
+  Content:
+    'The fuel that keeps the system alive: image, video, illustration, and motion assets that make launches feel current.',
+};
+
+const testimonialAuroraStops = ['#F8F8F8', '#10A4FF', '#0065A3'];
 const textRollStagger = 0.035;
+const heartColors = ['#ff2fd6', '#ff4b5f', '#ff7a1a', '#ffe100', '#34f56f', '#16d9ff', '#8b5cff'];
+const serviceAuroraBars = 28;
+
+function getAuroraBarHeight(index: number, total: number, time: number, minHeight: number, maxHeight: number) {
+  const normalized = total <= 1 ? 0 : index / (total - 1);
+  const arch = Math.sin(normalized * Math.PI);
+  const phaseOne = (index / total) * Math.PI * 2;
+  const phaseTwo = (index / total) * Math.PI * 5.3;
+  const wave = 0.5 + 0.25 * Math.sin(time * 1.1 + phaseOne) + 0.25 * Math.sin(time * 0.7 + phaseTwo);
+  const blended = arch * 0.65 + wave * 0.35;
+
+  return minHeight + blended * (maxHeight - minHeight);
+}
+
+function ServicesAuroraBars() {
+  const shouldReduceMotion = useReducedMotion();
+  const timeRef = useRef(0);
+  const [heights, setHeights] = useState(() =>
+    Array.from({ length: serviceAuroraBars }, (_, index) =>
+      getAuroraBarHeight(index, serviceAuroraBars, 0, 0.16, 0.82),
+    ),
+  );
+
+  useAnimationFrame((_, delta) => {
+    if (shouldReduceMotion) {
+      return;
+    }
+
+    timeRef.current += (delta / 1000) * 0.28;
+    setHeights(
+      Array.from({ length: serviceAuroraBars }, (_, index) =>
+        getAuroraBarHeight(index, serviceAuroraBars, timeRef.current, 0.16, 0.82),
+      ),
+    );
+  });
+
+  return (
+    <div className="mm-services__aurora" aria-hidden="true">
+      <div className="mm-services__aurora-bars">
+        {heights.map((height, index) => (
+          <div className="mm-services__aurora-bar-wrap" key={`service-aurora-${index}`}>
+            <motion.div
+              className="mm-services__aurora-bar"
+              style={{ height: `${height * 100}%` }}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="mm-services__aurora-mask" />
+    </div>
+  );
+}
+
+function subscribeToHydration() {
+  return () => {};
+}
+
+function getHydratedSnapshot() {
+  return true;
+}
+
+function getServerHydratedSnapshot() {
+  return false;
+}
+
+function useHydrated() {
+  return useSyncExternalStore(subscribeToHydration, getHydratedSnapshot, getServerHydratedSnapshot);
+}
 
 function TextRoll({ children, className = '', center = false }: { children: string; className?: string; center?: boolean }) {
   const letters = children.split('');
@@ -79,7 +162,6 @@ function TextRoll({ children, className = '', center = false }: { children: stri
   return (
     <motion.span
       initial="initial"
-      whileHover="hovered"
       className={`mm-text-roll ${className}`}
       aria-label={children}
     >
@@ -152,15 +234,61 @@ function FlipText({ text, className = '', stagger = 0.04 }: { text: string; clas
   );
 }
 
-export function Nav({ entrance }: EntranceProps) {
-  return <LiquidNav entrance={entrance} />;
+export function Nav({ entrance, introReady }: NavProps) {
+  return <LiquidNav entrance={entrance} introReady={introReady} />;
 }
 
-export function Hero({ entrance }: EntranceProps) {
-  const reduceMotion = useReducedMotion();
+export function Hero({ entrance, onIntroDone }: HeroProps) {
+  const [curtainDone, setCurtainDone] = useState(!entrance);
+  const hydrated = useHydrated();
+
+  useLayoutEffect(() => {
+    if (!entrance) {
+      onIntroDone?.();
+      return;
+    }
+
+    const previousScrollRestoration = window.history.scrollRestoration;
+    const previousOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+    window.history.scrollRestoration = 'manual';
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    let animationFrame = 0;
+    const pinToTop = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      animationFrame = window.requestAnimationFrame(pinToTop);
+    };
+    animationFrame = window.requestAnimationFrame(pinToTop);
+
+    const timeout = window.setTimeout(() => {
+      window.cancelAnimationFrame(animationFrame);
+      setCurtainDone(true);
+      onIntroDone?.();
+      window.history.scrollRestoration = previousScrollRestoration;
+      document.documentElement.style.overflow = previousOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+      document.body.classList.add('mm-intro-complete');
+    }, 1550);
+
+    return () => {
+      window.clearTimeout(timeout);
+      window.cancelAnimationFrame(animationFrame);
+      window.history.scrollRestoration = previousScrollRestoration;
+      document.documentElement.style.overflow = previousOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+      document.body.classList.remove('mm-intro-mounted');
+    };
+  }, [entrance, onIntroDone]);
 
   return (
-    <header className="mm-hero">
+    <header className={`mm-hero${curtainDone ? ' mm-hero--curtain-done' : ''}`}>
       <div className="mm-hero__bg-scale" aria-hidden>
         <div className="mm-hero__smokey">
           <SmokeyBackground color="#10A4FF" backdropBlurAmount="none" className="h-full min-h-0 w-full" />
@@ -168,10 +296,24 @@ export function Hero({ entrance }: EntranceProps) {
         <div className="mm-hero__grain" aria-hidden />
       </div>
       <div className="mm-hero__exit-splash" aria-hidden />
+      {entrance && hydrated
+        ? createPortal(
+            <div
+              className={`mm-hero__load-curtain${curtainDone ? ' mm-hero__load-curtain--done' : ''}`}
+              aria-hidden="true"
+              ref={(node) => {
+                document.body.classList.toggle('mm-intro-mounted', Boolean(node && !curtainDone));
+              }}
+            >
+              <span className="mm-hero__reveal-dot" />
+            </div>,
+            document.body,
+          )
+        : null}
       <motion.div
         className="mm-hero__content"
-        initial={entrance ? { opacity: 0, y: 24, filter: reduceMotion ? 'none' : 'blur(14px)' } : false}
-        animate={entrance ? { opacity: 1, y: 0, filter: 'blur(0px)' } : false}
+        initial={entrance ? { opacity: 0, y: 24 } : false}
+        animate={entrance && curtainDone ? { opacity: 1, y: 0 } : entrance ? { opacity: 0, y: 24 } : false}
         transition={entrance ? { duration: 0.8, ease: [0.22, 1, 0.36, 1] } : undefined}
       >
         <div className="mm-hero__content-shift">
@@ -227,44 +369,66 @@ export function Clients() {
 
 export function Services() {
   const pillars = CONTENT.services.items;
+  const defaultService = pillars[0]?.title.toLowerCase() ?? 'brand';
 
   return (
-    <section className="mm-section mm-section--services mm-services" id="services" aria-labelledby="services-heading">
-      <div className="mm-services__layout">
-        <div className="mm-services__intro">
-          {/* h2 + .mm-type-display: matches hero display scale without a second h1 on the landing page. If this section is ever the sole top-level heading on a route, promote to h1 and drop .mm-type-display from the hero (or split layouts) so the document has one h1. */}
-          <h2 id="services-heading" className="mm-type-display">
-            One studio for the whole launch surface.
+    <section
+      className="mm-section mm-section--services mm-services"
+      id="services"
+      aria-labelledby="services-heading"
+    >
+      <ServicesAuroraBars />
+      <div className="mm-services__shell">
+        <div className="mm-services__masthead">
+          <h2 id="services-heading" className="mm-services__title">
+            Services.
           </h2>
+          <p className="mm-services__lede">
+            Brand, web, and content systems built with one launch language: a single, coherent design vocabulary
+            that scales from your logo to your last social post.
+          </p>
         </div>
-        <div className="mm-services__grid-scroll">
-          <div className="mm-services__grid">
-            {pillars.map((pillar, index) => (
-              <div
-                key={pillar.title}
-                className={`mm-services__row${index === 0 ? ' mm-services__row--active' : ' mm-services__row--muted'}`}
-              >
-                <div className="mm-services__head">
-                  <span className="mm-services__index" aria-hidden="true">
-                    {String(index + 1).padStart(2, '0')}
+
+        <Accordion className="mm-services__accordion" defaultValue={[defaultService]}>
+          {pillars.map((pillar) => {
+            const value = pillar.title.toLowerCase();
+            return (
+              <AccordionItem className="mm-services__accordion-item" key={pillar.title} value={value}>
+                <AccordionTrigger className="mm-services__accordion-trigger">
+                  <span className="mm-services__accordion-trigger-copy">
+                    <span className="mm-services__accordion-title">{pillar.title}</span>
+                    <span className="mm-services__accordion-summary">
+                      {serviceSummaries[pillar.title] ?? pillar.items[0]?.description}
+                    </span>
                   </span>
-                  <h3 className="mm-services__pillar" id={`services-pillar-${index}`}>
-                    {pillar.title}
-                  </h3>
-                </div>
-                <div className="mm-services__body" id={`services-body-${index}`}>
-                  <ul className="mm-services__lines" aria-labelledby={`services-pillar-${index}`}>
-                    {pillar.items.map((line) => (
-                      <li key={line} className="mm-services__line">
-                        {line}
-                      </li>
+                </AccordionTrigger>
+                <AccordionContent className="mm-services__accordion-content">
+                  <ul className="mm-services__service-grid">
+                    {pillar.items.map((service) => (
+                      <motion.li
+                        className="mm-services__service-card"
+                        key={service.label}
+                        transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+                      >
+                        <h3>{service.label}</h3>
+                        <p>{service.description}</p>
+                      </motion.li>
                     ))}
                   </ul>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
+        </Accordion>
+
+        <button
+          type="button"
+          className="mm-services__contact"
+          onClick={() => openContactModalFromApp()}
+        >
+          <span>Contact</span>
+          <ArrowUpRight className="mm-services__contact-icon" size={22} aria-hidden />
+        </button>
       </div>
     </section>
   );
@@ -272,17 +436,23 @@ export function Services() {
 
 export function Work() {
   const [activeCategory, setActiveCategory] = useState('All');
+  const [previewCategory, setPreviewCategory] = useState<string | null>(null);
   const [projectIndex, setProjectIndex] = useState(0);
   const [transitionKey, setTransitionKey] = useState(0);
   const touchStartX = useRef<number | null>(null);
+  const displayCategory = previewCategory ?? activeCategory;
   const filteredProjects = useMemo(
-    () => CONTENT.work.items.filter((project) => activeCategory === 'All' || project.category === activeCategory),
-    [activeCategory],
+    () => CONTENT.work.items.filter((project) => displayCategory === 'All' || project.category === displayCategory),
+    [displayCategory],
   );
-  const activeProject = filteredProjects[projectIndex] ?? filteredProjects[0];
+  const displayedProjectIndex = previewCategory ? 0 : projectIndex;
+  const activeProject = filteredProjects[displayedProjectIndex] ?? filteredProjects[0];
   const hasMultipleProjects = filteredProjects.length > 1;
 
   const switchProject = (direction: -1 | 1) => {
+    if (previewCategory) {
+      setPreviewCategory(null);
+    }
     setProjectIndex((index) => {
       if (filteredProjects.length === 0) return 0;
       return (index + direction + filteredProjects.length) % filteredProjects.length;
@@ -304,6 +474,13 @@ export function Work() {
     switchProject(deltaX < 0 ? 1 : -1);
   };
 
+  const previewProjectCategory = (category: string) => {
+    if (category !== displayCategory) {
+      setTransitionKey((key) => key + 1);
+    }
+    setPreviewCategory(category);
+  };
+
   return (
     <section className="mm-section mm-section--work mm-work relative overflow-hidden" id="work">
       <div className="mm-work__ripple-layer absolute inset-0 z-0" aria-hidden>
@@ -318,16 +495,21 @@ export function Work() {
           <h2 className="mm-work__title">{CONTENT.work.title}</h2>
           <p>{CONTENT.work.subtitle}</p>
         </div>
-        <div className="mm-work-tabs" aria-label="Project categories">
+        <div className="mm-work-tabs" aria-label="Project categories" onMouseLeave={() => setPreviewCategory(null)}>
           {CONTENT.work.categories.map((category) => (
             <button
               key={category}
               type="button"
               className="mm-work-tab"
               aria-pressed={activeCategory === category}
+              onMouseEnter={() => previewProjectCategory(category)}
+              onFocus={() => previewProjectCategory(category)}
+              onBlur={() => setPreviewCategory(null)}
               onClick={() => {
                 setProjectIndex(0);
                 setActiveCategory(category);
+                setPreviewCategory(null);
+                setTransitionKey((key) => key + 1);
               }}
             >
               {category}
@@ -378,7 +560,7 @@ export function Work() {
                   <div>
                     <dt>Project</dt>
                     <dd>
-                      {projectIndex + 1} / {filteredProjects.length}
+                      {displayedProjectIndex + 1} / {filteredProjects.length}
                     </dd>
                   </div>
                 </dl>
@@ -425,7 +607,7 @@ export function ProcessStack() {
   return (
     <section className="mm-section mm-section--process stack-motion">
       <div className="mm-section-heading">
-        <h2>Fast does not have to feel thin.</h2>
+        <h2>Fast does not have to feel rushed.</h2>
         <p>
           The process is built around decisive creative direction, clear delivery rhythms, and enough motion
           detail to make the launch feel expensive.
@@ -443,8 +625,8 @@ export function ProcessStack() {
               role="listitem"
               className={`stack-card stack-card--flip flex flex-col${isActive ? ' is-active' : ''}`}
               style={{ ['--stack-index' as string]: index }}
-              animate={{
-                y: offset * 34,
+            animate={{
+                y: offset * 18,
                 scale: 1 - offset * 0.055,
                 rotateX: isActive ? 0 : -7,
                 opacity: 1,
@@ -485,8 +667,18 @@ export function Cta() {
                   onClick={() => openContactModalFromApp()}
                 >
                   {CONTENT.cta.contactButtonLabel}
+                  <ArrowUpRight className="liquid-contact-arrow" size={15} aria-hidden />
                 </button>
               </div>
+            </div>
+            <div className="mm-cta__logo-stage" aria-hidden>
+              <Image
+                src="/assets/Blue-HD.svg"
+                alt=""
+                width={520}
+                height={280}
+                className="mm-cta__logo"
+              />
             </div>
           </div>
         </div>
@@ -498,14 +690,6 @@ export function Cta() {
 export function Footer() {
   return (
     <footer className="mm-footer relative">
-      <div className="mm-footer__brand">
-        <Image
-          src={CONTENT.site.logo}
-          alt={CONTENT.site.logoAlt}
-          width={CONTENT.site.logoWidth}
-          height={CONTENT.site.logoHeight}
-        />
-      </div>
       <nav className="mm-footer__nav" aria-label="Footer navigation">
         {CONTENT.footer.nav.map((item) => (
           <Link key={item.href} href={item.href}>
@@ -520,18 +704,18 @@ export function Footer() {
   );
 }
 
-export function LandingPage() {
+export function LandingPage({ onHeroIntroDone }: { onHeroIntroDone?: () => void }) {
   const rootRef = useRef<HTMLElement>(null);
   useGsapLandingMotion(rootRef);
 
   return (
     <main ref={rootRef} id="main-content" className="site-main mm-main">
-      <Hero entrance />
+      <Hero entrance onIntroDone={onHeroIntroDone} />
       <Clients />
+      <ProcessStack />
       <Services />
       <Work />
       <MotionSystem />
-      <ProcessStack />
       <Testimonials />
       <Cta />
       <Footer />
@@ -699,10 +883,34 @@ function TestimonialCardArticle({
 
 export function Testimonials() {
   const sectionRef = useRef<HTMLElement>(null);
-  const waveRunning = useInView(sectionRef, { amount: 0.01, margin: '55% 0px 55% 0px' });
+  const auroraVisible = useInView(sectionRef, { amount: 0.01, margin: '55% 0px 55% 0px' });
   const { title, items } = CONTENT.testimonials;
   const reduceMotion = useReducedMotion();
   const titleWords = useMemo(() => title.trim().split(/\s+/).filter(Boolean), [title]);
+  const [hearts, setHearts] = useState<
+    { id: number; x: number; y: number; color: string; dx: number; dy: number; rotate: number }[]
+  >([]);
+
+  const handleTestimonialsClick = (event: React.MouseEvent<HTMLElement>) => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 28 + Math.random() * 38;
+    const id = Date.now() + Math.floor(Math.random() * 1000);
+    const nextHeart = {
+      id,
+      x: event.clientX - bounds.left,
+      y: event.clientY - bounds.top,
+      color: heartColors[Math.floor(Math.random() * heartColors.length)],
+      dx: Math.cos(angle) * distance,
+      dy: Math.sin(angle) * distance - (18 + Math.random() * 28),
+      rotate: -28 + Math.random() * 56,
+    };
+
+    setHearts((current) => [...current.slice(-18), nextHeart]);
+    window.setTimeout(() => {
+      setHearts((current) => current.filter((heart) => heart.id !== id));
+    }, 760);
+  };
 
   return (
     <section
@@ -710,9 +918,37 @@ export function Testimonials() {
       className="testimonials-carousel mm-section mm-section--testimonials mm-testimonials-wave"
       id="testimonials"
       aria-labelledby="testimonials-title"
+      onClick={handleTestimonialsClick}
     >
-      <TestimonialsWaveBackground running={waveRunning} />
+      <div className="mm-testimonials-wave__aurora" aria-hidden>
+        {auroraVisible ? (
+          <AuroraShader
+            colorStops={testimonialAuroraStops}
+            amplitude={1.18}
+            blend={0.42}
+            speed={reduceMotion ? 0 : 0.68}
+          />
+        ) : null}
+      </div>
       <div className="mm-testimonials-wave__gradient" aria-hidden />
+      <div className="mm-testimonials-hearts" aria-hidden>
+        {hearts.map((heart) => (
+          <span
+            key={heart.id}
+            className="mm-testimonials-heart"
+            style={{
+              left: heart.x,
+              top: heart.y,
+              color: heart.color,
+              ['--heart-x' as string]: `${heart.dx}px`,
+              ['--heart-y' as string]: `${heart.dy}px`,
+              ['--heart-rotate' as string]: `${heart.rotate}deg`,
+            }}
+          >
+            ♥
+          </span>
+        ))}
+      </div>
       <div className="testimonials-carousel-inner mm-testimonials-wave__inner">
         <div className="mm-testimonials-wave__grid">
           <header className="mm-testimonials-wave__head">

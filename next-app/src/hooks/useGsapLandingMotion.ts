@@ -27,33 +27,24 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
     let cancelled = false;
 
     const run = async () => {
-      const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+      const [{ gsap }, { ScrollTrigger }, { SplitText }] = await Promise.all([
         import('gsap'),
         import('gsap/ScrollTrigger'),
+        import('gsap/SplitText'),
       ]);
       if (cancelled || !rootRef.current) return;
 
-      gsap.registerPlugin(ScrollTrigger);
+      gsap.registerPlugin(ScrollTrigger, SplitText);
       const root = rootRef.current;
       const reduced = prefersReducedMotion();
 
       const ctx = gsap.context(() => {
         const hero = root.querySelector<HTMLElement>('.mm-hero');
+        const heroTitle = hero?.querySelector<HTMLElement>('.mm-hero__title');
+        const heroLead = hero?.querySelector<HTMLElement>('.mm-hero__lead');
 
         if (reduced) {
           if (hero) gsap.set(hero, { '--hero-exit-p': 1 });
-          const servicesSectionR = root.querySelector<HTMLElement>('#services');
-          const serviceRowsR = servicesSectionR?.querySelectorAll<HTMLElement>('.mm-services__row');
-          serviceRowsR?.forEach((row) => {
-            row.classList.add('mm-services__row--active');
-            row.classList.remove('mm-services__row--muted');
-            const body = row.querySelector<HTMLElement>('.mm-services__body');
-            if (body) {
-              body.removeAttribute('inert');
-              body.setAttribute('aria-hidden', 'false');
-            }
-          });
-          servicesSectionR?.classList.add('mm-services--all-open');
           gsap.utils
             .toArray<HTMLElement>(root.querySelectorAll('.mm-section, .marquee-system'))
             .forEach((el) => {
@@ -77,6 +68,63 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
         }
 
         const mm = gsap.matchMedia();
+
+        const heroTitleDelay = 1.15;
+        const heroTitleDuration = 1.05;
+        const heroTitleStagger = 0.095;
+        const heroLeadGap = 0.01;
+        let heroTitleLineCount = 1;
+
+        if (heroTitle) {
+          SplitText.create(heroTitle, {
+            type: 'lines',
+            mask: 'lines',
+            linesClass: 'mm-hero-title-line++',
+            autoSplit: true,
+            onSplit(self) {
+              const linesTopToBottom = [...self.lines].sort(
+                (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top,
+              );
+              heroTitleLineCount = Math.max(linesTopToBottom.length, 1);
+
+              return gsap.from(linesTopToBottom, {
+                yPercent: 112,
+                autoAlpha: 0,
+                duration: heroTitleDuration,
+                stagger: { each: heroTitleStagger, from: 'start' },
+                ease: 'power4.out',
+                delay: heroTitleDelay,
+              });
+            },
+          });
+        }
+
+        if (heroLead) {
+          SplitText.create(heroLead, {
+            type: 'lines',
+            mask: 'lines',
+            linesClass: 'mm-hero-lead-line++',
+            autoSplit: true,
+            onSplit(self) {
+              const linesTopToBottom = [...self.lines].sort(
+                (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top,
+              );
+
+              return gsap.from(linesTopToBottom, {
+                yPercent: 112,
+                autoAlpha: 0,
+                duration: 0.6,
+                stagger: { each: 0.045, from: 'start' },
+                ease: 'power3.out',
+                delay:
+                  heroTitleDelay +
+                  heroTitleDuration +
+                  heroTitleStagger * (heroTitleLineCount - 1) +
+                  heroLeadGap,
+              });
+            },
+          });
+        }
 
         mm.add(
           {
@@ -213,133 +261,82 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
             }
 
             const servicesSection = root.querySelector<HTMLElement>('#services');
-            const servicesIntro = servicesSection?.querySelector<HTMLElement>('.mm-services__intro');
-            const servicesScroll = servicesSection?.querySelector<HTMLElement>('.mm-services__grid-scroll');
-            const servicesGrid = servicesScroll?.querySelector<HTMLElement>('.mm-services__grid');
+            const servicesIntro = servicesSection?.querySelector<HTMLElement>('.mm-services__masthead');
+            const servicesTitle = servicesSection?.querySelector<HTMLElement>('.mm-services__title');
+            const servicesLede = servicesSection?.querySelector<HTMLElement>('.mm-services__lede');
+            const servicesCategoryStage = servicesSection?.querySelector<HTMLElement>('.mm-services__category-stage');
 
             if (servicesIntro) {
-              gsap.set(servicesIntro, { autoAlpha: 1, y: 0 });
-              ScrollTrigger.create({
-                trigger: servicesIntro,
-                start: 'top 88%',
-                toggleActions: 'play none none none',
-                ...stToggleActive(servicesIntro),
-                ...scrollTriggerDefaults,
-              });
-            }
+              if (servicesTitle && servicesLede) {
+                SplitText.create(servicesTitle, {
+                  type: 'lines',
+                  mask: 'lines',
+                  linesClass: 'mm-services-title-line++',
+                  autoSplit: true,
+                  onSplit(self) {
+                    const linesTopToBottom = [...self.lines].sort(
+                      (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top,
+                    );
 
-            const serviceRows = servicesSection?.querySelectorAll<HTMLElement>('.mm-services__row');
-            if (servicesSection && serviceRows && serviceRows.length > 0) {
-              const focalRatio = isNarrow ? 0.46 : 0.5;
-              let previousActive = -1;
-
-              const measureServiceBodies = () => {
-                serviceRows.forEach((row) => {
-                  const body = row.querySelector<HTMLElement>('.mm-services__body');
-                  if (!body) return;
-                  const wasActive = row.classList.contains('mm-services__row--active');
-                  row.classList.add('mm-services__row--active');
-                  body.style.maxHeight = 'none';
-                  body.style.opacity = '1';
-                  const h = Math.ceil(body.scrollHeight);
-                  body.style.removeProperty('max-height');
-                  body.style.removeProperty('opacity');
-                  if (!wasActive) {
-                    row.classList.remove('mm-services__row--active');
-                  }
-                  body.style.setProperty('--mm-services-body-max', `${Math.max(h, 56)}px`);
-                });
-              };
-
-              const applyServiceActive = (next: number) => {
-                if (next === previousActive) return;
-                previousActive = next;
-                serviceRows.forEach((row, i) => {
-                  row.classList.toggle('mm-services__row--active', i === next);
-                  row.classList.toggle('mm-services__row--muted', i !== next);
-                  const body = row.querySelector<HTMLElement>('.mm-services__body');
-                  if (body) {
-                    const open = i === next;
-                    body.setAttribute('aria-hidden', open ? 'false' : 'true');
-                    if (open) {
-                      body.removeAttribute('inert');
-                    } else {
-                      body.setAttribute('inert', '');
-                    }
-                  }
-                });
-              };
-
-              const updateServiceActiveFromScroll = () => {
-                const sec = servicesSection.getBoundingClientRect();
-                const vh = window.innerHeight;
-                if (sec.bottom < 0) {
-                  applyServiceActive(serviceRows.length - 1);
-                  return;
-                }
-                if (sec.top > vh) {
-                  applyServiceActive(0);
-                  return;
-                }
-
-                const focalY = vh * focalRatio;
-                let bestIdx = 0;
-                let bestDist = Infinity;
-                serviceRows.forEach((row, i) => {
-                  const anchor = row.querySelector<HTMLElement>('.mm-services__pillar');
-                  if (!anchor) return;
-                  const r = anchor.getBoundingClientRect();
-                  const mid = (r.top + r.bottom) / 2;
-                  const d = Math.abs(mid - focalY);
-                  if (d < bestDist) {
-                    bestDist = d;
-                    bestIdx = i;
-                  }
-                });
-                applyServiceActive(bestIdx);
-              };
-
-              ScrollTrigger.create({
-                trigger: servicesSection,
-                start: 'top bottom',
-                end: 'bottom top',
-                invalidateOnRefresh: true,
-                onRefresh: () => {
-                  measureServiceBodies();
-                  updateServiceActiveFromScroll();
-                },
-                onUpdate: updateServiceActiveFromScroll,
-              });
-            }
-
-            if (servicesScroll && servicesGrid && isWide) {
-              gsap.set(servicesScroll, {
-                '--services-pack': 0,
-                maxHeight: 'none',
-              });
-
-              if (servicesIntro) {
-                gsap.fromTo(
-                  servicesIntro,
-                  { y: -96 },
-                  {
-                    y: 132,
-                    ease: 'none',
-                    scrollTrigger: {
-                      trigger: servicesGrid,
-                      start: 'top 80%',
-                      end: 'bottom 24%',
-                      scrub: 0.85,
-                      invalidateOnRefresh: true,
-                      ...scrollTriggerDefaults,
-                    },
+                    return gsap.from(linesTopToBottom, {
+                      xPercent: -16,
+                      yPercent: 105,
+                      autoAlpha: 0,
+                      duration: isNarrow ? 0.72 : 0.95,
+                      stagger: { each: 0.075, from: 'start' },
+                      ease: 'power4.out',
+                      scrollTrigger: {
+                        trigger: servicesIntro,
+                        start: 'top 86%',
+                        toggleActions: 'play none none none',
+                        ...stToggleActive(servicesIntro),
+                        ...scrollTriggerDefaults,
+                      },
+                    });
                   },
-                );
+                });
+
+                SplitText.create(servicesLede, {
+                  type: 'lines',
+                  mask: 'lines',
+                  linesClass: 'mm-services-lede-line++',
+                  autoSplit: true,
+                  onSplit(self) {
+                    const linesTopToBottom = [...self.lines].sort(
+                      (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top,
+                    );
+
+                    return gsap.from(linesTopToBottom, {
+                      xPercent: 18,
+                      autoAlpha: 0,
+                      duration: 0.72,
+                      stagger: { each: 0.055, from: 'start' },
+                      ease: 'power3.out',
+                      scrollTrigger: {
+                        trigger: servicesIntro,
+                        start: 'top 86%',
+                        toggleActions: 'play none none none',
+                        ...scrollTriggerDefaults,
+                      },
+                    });
+                  },
+                });
+              } else {
+                gsap.set(servicesIntro, { autoAlpha: 1, y: 0 });
+                ScrollTrigger.create({
+                  trigger: servicesIntro,
+                  start: 'top 88%',
+                  toggleActions: 'play none none none',
+                  ...stToggleActive(servicesIntro),
+                  ...scrollTriggerDefaults,
+                });
               }
-            } else if (servicesScroll && isNarrow) {
+            }
+
+            if (servicesCategoryStage) {
               gsap.fromTo(
-                servicesScroll,
-                { autoAlpha: 0.9, y: 12 },
+                servicesCategoryStage,
+                { autoAlpha: 0.92, y: isNarrow ? 10 : 18 },
                 {
                   autoAlpha: 1,
                   y: 0,
@@ -361,11 +358,11 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
               end: 'bottom top',
             } as const;
 
-            const primaryTravel = isNarrow ? -10 : -22;
-            const secondaryFrom = isNarrow ? -2 : -4;
-            const secondaryTo = isNarrow ? 2 : 4;
-            const primaryScrub = isNarrow ? 1.6 : 1.1;
-            const secondaryScrub = isNarrow ? 2.2 : 2.8;
+            const primaryTravel = isNarrow ? -3.5 : -7;
+            const secondaryFrom = isNarrow ? -0.8 : -1.4;
+            const secondaryTo = isNarrow ? 0.8 : 1.4;
+            const primaryScrub = isNarrow ? 3.2 : 3.8;
+            const secondaryScrub = isNarrow ? 4.2 : 4.8;
 
             gsap.fromTo(
               root.querySelectorAll('.marquee-row--primary'),

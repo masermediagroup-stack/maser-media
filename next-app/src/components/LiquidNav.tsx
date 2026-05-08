@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ChevronRight, Menu, X } from "lucide-react";
+import { ArrowUpRight, ChevronRight, Menu, X } from "lucide-react";
 import { ContactFlow } from "@/components/ContactFlow";
 import { OPEN_CONTACT_MODAL_EVENT } from "@/lib/contactModalEvents";
 
@@ -32,9 +32,9 @@ function getFocusable(container: HTMLElement) {
   return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE));
 }
 
-type Props = { entrance?: boolean };
+type Props = { entrance?: boolean; introReady?: boolean };
 
-export function LiquidNav({ entrance }: Props) {
+export function LiquidNav({ entrance, introReady = !entrance }: Props) {
   const reduceMotion = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
@@ -198,7 +198,7 @@ export function LiquidNav({ entrance }: Props) {
         className={`liquid-nav${isScrolled && !morphing ? " liquid-nav--expanded" : ""}${morphing ? " liquid-nav--morph" : ""}`}
         aria-label="Primary navigation"
         initial={entrance ? { y: -36, opacity: 0 } : false}
-        animate={entrance ? { y: 0, opacity: 1 } : false}
+        animate={entrance && introReady ? { y: 0, opacity: 1 } : entrance ? { y: -36, opacity: 0 } : false}
         transition={entrance ? { duration: 0.5, ease: [0.22, 1, 0.36, 1] } : undefined}
       >
         <div className="liquid-nav-bubble-shell">
@@ -243,6 +243,7 @@ export function LiquidNav({ entrance }: Props) {
                     style={{ transformOrigin: "50% 0%" }}
                   >
                     Contact
+                    <ArrowUpRight className="liquid-contact-arrow" size={15} aria-hidden />
                   </motion.span>
                 </button>
               </div>
@@ -262,6 +263,7 @@ export function LiquidNav({ entrance }: Props) {
 
         <button type="button" className="liquid-nav-contact liquid-nav-contact--mobile" onClick={() => setContactOpen(true)}>
           Contact
+          <ArrowUpRight className="liquid-contact-arrow" size={15} aria-hidden />
         </button>
 
         <button
@@ -367,6 +369,7 @@ export function LiquidNav({ entrance }: Props) {
                       }}
                     >
                       <span className="liquid-nav-fs-link-label">Contact</span>
+                      <ArrowUpRight className="liquid-contact-arrow" size={18} aria-hidden />
                     </button>
                   </div>
                 </div>
@@ -386,6 +389,7 @@ export function LiquidNav({ entrance }: Props) {
                     }}
                   >
                     Contact
+                    <ArrowUpRight className="liquid-contact-arrow" size={15} aria-hidden />
                   </button>
                 </>
               )}

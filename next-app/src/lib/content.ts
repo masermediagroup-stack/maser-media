@@ -53,7 +53,10 @@ export interface ClientItem {
 
 export interface ServiceItem {
   title: string;
-  items: string[];
+  items: {
+    label: string;
+    description: string;
+  }[];
 }
 
 export interface WorkItem {
@@ -211,28 +214,91 @@ export const CONTENT: Content = {
   services: {
     title: "Serious Craft. Playful Energy.",
     subtitle: "",
-    /** Three pillars: index + label + stacked lines (home + /services). */
+    /** Three pillars with outcome-led descriptions (home + /services). */
     items: [
       {
         title: "Brand",
-        items: ["Brand Strategy", "Logo & Identity", "Brand Guidelines", "Visual Systems"],
+        items: [
+          {
+            label: "Brand Strategy",
+            description:
+              "Clarify positioning, audience, and message so every launch decision has a sharper reason behind it.",
+          },
+          {
+            label: "Logo & Identity",
+            description:
+              "Create a recognizable identity system that makes the brand easier to remember and easier to trust.",
+          },
+          {
+            label: "Brand Guidelines",
+            description:
+              "Give teams rules they can actually use, so the brand stays consistent after handoff.",
+          },
+          {
+            label: "Visual Systems",
+            description:
+              "Build a flexible design language that scales across web, social, decks, and campaigns.",
+          },
+        ],
       },
       {
-        title: "Build",
+        title: "Web",
         items: [
-          "Web Design",
-          "UI/UX",
-          "Pitch Decks",
-          "Marketing Assets",
-          "Websites",
-          "Landing Pages",
-          "E-commerce",
-          "Portfolios",
+          {
+            label: "Web Design",
+            description: "Shape pages that make the offer clear, credible, and easier to act on.",
+          },
+          {
+            label: "UI/UX",
+            description: "Improve flows, hierarchy, and interaction patterns so users can move with less friction.",
+          },
+          {
+            label: "Pitch Decks",
+            description:
+              "Turn the story into a focused deck that helps buyers, partners, or investors understand the value fast.",
+          },
+          {
+            label: "Marketing Assets",
+            description: "Create campaign pieces that feel connected to the brand instead of one-off.",
+          },
+          {
+            label: "Websites",
+            description: "Build a polished web presence that gives the brand a reliable home base.",
+          },
+          {
+            label: "Landing Pages",
+            description: "Design focused conversion pages for launches, campaigns, offers, and paid traffic.",
+          },
+          {
+            label: "E-commerce",
+            description: "Create storefront experiences that make products easier to browse, compare, and buy.",
+          },
+          {
+            label: "Portfolios",
+            description: "Present work with stronger pacing, context, and credibility.",
+          },
         ],
       },
       {
         title: "Content",
-        items: ["Photography", "Video", "Illustration", "Animation"],
+        items: [
+          {
+            label: "Photography",
+            description: "Produce image systems that make the brand feel specific, current, and ownable.",
+          },
+          {
+            label: "Video",
+            description: "Create motion assets that explain, sell, and hold attention across platforms.",
+          },
+          {
+            label: "Illustration",
+            description: "Add custom visuals that make abstract ideas easier to understand and remember.",
+          },
+          {
+            label: "Animation",
+            description: "Use movement to guide attention, add polish, and make key moments feel intentional.",
+          },
+        ],
       },
     ],
   },
@@ -379,7 +445,7 @@ export const CONTENT: Content = {
 
   // ─── CTA ──────────────────────────────────────────────────────────
   cta: {
-    title: "Start my project",
+    title: "Create your future with us.",
     subtitle:
       "Let's build. Every standout project begins with one conversation. Tell us your vision and we'll reach back with a clear next step.",
     contactButtonLabel: "Contact",

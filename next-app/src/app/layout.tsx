@@ -28,6 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth" className={cn("font-sans", geist.variable)}>
       <body className={poppins.variable}>
+        <div className="mm-preload-fallback" aria-hidden="true" />
         <a href="#main-content" className="skip-to-content">
           Skip to main content
         </a>

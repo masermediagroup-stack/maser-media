@@ -1,38 +1,79 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CheckCircle2,
+  Clock3,
+} from "lucide-react";
 
-type FormData = {
-  service: string;
+type ServiceId = "brand" | "web" | "copy" | "strategy" | "unsure";
+type BudgetId = "under-1000" | "1000-5000" | "5000-15000" | "15000-plus" | "unsure";
+
+type ContactData = {
+  service: ServiceId;
   brief: string;
-  budget: string;
+  budget: BudgetId;
   firstName: string;
   email: string;
   phone: string;
 };
 
-const SERVICE_OPTIONS = [
-  "Brand Identity",
-  "Web Design",
-  "Content / Copy",
-  "Strategy & Consulting",
-  "Not sure yet",
+type ServiceOption = {
+  id: ServiceId;
+  label: string;
+  wide?: boolean;
+};
+
+type BudgetOption = {
+  id: BudgetId;
+  label: string;
+  wide?: boolean;
+};
+
+const SERVICE_OPTIONS: ServiceOption[] = [
+  { id: "brand", label: "Brand Identity" },
+  { id: "web", label: "Web Design" },
+  { id: "copy", label: "Content / Copy" },
+  { id: "strategy", label: "Strategy & Consulting" },
+  { id: "unsure", label: "Not sure yet", wide: true },
 ];
 
-const BUDGET_OPTIONS = [
-  "Under $1,000",
-  "$1,000 - $5,000",
-  "$5,000 - $15,000",
-  "$15,000 - $50,000",
-  "$50,000+",
-  "Not sure yet",
+const BUDGET_OPTIONS: BudgetOption[] = [
+  { id: "under-1000", label: "Under $1,000" },
+  { id: "1000-5000", label: "$1,000 - $5,000" },
+  { id: "5000-15000", label: "$5,000 - $15,000" },
+  { id: "15000-plus", label: "$15,000+" },
+  { id: "unsure", label: "Not sure yet", wide: true },
 ];
 
-const initialData: FormData = {
-  service: "",
+const STEP_COPY = [
+  {
+    title: "What are you looking to build?",
+    helper: "A few quick questions so we can tailor the conversation to your goals.",
+  },
+  {
+    title: "Tell us about your project.",
+    helper: "Quick intake now, detailed planning on the call.",
+  },
+  {
+    title: "What's your rough budget?",
+    helper: "",
+  },
+  {
+    title: "Almost there - let's get in touch.",
+    helper: "",
+  },
+];
+
+const INITIAL_DATA: ContactData = {
+  service: "web",
   brief: "",
-  budget: "",
+  budget: "5000-15000",
   firstName: "",
   email: "",
   phone: "",
@@ -42,44 +83,53 @@ export function ContactFlow() {
   const reduceMotion = useReducedMotion();
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
-  const [data, setData] = useState<FormData>(initialData);
-  const [error, setError] = useState("");
+  const [data, setData] = useState<ContactData>(INITIAL_DATA);
 
   const totalSteps = 4;
-  const progress = ((step + 1) / totalSteps) * 100;
-  const stepLabel = useMemo(() => `Step ${step + 1} of ${totalSteps}`, [step]);
+  const copy = STEP_COPY[step];
+  const progress = `${((step + 1) / totalSteps) * 100}%`;
+  const canContinue = useMemo(() => {
+    if (step === 0) return Boolean(data.service);
+    if (step === 1) return data.brief.trim().length > 0;
+    if (step === 2) return Boolean(data.budget);
+    return data.firstName.trim().length > 0 && data.email.trim().length > 0;
+  }, [data, step]);
 
   const next = () => {
-    if (step === 0 && !data.service) return setError("Select a service to continue.");
-    if (step === 1 && data.brief.trim().length < 12) return setError("Please share a short project brief.");
-    if (step === 2 && !data.budget) return setError("Pick a budget range to continue.");
-    if (step === 3) {
-      if (!data.firstName.trim()) return setError("First name is required.");
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) return setError("Enter a valid email.");
-      setSubmitted(true);
-      setError("");
+    if (!canContinue) return;
+    if (step < totalSteps - 1) {
+      setStep((currentStep) => currentStep + 1);
       return;
     }
-    setError("");
-    setStep((v) => Math.min(v + 1, totalSteps - 1));
+    setSubmitted(true);
   };
 
   const back = () => {
-    setError("");
-    setStep((v) => Math.max(0, v - 1));
+    setStep((currentStep) => Math.max(0, currentStep - 1));
+  };
+
+  const resetToStart = () => {
+    setSubmitted(false);
+    setStep(0);
   };
 
   if (submitted) {
     return (
       <section className="contact-flow-wrap" aria-labelledby="contact-success-title">
-        <div className="contact-flow-shell">
-          <h1 id="contact-success-title" className="contact-flow-title">You are booked. We will talk soon.</h1>
+        <div className="contact-flow-shell contact-flow-shell--success">
+          <div className="contact-flow-success-icon" aria-hidden>
+            <CheckCircle2 size={30} />
+          </div>
+          <p className="contact-flow-step-label">Submitted</p>
+          <h1 id="contact-success-title" className="contact-flow-title">
+            Thanks. We received your project intake.
+          </h1>
           <p className="contact-flow-subtitle">
-            Check your inbox for confirmation. If you prefer direct email, contact hello@masermedia.com.
+            We will review the details and reach out within 24 hours to schedule your call.
           </p>
-          <a className="contact-flow-primary contact-flow-primary--link" href="https://calendly.com/client/meeting-type" target="_blank" rel="noopener noreferrer">
-            Open Calendly
-          </a>
+          <button className="contact-flow-primary contact-flow-primary--compact" type="button" onClick={resetToStart}>
+            Review answers
+          </button>
         </div>
       </section>
     );
@@ -87,119 +137,241 @@ export function ContactFlow() {
 
   return (
     <section className="contact-flow-wrap" aria-labelledby="contact-flow-title">
-      <div className="contact-flow-shell">
-        <p className="contact-flow-step-label">{stepLabel}</p>
-        <h1 id="contact-flow-title" className="contact-flow-title">Start your project in under two minutes.</h1>
-        <p className="contact-flow-subtitle">Quick intake now, detailed planning on the call.</p>
+      <form
+        className="contact-flow-shell"
+        onSubmit={(event) => {
+          event.preventDefault();
+          next();
+        }}
+      >
+        <header className="contact-flow-header">
+          <p className="contact-flow-step-label">
+            Step {step + 1} of {totalSteps}
+          </p>
+          <h1 id="contact-flow-title" className="contact-flow-title">
+            {copy.title}
+          </h1>
+          {copy.helper ? <p className="contact-flow-subtitle">{copy.helper}</p> : null}
+        </header>
 
-        <div className="contact-flow-progress" role="progressbar" aria-label="Form progress" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={totalSteps}>
-          <span style={{ width: `${progress}%` }} />
+        <div
+          className="contact-flow-progress"
+          role="progressbar"
+          aria-label="Form progress"
+          aria-valuenow={step + 1}
+          aria-valuemin={1}
+          aria-valuemax={totalSteps}
+        >
+          <span style={{ width: progress }} />
         </div>
 
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
+            className="contact-flow-step"
             initial={reduceMotion ? { opacity: 1 } : { opacity: 0, x: 18 }}
             animate={{ opacity: 1, x: 0 }}
             exit={reduceMotion ? { opacity: 1 } : { opacity: 0, x: -18 }}
-            transition={{ duration: reduceMotion ? 0 : 0.28, ease: [0.22, 1, 0.36, 1] }}
-            className="contact-flow-step"
+            transition={{ duration: reduceMotion ? 0 : 0.24, ease: [0.22, 1, 0.36, 1] }}
           >
-            {step === 0 ? (
-              <fieldset>
-                <legend className="contact-flow-field-title">What can we help you with?</legend>
-                <div className="contact-flow-grid">
-                  {SERVICE_OPTIONS.map((option) => (
-                    <button
-                      type="button"
-                      key={option}
-                      className={`contact-flow-option${data.service === option ? " is-selected" : ""}`}
-                      onClick={() => setData((v) => ({ ...v, service: option }))}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
-            ) : null}
-
-            {step === 1 ? (
-              <div>
-                <label htmlFor="brief-input" className="contact-flow-field-title">Tell us about your project</label>
-                <textarea
-                  id="brief-input"
-                  className="contact-flow-input contact-flow-textarea"
-                  placeholder="Scope, timeline, and goals."
-                  value={data.brief}
-                  onChange={(e) => setData((v) => ({ ...v, brief: e.target.value }))}
-                />
-              </div>
-            ) : null}
-
-            {step === 2 ? (
-              <fieldset>
-                <legend className="contact-flow-field-title">What is your rough budget?</legend>
-                <div className="contact-flow-grid">
-                  {BUDGET_OPTIONS.map((option) => (
-                    <button
-                      type="button"
-                      key={option}
-                      className={`contact-flow-option${data.budget === option ? " is-selected" : ""}`}
-                      onClick={() => setData((v) => ({ ...v, budget: option }))}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
-            ) : null}
-
-            {step === 3 ? (
-              <div className="contact-flow-fields">
-                <label htmlFor="first-name">First name</label>
-                <input
-                  id="first-name"
-                  className="contact-flow-input"
-                  value={data.firstName}
-                  onChange={(e) => setData((v) => ({ ...v, firstName: e.target.value }))}
-                  autoComplete="given-name"
-                />
-                <label htmlFor="email-address">Email</label>
-                <input
-                  id="email-address"
-                  className="contact-flow-input"
-                  type="email"
-                  value={data.email}
-                  onChange={(e) => setData((v) => ({ ...v, email: e.target.value }))}
-                  autoComplete="email"
-                />
-                <label htmlFor="phone-number">Phone (optional)</label>
-                <input
-                  id="phone-number"
-                  className="contact-flow-input"
-                  type="tel"
-                  inputMode="tel"
-                  value={data.phone}
-                  onChange={(e) => setData((v) => ({ ...v, phone: e.target.value }))}
-                  autoComplete="tel"
-                />
-              </div>
-            ) : null}
+            {step === 0 ? <ServiceStep data={data} setData={setData} /> : null}
+            {step === 1 ? <BriefStep data={data} setData={setData} /> : null}
+            {step === 2 ? <BudgetStep data={data} setData={setData} /> : null}
+            {step === 3 ? <ContactStep data={data} setData={setData} /> : null}
           </motion.div>
         </AnimatePresence>
 
-        {error ? <p className="contact-flow-error" role="alert">{error}</p> : null}
-
-        <div className="contact-flow-actions">
+        <footer className="contact-flow-actions">
           <button type="button" className="contact-flow-back" onClick={back} disabled={step === 0}>
+            <ArrowLeft size={20} aria-hidden />
             Back
           </button>
-          <button type="button" className="contact-flow-primary" onClick={next}>
-            {step === totalSteps - 1 ? "Submit and book call" : "Continue"}
+          <button type="submit" className="contact-flow-primary" disabled={!canContinue}>
+            {step === totalSteps - 1 ? "Submit & Book a Call" : "Continue"}
+            <ArrowRight size={20} aria-hidden />
           </button>
-        </div>
-      </div>
+        </footer>
+      </form>
     </section>
   );
 }
 
+function ServiceStep({
+  data,
+  setData,
+}: {
+  data: ContactData;
+  setData: React.Dispatch<React.SetStateAction<ContactData>>;
+}) {
+  return (
+    <fieldset className="contact-flow-fieldset">
+      <legend className="contact-flow-field-title">What can we help you with?</legend>
+      <div className="contact-flow-grid contact-flow-grid--services">
+        {SERVICE_OPTIONS.map((option) => {
+          const selected = data.service === option.id;
+
+          return (
+            <button
+              type="button"
+              key={option.id}
+              className={`contact-flow-option${selected ? " is-selected" : ""}${option.wide ? " is-wide" : ""}`}
+              aria-pressed={selected}
+              onClick={() => setData((current) => ({ ...current, service: option.id }))}
+            >
+              <span className="contact-flow-option-label">{option.label}</span>
+              {selected ? (
+                <span className="contact-flow-option-check" aria-hidden>
+                  <Check size={16} strokeWidth={3} />
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
+function BriefStep({
+  data,
+  setData,
+}: {
+  data: ContactData;
+  setData: React.Dispatch<React.SetStateAction<ContactData>>;
+}) {
+  return (
+    <div className="contact-flow-fields">
+      <label htmlFor="brief-input" className="contact-flow-field-title">
+        Tell us about your project
+      </label>
+      <textarea
+        id="brief-input"
+        className="contact-flow-input contact-flow-textarea"
+        placeholder="Scope, timeline, and goals."
+        value={data.brief}
+        onChange={(event) => setData((current) => ({ ...current, brief: event.target.value }))}
+      />
+      <p className="contact-flow-field-note">A short paragraph is plenty - we&apos;ll dig in on the call.</p>
+    </div>
+  );
+}
+
+function BudgetStep({
+  data,
+  setData,
+}: {
+  data: ContactData;
+  setData: React.Dispatch<React.SetStateAction<ContactData>>;
+}) {
+  return (
+    <fieldset className="contact-flow-fieldset">
+      <legend className="contact-flow-field-title">What is your rough budget?</legend>
+      <div className="contact-flow-grid contact-flow-grid--budget">
+        {BUDGET_OPTIONS.map((option) => {
+          const selected = data.budget === option.id;
+
+          return (
+            <button
+              type="button"
+              key={option.id}
+              className={`contact-flow-option contact-flow-option--budget${selected ? " is-selected" : ""}${
+                option.wide ? " is-wide" : ""
+              }`}
+              aria-pressed={selected}
+              onClick={() => setData((current) => ({ ...current, budget: option.id }))}
+            >
+              <span className="contact-flow-option-label">{option.label}</span>
+              {selected ? (
+                <span className="contact-flow-option-check" aria-hidden>
+                  <Check size={16} strokeWidth={3} />
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
+function ContactStep({
+  data,
+  setData,
+}: {
+  data: ContactData;
+  setData: React.Dispatch<React.SetStateAction<ContactData>>;
+}) {
+  return (
+    <div className="contact-flow-fields">
+      <TextField
+        id="first-name"
+        label="First Name"
+        placeholder="Jane"
+        autoComplete="given-name"
+        value={data.firstName}
+        onChange={(value) => setData((current) => ({ ...current, firstName: value }))}
+      />
+      <TextField
+        id="email-address"
+        label="Email"
+        placeholder="jane@company.com"
+        type="email"
+        autoComplete="email"
+        value={data.email}
+        onChange={(value) => setData((current) => ({ ...current, email: value }))}
+      />
+      <TextField
+        id="phone-number"
+        label="Phone"
+        optionalLabel="(optional)"
+        placeholder="+1 (555) 000-0000"
+        type="tel"
+        autoComplete="tel"
+        value={data.phone}
+        onChange={(value) => setData((current) => ({ ...current, phone: value }))}
+      />
+      <p className="contact-flow-field-note contact-flow-field-note--inline">
+        <Clock3 size={16} aria-hidden />
+        We&apos;ll reach out within 24 hours to schedule your call.
+      </p>
+    </div>
+  );
+}
+
+function TextField({
+  autoComplete,
+  id,
+  label,
+  optionalLabel,
+  onChange,
+  placeholder,
+  type = "text",
+  value,
+}: {
+  autoComplete: string;
+  id: string;
+  label: string;
+  optionalLabel?: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  type?: string;
+  value: string;
+}) {
+  return (
+    <label className="contact-flow-text-field" htmlFor={id}>
+      <span>
+        {label}
+        {optionalLabel ? <span>{optionalLabel}</span> : null}
+      </span>
+      <input
+        id={id}
+        className="contact-flow-input"
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        autoComplete={autoComplete}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </label>
+  );
+}
