@@ -10,7 +10,6 @@ import { OPEN_CONTACT_MODAL_EVENT } from "@/lib/contactModalEvents";
 
 const NAV_ITEMS = [
   { label: "OUR WORK", href: "/work" },
-  { label: "OUR SOLUTIONS", href: "/services" },
   { label: "ABOUT US", href: "/about" },
   { label: "THE COST", href: "/pricing" },
 ] as const;

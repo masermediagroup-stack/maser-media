@@ -1,18 +1,16 @@
 ﻿'use client';
 
-import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import type React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useInView } from 'framer-motion';
-import { motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { createPortal } from 'react-dom';
 import {
   ArrowUpRight,
   BadgeCheck,
   BarChart3,
-  ChevronLeft,
-  ChevronRight,
   CircleDot,
   MousePointer2,
   Sparkles,
@@ -21,8 +19,6 @@ import {
 import { CONTENT } from '@/lib/content';
 import { openContactModalFromApp } from '@/lib/contactModalEvents';
 import SmokeyBackground from '@/components/lightswind/smokey-background';
-import AuroraShader from '@/components/lightswind/aurora-shader';
-import { AuroraText } from '@/registry/magicui/aurora-text';
 import { Ripple } from '@/registry/magicui/ripple';
 import { useGsapLandingMotion } from '@/hooks/useGsapLandingMotion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -34,24 +30,27 @@ import { FooterCoolButton } from './FooterCoolButton';
 type EntranceProps = { entrance?: boolean };
 type NavProps = EntranceProps & { introReady?: boolean };
 type HeroProps = EntranceProps & { onIntroDone?: () => void };
-type InnerPageKind = 'work' | 'services' | 'about';
+type InnerPageKind = 'work' | 'about';
 
 const CASE_IMAGE = '/assets/generated/maser-case-wall.png';
 
 const processSteps = [
   {
-    title: 'Narrative lock',
-    text: 'Positioning, hierarchy, and conversion intent get sharpened before pixels start moving.',
+    title: 'Direct communication',
+    text: 'You work close to the people making the decisions and the work, so feedback stays visible and turns into progress quickly.',
   },
   {
-    title: 'Visual system',
-    text: 'Brand, web, and campaign materials share one language instead of feeling stitched together.',
+    title: 'One connected system',
+    text: 'Brand, website, content, and launch assets share one point of view, so the final experience feels aligned instead of stitched together.',
   },
   {
-    title: 'Launch build',
-    text: 'Custom code, fast iteration, and handoff-ready assets keep the path from approval to launch tight.',
+    title: 'Built for launch pressure',
+    text: 'Every sprint is scoped around clear decisions, realistic timelines, reusable assets, and what your team needs to send next.',
   },
 ];
+
+const whyMaserMediaSubtitle =
+  'Maser Media is built for companies, startups, and brands\nthat need a polished brand presence without slow layers.';
 
 const motionPanels = [
   'Realtime launch board',
@@ -85,9 +84,6 @@ const serviceSummaries: Record<string, string> = {
     'The fuel that keeps the system alive: image, video, illustration, and motion assets that make launches feel current.',
 };
 
-const testimonialAuroraStops = ['#F8F8F8', '#10A4FF', '#0065A3'];
-const textRollStagger = 0.035;
-const heartColors = ['#ff2fd6', '#ff4b5f', '#ff7a1a', '#ffe100', '#34f56f', '#16d9ff', '#8b5cff'];
 const serviceAuroraBars = 28;
 
 function getAuroraBarHeight(index: number, total: number, time: number, minHeight: number, maxHeight: number) {
@@ -147,49 +143,6 @@ function getServerHydratedSnapshot() {
 
 function useHydrated() {
   return useSyncExternalStore(subscribeToHydration, getHydratedSnapshot, getServerHydratedSnapshot);
-}
-
-function TextRoll({ children, className = '', center = false }: { children: string; className?: string; center?: boolean }) {
-  const letters = children.split('');
-
-  return (
-    <motion.span
-      initial="initial"
-      className={`mm-text-roll ${className}`}
-      aria-label={children}
-    >
-      <span className="mm-text-roll__row" aria-hidden>
-        {letters.map((letter, index) => {
-          const delay = center ? textRollStagger * Math.abs(index - (letters.length - 1) / 2) : textRollStagger * index;
-          return (
-            <motion.span
-              className="mm-text-roll__char"
-              variants={{ initial: { y: '0%', opacity: 1 }, hovered: { y: '-112%', opacity: 0 } }}
-              transition={{ duration: 0.42, ease: 'easeInOut', delay }}
-              key={`top-${letter}-${index}`}
-            >
-              {letter === ' ' ? '\u00a0' : letter}
-            </motion.span>
-          );
-        })}
-      </span>
-      <span className="mm-text-roll__row mm-text-roll__row--clone" aria-hidden>
-        {letters.map((letter, index) => {
-          const delay = center ? textRollStagger * Math.abs(index - (letters.length - 1) / 2) : textRollStagger * index;
-          return (
-            <motion.span
-              className="mm-text-roll__char"
-              variants={{ initial: { y: '112%', opacity: 0 }, hovered: { y: '0%', opacity: 1 } }}
-              transition={{ duration: 0.42, ease: 'easeInOut', delay }}
-              key={`clone-${letter}-${index}`}
-            >
-              {letter === ' ' ? '\u00a0' : letter}
-            </motion.span>
-          );
-        })}
-      </span>
-    </motion.span>
-  );
 }
 
 function FlipText({ text, className = '', stagger = 0.04 }: { text: string; className?: string; stagger?: number }) {
@@ -332,11 +285,22 @@ export function Hero({ entrance, onIntroDone }: HeroProps) {
 
 export function Clients() {
   const items = CONTENT.clients.items;
+  const clientHeading = CONTENT.clients.label;
+  const headingAccent = clientHeading.endsWith('Us') ? 'Us' : '';
+  const headingBase = headingAccent ? clientHeading.slice(0, -headingAccent.length).trimEnd() : clientHeading;
 
   return (
     <section className="mm-section mm-section--clients mm-clients" aria-labelledby="clients-heading">
       <h2 id="clients-heading" className="mm-clients__headline">
-        <TextRoll center>{CONTENT.clients.label}</TextRoll>
+        <span className="mm-clients__headline-text">
+          {headingBase}
+          {headingAccent ? (
+            <>
+              {' '}
+              <span className="mm-gradient-word">{headingAccent}</span>
+            </>
+          ) : null}
+        </span>
       </h2>
       <div className="mm-client-strip">
         <div className="mm-client-strip__track">
@@ -374,11 +338,12 @@ export function Services() {
       <div className="mm-services__shell">
         <div className="mm-services__masthead">
           <h2 id="services-heading" className="mm-services__title">
-            Services.
+            <span className="mm-services__title-line">Serious Craft.</span>
+            <span className="mm-services__title-line">Playful Energy.</span>
           </h2>
           <p className="mm-services__lede">
-            Brand, web, and content systems built with one launch language: a single, coherent design vocabulary
-            that scales from your logo to your last social post.
+            {CONTENT.services.subtitle ||
+              'Brand, web, and content systems built with one launch language: a single, coherent design vocabulary that scales from your logo to your last social post.'}
           </p>
         </div>
 
@@ -431,51 +396,7 @@ export function Work() {
   const sectionRef = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
   const rippleVisible = useInView(sectionRef, { amount: 0.01, margin: '45% 0px 45% 0px' });
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [previewCategory, setPreviewCategory] = useState<string | null>(null);
-  const [projectIndex, setProjectIndex] = useState(0);
-  const [transitionKey, setTransitionKey] = useState(0);
-  const touchStartX = useRef<number | null>(null);
-  const displayCategory = previewCategory ?? activeCategory;
-  const filteredProjects = useMemo(
-    () => CONTENT.work.items.filter((project) => displayCategory === 'All' || project.category === displayCategory),
-    [displayCategory],
-  );
-  const displayedProjectIndex = previewCategory ? 0 : projectIndex;
-  const activeProject = filteredProjects[displayedProjectIndex] ?? filteredProjects[0];
-  const hasMultipleProjects = filteredProjects.length > 1;
-
-  const switchProject = (direction: -1 | 1) => {
-    if (previewCategory) {
-      setPreviewCategory(null);
-    }
-    setProjectIndex((index) => {
-      if (filteredProjects.length === 0) return 0;
-      return (index + direction + filteredProjects.length) % filteredProjects.length;
-    });
-    setTransitionKey((key) => key + 1);
-  };
-
-  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
-    touchStartX.current = event.touches[0]?.clientX ?? null;
-  };
-
-  const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
-    if (touchStartX.current === null || !hasMultipleProjects) return;
-    const endX = event.changedTouches[0]?.clientX ?? touchStartX.current;
-    const deltaX = endX - touchStartX.current;
-    touchStartX.current = null;
-
-    if (Math.abs(deltaX) < 44) return;
-    switchProject(deltaX < 0 ? 1 : -1);
-  };
-
-  const previewProjectCategory = (category: string) => {
-    if (category !== displayCategory) {
-      setTransitionKey((key) => key + 1);
-    }
-    setPreviewCategory(category);
-  };
+  const landingProjects = CONTENT.work.items.slice(0, 3);
 
   return (
     <section ref={sectionRef} className="mm-section mm-section--work mm-work relative overflow-hidden" id="work">
@@ -489,91 +410,45 @@ export function Work() {
       <div className="relative z-10">
         <div className="mm-section-heading mm-section-heading--wide">
           <h2 className="mm-work__title">{CONTENT.work.title}</h2>
-          <p>{CONTENT.work.subtitle}</p>
+          {CONTENT.work.subtitle ? <p>{CONTENT.work.subtitle}</p> : null}
         </div>
-        <div className="mm-work-tabs" aria-label="Project categories" onMouseLeave={() => setPreviewCategory(null)}>
-          {CONTENT.work.categories.map((category) => (
-            <button
-              key={category}
-              type="button"
-              className="mm-work-tab"
-              aria-pressed={activeCategory === category}
-              onMouseEnter={() => previewProjectCategory(category)}
-              onFocus={() => previewProjectCategory(category)}
-              onBlur={() => setPreviewCategory(null)}
-              onClick={() => {
-                setProjectIndex(0);
-                setActiveCategory(category);
-                setPreviewCategory(null);
-                setTransitionKey((key) => key + 1);
-              }}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-        <div className="mm-work-carousel" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-          <button
-            type="button"
-            className="mm-work-arrow mm-work-arrow--prev"
-            onClick={() => switchProject(-1)}
-            aria-label="Show previous project"
-            disabled={!hasMultipleProjects}
-          >
-            <ChevronLeft size={24} aria-hidden />
-          </button>
-
-          {activeProject ? (
+        <div className="mm-work-projects">
+          {landingProjects.map((project) => (
             <Link
-              key={activeProject.title}
-              href={activeProject.link}
-              className="mm-work-card mm-work-card--single"
-              target={activeProject.link.startsWith('http') ? '_blank' : undefined}
-              rel={activeProject.link.startsWith('http') ? 'noopener noreferrer' : undefined}
+              key={project.title}
+              href={project.link}
+              className="mm-work-card"
+              target={project.link.startsWith('http') ? '_blank' : undefined}
+              rel={project.link.startsWith('http') ? 'noopener noreferrer' : undefined}
             >
-              <span key={transitionKey} className="mm-work-card__blue-transition" aria-hidden />
               <div className="mm-work-card__image">
                 <Image
-                  src={activeProject.image ?? CASE_IMAGE}
+                  src={project.image ?? CASE_IMAGE}
                   alt=""
                   fill
-                  sizes="(max-width: 900px) 92vw, 980px"
+                  sizes="(max-width: 900px) 92vw, 1180px"
                 />
               </div>
               <div className="mm-work-card__body">
-                <span>{activeProject.category}</span>
-                <h3>{activeProject.title}</h3>
-                <p>{activeProject.description}</p>
-                <dl>
-                  <div>
-                    <dt>Timeline</dt>
-                    <dd>{activeProject.timeframe}</dd>
+                <h3>{project.title}</h3>
+                <p>{project.description}</p>
+                {project.tags?.length ? (
+                  <div className="mm-work-card__tags" aria-label="Project tags">
+                    {project.tags.slice(0, 3).map((tag) => (
+                      <span key={tag} className="mm-work-card__tag">
+                        {tag}
+                      </span>
+                    ))}
                   </div>
-                  <div>
-                    <dt>Role</dt>
-                    <dd>{activeProject.role}</dd>
-                  </div>
-                  <div>
-                    <dt>Project</dt>
-                    <dd>
-                      {displayedProjectIndex + 1} / {filteredProjects.length}
-                    </dd>
-                  </div>
-                </dl>
+                ) : null}
               </div>
             </Link>
-          ) : null}
-
-          <button
-            type="button"
-            className="mm-work-arrow mm-work-arrow--next"
-            onClick={() => switchProject(1)}
-            aria-label="Show next project"
-            disabled={!hasMultipleProjects}
-          >
-            <ChevronRight size={24} aria-hidden />
-          </button>
+          ))}
         </div>
+        <Link href="/work" className="mm-work-view-all">
+          <span>View all projects</span>
+          <ArrowUpRight size={20} aria-hidden />
+        </Link>
       </div>
     </section>
   );
@@ -603,11 +478,8 @@ export function ProcessStack() {
   return (
     <section className="mm-section mm-section--process stack-motion">
       <div className="mm-section-heading">
-        <h2>Fast does not have to feel rushed.</h2>
-        <p>
-          The process is built around decisive creative direction, clear delivery rhythms, and enough motion
-          detail to make the launch feel expensive.
-        </p>
+        <h2>Why Maser Media</h2>
+        <p>{whyMaserMediaSubtitle}</p>
       </div>
       <div className="stack-grid stack-grid--interactive" role="list" aria-label="Process steps">
         {processSteps.map((step, index) => {
@@ -643,6 +515,49 @@ export function ProcessStack() {
   );
 }
 
+export function TrustSection() {
+  const { eyebrow, title, subtitle, items } = CONTENT.trust;
+
+  return (
+    <section className="mm-section mm-trust" aria-labelledby="trust-title">
+      <div className="mm-trust__shell">
+        <div className="mm-trust__copy">
+          <p className="mm-kicker">{eyebrow}</p>
+          <h2 id="trust-title">{title}</h2>
+          <p>{subtitle}</p>
+        </div>
+        <div className="mm-trust__grid">
+          {items.map((item, index) => (
+            <article key={item.title} className="mm-trust__card">
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <h3>{item.title}</h3>
+              <p>{item.text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function FaqSection() {
+  return (
+    <section className="mm-section mm-faq" aria-labelledby="faq-title">
+      <div className="mm-faq__shell">
+        <h2 id="faq-title">{CONTENT.faqs.title}</h2>
+        <div className="mm-faq__list">
+          {CONTENT.faqs.items.map((item) => (
+            <article key={item.question} className="mm-faq__item">
+              <h3>{item.question}</h3>
+              <p>{item.answer}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function Cta() {
   return (
     <section className="mm-cta mm-section--cta" id="contact" aria-labelledby="contact-heading">
@@ -653,9 +568,7 @@ export function Cta() {
               <h2 id="contact-heading" className="mm-cta__title">
                 <FlipText text={CONTENT.cta.title} />
               </h2>
-              <p className="mm-cta__lead">
-                <FlipText text={CONTENT.cta.subtitle} className="mm-flip-text--lead" stagger={0.014} />
-              </p>
+              {CONTENT.cta.subtitle ? <p className="mm-cta__lead">{CONTENT.cta.subtitle}</p> : null}
               <div className="mm-cta__actions mm-cta__actions--contact">
                 <button
                   type="button"
@@ -711,7 +624,6 @@ export function LandingPage({ onHeroIntroDone }: { onHeroIntroDone?: () => void 
       <ProcessStack />
       <Services />
       <Work />
-      <MotionSystem />
       <Testimonials />
       <Cta />
       <Footer />
@@ -724,8 +636,8 @@ export function PricingPlans() {
     <section id="pricing" className="mm-pricing-page" aria-labelledby="pricing-heading">
       <InnerHero
         eyebrow={CONTENT.pricing.eyebrow}
-        title="Pricing built for clear decisions."
-        copy="Two ways to work with us. Both built for speed, backed by senior talent, and designed to get you results - not excuses."
+        title={CONTENT.pricing.title}
+        copy={CONTENT.pricing.subtitle}
       />
       <div className="mm-pricing-grid">
         {CONTENT.pricing.plans.map((plan) => (
@@ -768,8 +680,8 @@ export function ContactPageExperience() {
     <main id="main-content" className="site-main mm-inner-main">
       <InnerHero
         eyebrow="Contact"
-        title="Start with the shape of the problem. We will handle the path."
-        copy="Use the quick intake below. It keeps the first conversation focused and gives us enough signal to respond with a useful next step."
+        title="Start with the problem. We will shape the path."
+        copy="Send the goal, deadline, and what feels unclear. You will get a direct next step from a small team built for quick communication."
       />
       <section className="mm-contact-layout">
         <div className="mm-contact-card">
@@ -805,22 +717,11 @@ export function InnerPage({ kind }: { kind: InnerPageKind }) {
       copy: 'A focused look at the launch surfaces we shape: websites, product stories, identities, and motion systems.',
       body: <Work />,
     },
-    services: {
-      eyebrow: 'Services',
-      title: 'Strategy, design, web, content, and motion under one roof.',
-      copy: 'Use us when the brand, landing page, product story, and launch assets need to feel like they came from one confident source.',
-      body: (
-        <>
-          <Services />
-          <ProcessStack />
-        </>
-      ),
-    },
     about: {
       eyebrow: 'About',
       title: 'A lean creative crew for teams that need senior taste and real output.',
       copy: 'Maser Media works close to the decision makers, keeps the process direct, and builds brand experiences that are clear enough to sell.',
-      body: <MotionSystem />,
+      body: <TrustSection />,
     },
   } satisfies Record<InnerPageKind, { eyebrow: string; title: string; copy: string; body: React.ReactNode }>;
 
@@ -836,18 +737,6 @@ export function InnerPage({ kind }: { kind: InnerPageKind }) {
   );
 }
 
-function Stars({ muted = false }: { muted?: boolean }) {
-  return (
-    <div className={`testimonial-stars ${muted ? 'testimonial-stars--muted' : ''}`} aria-hidden>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <span key={i} className="testimonial-star">
-          â˜…
-        </span>
-      ))}
-    </div>
-  );
-}
-
 function TestimonialCardArticle({
   quote,
   name,
@@ -860,11 +749,14 @@ function TestimonialCardArticle({
   className?: string;
 }) {
   return (
-    <article
+    <motion.article
       className={`testimonial-card mm-testimonials-wave__card${className ? ` ${className}` : ''}`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 1.35, ease: 'easeInOut' }}
     >
       <Sparkles className="testimonial-card-quote-icon" size={22} aria-hidden />
-      <Stars />
       <p className="testimonial-card-text">{quote}</p>
       <div className="testimonial-card-footer">
         <div className="testimonial-card-avatar testimonial-card-avatar--placeholder" aria-hidden />
@@ -873,40 +765,39 @@ function TestimonialCardArticle({
           <span className="testimonial-card-role">{role}</span>
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 }
 
 export function Testimonials() {
   const sectionRef = useRef<HTMLElement>(null);
-  const auroraVisible = useInView(sectionRef, { amount: 0.01, margin: '55% 0px 55% 0px' });
-  const { title, items } = CONTENT.testimonials;
+  const { eyebrow, title, items } = CONTENT.testimonials;
   const reduceMotion = useReducedMotion();
-  const titleWords = useMemo(() => title.trim().split(/\s+/).filter(Boolean), [title]);
-  const [hearts, setHearts] = useState<
-    { id: number; x: number; y: number; color: string; dx: number; dy: number; rotate: number }[]
-  >([]);
+  const visibleCount = Math.min(3, items.length);
+  const [visibleIndexes, setVisibleIndexes] = useState(() =>
+    Array.from({ length: visibleCount }, (_, index) => index),
+  );
 
-  const handleTestimonialsClick = (event: React.MouseEvent<HTMLElement>) => {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const angle = Math.random() * Math.PI * 2;
-    const distance = 28 + Math.random() * 38;
-    const id = Date.now() + Math.floor(Math.random() * 1000);
-    const nextHeart = {
-      id,
-      x: event.clientX - bounds.left,
-      y: event.clientY - bounds.top,
-      color: heartColors[Math.floor(Math.random() * heartColors.length)],
-      dx: Math.cos(angle) * distance,
-      dy: Math.sin(angle) * distance - (18 + Math.random() * 28),
-      rotate: -28 + Math.random() * 56,
-    };
+  useEffect(() => {
+    if (reduceMotion || items.length <= visibleCount) {
+      return;
+    }
 
-    setHearts((current) => [...current.slice(-18), nextHeart]);
-    window.setTimeout(() => {
-      setHearts((current) => current.filter((heart) => heart.id !== id));
-    }, 760);
-  };
+    const interval = window.setInterval(() => {
+      setVisibleIndexes((current) => {
+        const slot = Math.floor(Math.random() * current.length);
+        const availableIndexes = items
+          .map((_, index) => index)
+          .filter((index) => !current.includes(index) || index === current[slot]);
+        const nextPool = availableIndexes.filter((index) => index !== current[slot]);
+        const nextIndex = nextPool[Math.floor(Math.random() * nextPool.length)] ?? current[slot];
+
+        return current.map((index, itemSlot) => (itemSlot === slot ? nextIndex : index));
+      });
+    }, 4200);
+
+    return () => window.clearInterval(interval);
+  }, [items, reduceMotion, visibleCount]);
 
   return (
     <section
@@ -914,71 +805,34 @@ export function Testimonials() {
       className="testimonials-carousel mm-section mm-section--testimonials mm-testimonials-wave"
       id="testimonials"
       aria-labelledby="testimonials-title"
-      onClick={handleTestimonialsClick}
     >
-      <div className="mm-testimonials-wave__aurora" aria-hidden>
-        {auroraVisible ? (
-          <AuroraShader
-            colorStops={testimonialAuroraStops}
-            amplitude={1.18}
-            blend={0.42}
-            speed={reduceMotion ? 0 : 0.68}
-          />
-        ) : null}
-      </div>
       <div className="mm-testimonials-wave__gradient" aria-hidden />
-      <div className="mm-testimonials-hearts" aria-hidden>
-        {hearts.map((heart) => (
-          <span
-            key={heart.id}
-            className="mm-testimonials-heart"
-            style={{
-              left: heart.x,
-              top: heart.y,
-              color: heart.color,
-              ['--heart-x' as string]: `${heart.dx}px`,
-              ['--heart-y' as string]: `${heart.dy}px`,
-              ['--heart-rotate' as string]: `${heart.rotate}deg`,
-            }}
-          >
-            ♥
-          </span>
-        ))}
-      </div>
       <div className="testimonials-carousel-inner mm-testimonials-wave__inner">
-        <div className="mm-testimonials-wave__grid">
+        <div className="mm-testimonials-wave__layout">
           <header className="mm-testimonials-wave__head">
+            {eyebrow ? <p className="mm-testimonials-wave__eyebrow">{eyebrow}</p> : null}
             <h2 className="mm-testimonials-wave__title" id="testimonials-title">
-              <span className="mm-testimonials-wave__title-anim">
-                {reduceMotion ? (
-                  titleWords.map((word, i) => (
-                    <span className="mm-testimonials-wave__title-line" key={`${i}-${word}`}>
-                      {word}
-                    </span>
-                  ))
-                ) : (
-                  <AuroraText
-                    className="relative z-10 flex flex-col items-start"
-                    colors={['#ffffff', '#f8fafc', '#f1f5f9', '#e2e8f0', '#cbd5e1']}
-                    speed={1.15}
-                  >
-                    {titleWords.map((word, i) => (
-                      <span className="mm-testimonials-wave__title-line" key={`${i}-${word}`}>
-                        {word}
-                      </span>
-                    ))}
-                  </AuroraText>
-                )}
-              </span>
+              {title}
             </h2>
           </header>
 
-          <ul className="mm-testimonials-wave__static mm-testimonials-wave__static--live">
-            {items.map((item, index) => (
-              <li key={`${item.name}-${index}`}>
-                <TestimonialCardArticle quote={item.quote} name={item.name} role={item.role} />
-              </li>
-            ))}
+          <ul className="mm-testimonials-wave__static mm-testimonials-wave__static--live" aria-live="off">
+            {visibleIndexes.map((itemIndex, slot) => {
+              const item = items[itemIndex];
+
+              return (
+                <li key={`testimonial-slot-${slot}`} className="mm-testimonials-wave__slot">
+                  <AnimatePresence mode="wait" initial={false}>
+                    <TestimonialCardArticle
+                      key={`${slot}-${item.name}`}
+                      quote={item.quote}
+                      name={item.name}
+                      role={item.role}
+                    />
+                  </AnimatePresence>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </div>

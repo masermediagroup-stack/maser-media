@@ -1,12 +1,11 @@
 /**
- * MASER MEDIA — All site content lives here.
- * Edit this file to add or change anything. No HTML editing required.
+ * MASER MEDIA - site content.
+ * Keep rendered hero changes in the Hero component, not here.
  */
 
 export interface SiteConfig {
   title: string;
   logo: string;
-  /** Matches the PNG’s pixel dimensions (used by next/image for aspect ratio) */
   logoWidth: number;
   logoHeight: number;
   logoAlt: string;
@@ -20,16 +19,13 @@ export interface HeroConfig {
   badge: string;
   storyTitle: string;
   storyHighlight: string;
-  /** Single supporting paragraph under the headline */
   lead: string;
   trustStrip: string[];
   trustedBy: {
     prefix: string;
     rotatingWords: string[];
-    /** Full claim for screen readers (static, no rotation spam) */
     ariaLabel: string;
   };
-  /** When set, shows logo above hero headline (optional asset) */
   heroLogo?: { src: string; alt: string; width: number; height: number };
   asciiLogo?: {
     enabled?: boolean;
@@ -61,22 +57,17 @@ export interface ServiceItem {
 
 export interface WorkItem {
   title: string;
-  category: string;
   description: string;
-  outcome: string;
-  timeframe: string;
-  role: string;
   image: string | null;
   link: string;
+  tags?: string[];
 }
 
 export interface TestimonialCarouselItem {
   quote: string;
   name: string;
   role: string;
-  /** Optional image URL; null uses a gradient placeholder */
   avatar: string | null;
-  /** 1–5, default 5 */
   rating?: number;
 }
 
@@ -91,7 +82,6 @@ export interface TestimonialsConfig {
 export interface CtaConfig {
   title: string;
   subtitle: string;
-  /** Label for the CTA control that opens the same contact modal as the nav. */
   contactButtonLabel: string;
 }
 
@@ -112,6 +102,8 @@ export interface Content {
   clients: {
     label: string;
     items: ClientItem[];
+    supportingLabel: string;
+    categories: string[];
   };
   services: {
     title: string;
@@ -122,11 +114,26 @@ export interface Content {
   work: {
     title: string;
     subtitle: string;
-    categories: string[];
     items: WorkItem[];
   };
   testimonials: TestimonialsConfig;
+  trust: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    items: {
+      title: string;
+      text: string;
+    }[];
+  };
   cta: CtaConfig;
+  faqs: {
+    title: string;
+    items: {
+      question: string;
+      answer: string;
+    }[];
+  };
   footer: FooterConfig;
   pricing: {
     eyebrow: string;
@@ -147,10 +154,8 @@ export interface Content {
 }
 
 export const CONTENT: Content = {
-  // ─── Site & Nav ───────────────────────────────────────────────────
   site: {
-    title: "Maser Media — Creative Agency",
-    // Same transparent asset as hero — logo-cloud-white.png had a solid fill behind the wordmark
+    title: "Maser Media - Creative Agency",
     logo: "/assets/logo-maser-cloud-white-transparent.png",
     logoWidth: 1024,
     logoHeight: 519,
@@ -160,13 +165,12 @@ export const CONTENT: Content = {
     startProjectCta: { text: "Start project", href: "/contact" },
   },
 
-  // ─── Hero ─────────────────────────────────────────────────────────
   hero: {
     layout: 'editorial',
     badge: "One crew. Brand, product, and web.",
     storyTitle: "Need one creative team?",
     storyHighlight: "HERE WE ARE.",
-    lead: "We work as one integrated studio so your story, visuals, and site stay aligned from first sketch to launch—fewer handoffs, clearer outcomes.",
+    lead: "We work as one integrated studio so your story, visuals, and site stay aligned from first sketch to launch - fewer handoffs, clearer outcomes.",
     trustStrip: ["Startups shipping fast", "Service brands going digital", "Founder-led products"],
     trustedBy: {
       prefix: "Trusted by 1k+",
@@ -194,50 +198,36 @@ export const CONTENT: Content = {
     },
   },
 
-  // ─── Clients (logos or names) ──────────────────────────────────────
   clients: {
     label: "They Trust Us",
     items: [
       { name: "Miller More Handiwork", logo: null },
-      { name: "Local service brands", logo: null },
-      { name: "Early-stage SaaS teams", logo: null },
-      { name: "Founder-led eCommerce", logo: null },
-      { name: "Marketing consultants", logo: null },
       { name: "BrParadox", logo: null },
-      { name: "Regional retail partners", logo: null },
-      { name: "B2B product launches", logo: null },
-      { name: "Nonprofit campaigns", logo: null },
+      { name: "MainStreet Pub&Grub", logo: null },
     ],
+    supportingLabel: "",
+    categories: [],
   },
 
-  // ─── Services ─────────────────────────────────────────────────────
   services: {
     title: "Serious Craft. Playful Energy.",
-    subtitle: "",
-    /** Three pillars with outcome-led descriptions (home + /services). */
+    subtitle:
+      "Strategy, identity, websites, launch content, and motion built together so the brand feels clear from first impression to follow-up.",
     items: [
       {
         title: "Brand",
         items: [
           {
             label: "Brand Strategy",
-            description:
-              "Clarify positioning, audience, and message so every launch decision has a sharper reason behind it.",
+            description: "Clarify positioning, audience, and message so every launch decision has a sharper reason behind it.",
           },
           {
             label: "Logo & Identity",
-            description:
-              "Create a recognizable identity system that makes the brand easier to remember and easier to trust.",
-          },
-          {
-            label: "Brand Guidelines",
-            description:
-              "Give teams rules they can actually use, so the brand stays consistent after handoff.",
+            description: "Create a recognizable identity system that makes the brand easier to remember and easier to trust.",
           },
           {
             label: "Visual Systems",
-            description:
-              "Build a flexible design language that scales across web, social, decks, and campaigns.",
+            description: "Build a flexible design language and practical guidelines that keep the brand consistent across web, social, decks, and campaigns.",
           },
         ],
       },
@@ -246,7 +236,7 @@ export const CONTENT: Content = {
         items: [
           {
             label: "Web Design",
-            description: "Shape pages that make the offer clear, credible, and easier to act on.",
+            description: "Shape websites and landing pages that make the offer clear, credible, and easier to act on.",
           },
           {
             label: "UI/UX",
@@ -254,33 +244,16 @@ export const CONTENT: Content = {
           },
           {
             label: "Pitch Decks",
-            description:
-              "Turn the story into a focused deck that helps buyers, partners, or investors understand the value fast.",
-          },
-          {
-            label: "Marketing Assets",
-            description: "Create campaign pieces that feel connected to the brand instead of one-off.",
-          },
-          {
-            label: "Websites",
-            description: "Build a polished web presence that gives the brand a reliable home base.",
-          },
-          {
-            label: "Landing Pages",
-            description: "Design focused conversion pages for launches, campaigns, offers, and paid traffic.",
+            description: "Turn the story into a focused deck that helps buyers, partners, or investors understand the value fast.",
           },
           {
             label: "E-commerce",
             description: "Create storefront experiences that make products easier to browse, compare, and buy.",
           },
-          {
-            label: "Portfolios",
-            description: "Present work with stronger pacing, context, and credibility.",
-          },
         ],
       },
       {
-        title: "Content",
+        title: "Digital",
         items: [
           {
             label: "Photography",
@@ -291,23 +264,34 @@ export const CONTENT: Content = {
             description: "Create motion assets that explain, sell, and hold attention across platforms.",
           },
           {
-            label: "Illustration",
-            description: "Add custom visuals that make abstract ideas easier to understand and remember.",
+            label: "Strategic Marketing",
+            description: "Turn goals, audience, offer, and channels into a focused plan so campaigns move with intent instead of guesswork.",
           },
           {
-            label: "Animation",
-            description: "Use movement to guide attention, add polish, and make key moments feel intentional.",
+            label: "Creative AD Management",
+            description: "Manage paid creative from concept to iteration, keeping hooks, visuals, landing pages, and performance signals connected.",
+          },
+          {
+            label: "SEO",
+            description: "Improve site structure, page copy, and content signals so search engines can understand the work and the right people can find it.",
+          },
+          {
+            label: "Content Marketing",
+            description: "Build useful articles, emails, social posts, and campaign assets around one clear message so the brand stays visible between launches.",
+          },
+          {
+            label: "Email Marketing",
+            description: "Create segmented email campaigns with sharper copy, stronger calls to action, and reporting that shows what people actually respond to.",
           },
         ],
       },
     ],
   },
 
-  // ─── Internet Playground / Crash-style section ──────────────────────
   playground: {
-    title: "We build with teams, not around them.",
+    title: "Fast communication. Senior taste. No vendor maze.",
     subtitle:
-      "Our process is collaborative and direct. Fewer handoffs, tighter loops, stronger outcomes.",
+      "Maser Media works close to the decision maker, keeps feedback loops short, and turns scattered ideas into launch-ready brand, web, and content systems.",
     tags: [
       "Brand strategy",
       "Launch campaigns",
@@ -324,174 +308,193 @@ export const CONTENT: Content = {
     ],
   },
 
-  // ─── Work / Portfolio ─────────────────────────────────────────────
   work: {
-    title: "Projects that shipped with clarity.",
-    subtitle: "Browse by outcome focus and see the role we played, timeline, and business impact.",
-    categories: ["All", "Website", "Branding", "Product", "Motion"],
+    title: "Our Work",
+    subtitle: "See some of our selected projects we launched.",
     items: [
       {
         title: "Miller More Handiwork",
-        category: "Website",
         description: "Rebuilt their site around service clarity, local trust, and clean lead capture.",
-        outcome: "Clearer service narrative and stronger lead intent from homepage traffic.",
-        timeframe: "3 weeks",
-        role: "Brand + Web design + Build",
         image: null,
         link: "https://millermorehandiwork.com",
+        tags: ["Local services", "Lead capture", "Web build"],
       },
       {
-        title: "Riverlight Studio",
-        category: "Website",
-        description: "Portfolio and inquiry flow for a creative studio—fast loads, case-study clarity, and one clear CTA.",
-        outcome: "Higher inquiry quality and less back-and-forth before the first call.",
-        timeframe: "4 weeks",
-        role: "Web design + Build",
+        title: "Local Service Brand System",
+        description: "A practical site and identity direction for a service business that needed clearer trust, offer structure, and inquiry flow.",
         image: null,
         link: "/contact",
+        tags: ["Service business", "Identity", "Conversion"],
       },
       {
-        title: "Northline Tools",
-        category: "Website",
-        description: "Product-led marketing site with sharper positioning, spec comparison, and distributor-ready pages.",
-        outcome: "Stronger self-serve discovery for buyers comparing options online.",
-        timeframe: "5 weeks",
-        role: "UX + Web + Content",
+        title: "Startup Launch Surface",
+        description: "A product-led marketing surface for a startup that needed the offer, proof, and next step to read clearly in seconds.",
         image: null,
         link: "/contact",
+        tags: ["SaaS", "Product story", "Landing page"],
       },
       {
         title: "Founder Product Narrative Sprint",
-        category: "Branding",
         description: "Positioned a founder-led product with a tighter story and conversion-oriented messaging.",
-        outcome: "Stronger positioning for investor and customer conversations.",
-        timeframe: "10 days",
-        role: "Narrative strategy + identity system",
         image: null,
         link: "/contact",
+        tags: ["Positioning", "Messaging", "Deck story"],
       },
       {
         title: "SaaS Landing Refresh",
-        category: "Product",
         description: "Redesigned onboarding and pricing story for faster buyer confidence.",
-        outcome: "Cleaner flow from first impression to pricing action.",
-        timeframe: "2 weeks",
-        role: "UI/UX + conversion copy",
         image: null,
         link: "/contact",
+        tags: ["UX", "Pricing", "Copy"],
       },
       {
         title: "Launch Motion Kit",
-        category: "Motion",
         description: "Created reusable motion assets for product updates, social, and launch pages.",
-        outcome: "Consistent launch quality across channels without extra production drag.",
-        timeframe: "2 weeks",
-        role: "Motion direction + asset library",
         image: null,
         link: "/contact",
+        tags: ["Animation", "Launch assets", "Social"],
       },
     ],
   },
 
-  // ─── Testimonials (carousel — edit copy here) ─────────────────────
   testimonials: {
-    eyebrow: "TESTIMONIALS",
+    eyebrow: "",
     title: "Loved by you",
     prevLabel: "Prev",
     nextLabel: "Next",
     items: [
       {
         quote:
-          "Maser Media is the real deal. They took our half-formed product story and turned it into a brand and site we actually want to share. Deadlines were clear and delivery felt like one team, not five vendors.",
-        name: "Rachel Kim",
-        role: "Co-founder, Lumina Health",
+          "Clear direction before design starts. You should know what the site needs to say, who it needs to convince, and what action matters most.",
+        name: "Direction",
+        role: "Positioning, hierarchy, and launch intent",
         avatar: null,
         rating: 5,
       },
       {
         quote:
-          "We finally stopped explaining the same thing to three different designers. One crew, one standard—our launch assets and web experience finally match how we talk in the room.",
-        name: "Marcus Webb",
-        role: "CEO, Northline Tools",
+          "A small team that stays close to the work. Fewer handoffs, faster answers, and a cleaner path from feedback to finished pages.",
+        name: "Communication",
+        role: "Direct access and tight feedback loops",
         avatar: null,
         rating: 5,
       },
       {
         quote:
-          "Fast, opinionated, and kind. They pushed back when our copy was vague and celebrated when we landed on something sharp. That’s the kind of creative partner you want before a raise.",
-        name: "Priya Desai",
-        role: "Founder, Ledgerline",
+          "Design that feels current without becoming hard to use. Motion, visuals, and copy should support the offer, not bury it.",
+        name: "Craft",
+        role: "Brand, web, content, and motion",
         avatar: null,
         rating: 5,
       },
       {
         quote:
-          "Our old site looked fine but didn’t convert. The new flow and messaging made the value obvious in seconds. Leads are up and we’re not embarrassed to send the link anymore.",
-        name: "Jordan Ellis",
-        role: "Head of Growth, Fieldcraft",
+          "A launch-ready system you can keep using after handoff. Pages, assets, and rules should make the next campaign easier.",
+        name: "Handoff",
+        role: "Reusable systems and practical assets",
         avatar: null,
         rating: 5,
       },
       {
         quote:
-          "They treat the work like it’s their own. Responsive, detail-oriented, and weirdly calm under pressure. If you need creative that ships without drama, start here.",
-        name: "Sam Okonkwo",
-        role: "Partner, Riverlight Studio",
+          "Local enough to be reachable, ambitious enough to serve brands anywhere. The standard is simple: make the next version easier to trust.",
+        name: "Reach",
+        role: "Local and global creative support",
         avatar: null,
         rating: 5,
       },
     ],
   },
 
-  // ─── CTA ──────────────────────────────────────────────────────────
-  cta: {
-    title: "Create your future with us.",
+  trust: {
+    eyebrow: "Why work with us",
+    title: "The future still has to ship.",
     subtitle:
-      "Let's build. Every standout project begins with one conversation. Tell us your vision and we'll reach back with a clear next step.",
-    contactButtonLabel: "Contact",
+      "Maser Media is built for companies, startups, and brands that need a polished digital presence without slow agency layers.",
+    items: [
+      {
+        title: "Small team, fast loops",
+        text: "You work close to the people doing the thinking and making, so feedback does not disappear into a chain of handoffs.",
+      },
+      {
+        title: "Brand and web together",
+        text: "Strategy, identity, content, and site execution stay aligned, which keeps the final experience from feeling stitched together.",
+      },
+      {
+        title: "Built for launch pressure",
+        text: "The work is scoped around clear decisions, realistic timelines, and assets that are ready for outreach, campaigns, and sales conversations.",
+      },
+    ],
   },
 
-  // ─── Footer ───────────────────────────────────────────────────────
+  cta: {
+    title: "Build your future with us",
+    subtitle: "",
+    contactButtonLabel: "Start a project",
+  },
+
+  faqs: {
+    title: "Questions before we start",
+    items: [
+      {
+        question: "Who is Maser Media for?",
+        answer: "Companies, startups, local service brands, and founder-led teams that need brand, web, content, or motion work to feel sharper and ship quickly.",
+      },
+      {
+        question: "Can you work locally and remotely?",
+        answer: "Yes. The studio is built for direct communication whether the client is local or across the world.",
+      },
+      {
+        question: "Do we need a finished brief?",
+        answer: "No. Bring the goal, the deadline, and what feels unclear. We can help shape the brief before design and build work begins.",
+      },
+      {
+        question: "What can be ready first?",
+        answer: "A focused landing page, refreshed homepage, pitch deck, visual identity pass, or launch asset kit can usually move fastest.",
+      },
+    ],
+  },
+
   footer: {
     nav: [
       { text: "Home", href: "/" },
       { text: "Work", href: "/work" },
-      { text: "Services", href: "/services" },
       { text: "Pricing", href: "/pricing" },
       { text: "About", href: "/about" },
       { text: "Contact", href: "/contact" },
     ],
     copyright: "Maser Media Group. All rights reserved.",
   },
+
   pricing: {
     eyebrow: "Simple plans",
-    title: "Pricing that helps you decide quickly.",
-    subtitle: "Choose a scoped project or ongoing retainer, both with direct communication and clear delivery.",
+    title: "Simple ways to start.",
+    subtitle: "Choose a focused sprint or ongoing creative support. Both are built around direct communication and visible progress.",
     plans: [
       {
         name: "Project",
-        summary: "One goal. One timeline. Done right.",
+        summary: "One clear goal, scoped tightly.",
         bestFor: "Best for: launches, redesigns, and one-off initiatives.",
-        cadence: "Delivery rhythm: scoped kickoff, weekly updates, launch handoff.",
+        cadence: "Delivery rhythm: scoped kickoff, weekly progress, clean launch handoff.",
         price: "Quoted",
         bullets: [
-          "Scoped, quoted, and delivered in 2-4 weeks flat.",
-          "Custom code, not cookie-cutter templates",
-          "Launch ready assets that will drive real results",
+          "Scoped and quoted before production starts",
+          "Custom design and build, not cookie-cutter templates",
+          "Launch-ready assets for outreach, sales, and campaigns",
         ],
         primaryCta: { text: "Book Call", href: "/contact" },
         secondaryCta: { text: "Email", href: "mailto:hello@masermedia.com" },
       },
       {
         name: "Retainer",
-        summary: "Ongoing execution. Relentless output.",
+        summary: "Ongoing creative execution.",
         bestFor: "Best for: teams shipping regularly across web, product, and campaign work.",
         cadence: "Delivery rhythm: active queue, recurring check-ins, continuous iteration.",
         price: "$2k/month",
         bullets: [
-          "Design, dev and strategy - no bottlenecks",
-          "You scale, we keep up - month after month",
-          "Built to move fast and hit deadlines, period",
+          "Design, web, content, and strategy in one active queue",
+          "Recurring check-ins with direct communication",
+          "Built for teams that keep launching and improving",
         ],
         primaryCta: { text: "Book Call", href: "/contact" },
         secondaryCta: { text: "Email", href: "mailto:hello@masermedia.com" },
