@@ -621,9 +621,9 @@ export function LandingPage({ onHeroIntroDone }: { onHeroIntroDone?: () => void 
     <main ref={rootRef} id="main-content" className="site-main mm-main">
       <Hero entrance onIntroDone={onHeroIntroDone} />
       <Clients />
-      <ProcessStack />
       <Services />
       <Work />
+      <ProcessStack />
       <Testimonials />
       <Cta />
       <Footer />

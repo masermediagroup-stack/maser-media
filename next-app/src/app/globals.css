@@ -7891,7 +7891,64 @@ body.mm-intro-complete .mm-preload-fallback {
   transform: translateY(-2px);
 }
 
+.mm-section.mm-section--work.mm-work {
+  padding-bottom: clamp(5.5rem, 10vw, 8rem);
+}
+
+.mm-section.mm-section--process.stack-motion {
+  position: relative;
+  overflow: hidden;
+  margin-top: -1px;
+  padding-top: clamp(5rem, 9vw, 7.5rem);
+  background:
+    radial-gradient(ellipse 70% 44% at 50% 0%, rgba(16, 164, 255, 0.22), transparent 68%),
+    radial-gradient(ellipse 86% 58% at 84% 38%, rgba(0, 101, 163, 0.26), transparent 70%),
+    linear-gradient(180deg, #051524 0%, #06111c 46%, #040a12 100%) !important;
+  color: #fff;
+}
+
+.mm-section.mm-section--process.stack-motion::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(10, 117, 182, 0.24) 0%, transparent 18%),
+    radial-gradient(ellipse 42% 32% at 50% 28%, rgba(116, 216, 255, 0.12), transparent 70%);
+}
+
+.mm-section.mm-section--process.stack-motion > * {
+  position: relative;
+  z-index: 1;
+}
+
+.mm-section.mm-section--process.stack-motion .mm-section-heading p {
+  color: rgba(255, 255, 255, 0.86);
+}
+
 @media (max-width: 760px) {
+  .mm-client-strip {
+    width: min(100%, calc(100vw - 2rem));
+    max-width: calc(100vw - 2rem);
+    overflow: visible;
+  }
+
+  .mm-clients .mm-client-strip__track,
+  .mm-clients .mm-client-strip__segment {
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 0.65rem;
+    padding-inline-end: 0;
+  }
+
+  .mm-client-pill {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+
   .mm-work-projects .mm-work-card {
     min-height: clamp(22rem, 92vw, 28rem);
     border-radius: 20px;
@@ -7903,6 +7960,10 @@ body.mm-intro-complete .mm-preload-fallback {
 
   .mm-work-view-all {
     margin-left: var(--mm-section-pad-x);
+  }
+
+  .mm-section.mm-section--process.stack-motion {
+    padding-top: clamp(4rem, 12vw, 5.5rem);
   }
 }
 
