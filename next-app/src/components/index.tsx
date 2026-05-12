@@ -445,7 +445,7 @@ export function Work() {
             </Link>
           ))}
         </div>
-        <Link href="/work" className="mm-work-view-all">
+        <Link href="/work#main-content" className="mm-work-view-all">
           <span>View all projects</span>
           <ArrowUpRight size={20} aria-hidden />
         </Link>
