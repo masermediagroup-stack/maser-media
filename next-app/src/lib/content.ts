@@ -202,8 +202,9 @@ export const CONTENT: Content = {
     label: "They Trust Us",
     items: [
       { name: "Miller More Handiwork", logo: null },
-      { name: "BrParadox", logo: null },
-      { name: "MainStreet Pub&Grub", logo: null },
+      { name: "Paradox Customs", logo: null },
+      { name: "Main Street Pub & Grub", logo: null },
+      { name: "Cat Eye Construction", logo: null },
     ],
     supportingLabel: "",
     categories: [],
@@ -212,7 +213,7 @@ export const CONTENT: Content = {
   services: {
     title: "Serious Craft. Playful Energy.",
     subtitle:
-      "Strategy, identity, websites, launch content, and motion built together so the brand feels clear from first impression to follow-up.",
+      "Strategy, identity, websites, launch content, and motion built together so the brand feels clear from first impression to the follow-up.",
     items: [
       {
         title: "Brand",
@@ -261,7 +262,7 @@ export const CONTENT: Content = {
           },
           {
             label: "Video",
-            description: "Create motion assets that explain, sell, and hold attention across platforms.",
+            description: "Filming, shooting, and motion assets that explain, sell, and hold attention across platforms.",
           },
           {
             label: "Strategic Marketing",
@@ -310,49 +311,23 @@ export const CONTENT: Content = {
 
   work: {
     title: "Our Work",
-    subtitle: "See some of our selected projects we launched.",
+    subtitle: "A live list. It changes as we build.",
     items: [
       {
         title: "Miller More Handiwork",
-        description: "Rebuilt their site around service clarity, local trust, and clean lead capture.",
+        description:
+          "A website build focused on gathering local clients for home improvement and handiwork services.",
         image: null,
         link: "https://millermorehandiwork.com",
         tags: ["Local services", "Lead capture", "Web build"],
       },
       {
-        title: "Local Service Brand System",
-        description: "A practical site and identity direction for a service business that needed clearer trust, offer structure, and inquiry flow.",
+        title: "In-House SaaS — name pending",
+        description:
+          "A tool we are building ourselves to support how creative studios run client work. Description and link to come.",
         image: null,
         link: "/contact",
-        tags: ["Service business", "Identity", "Conversion"],
-      },
-      {
-        title: "Startup Launch Surface",
-        description: "A product-led marketing surface for a startup that needed the offer, proof, and next step to read clearly in seconds.",
-        image: null,
-        link: "/contact",
-        tags: ["SaaS", "Product story", "Landing page"],
-      },
-      {
-        title: "Founder Product Narrative Sprint",
-        description: "Positioned a founder-led product with a tighter story and conversion-oriented messaging.",
-        image: null,
-        link: "/contact",
-        tags: ["Positioning", "Messaging", "Deck story"],
-      },
-      {
-        title: "SaaS Landing Refresh",
-        description: "Redesigned onboarding and pricing story for faster buyer confidence.",
-        image: null,
-        link: "/contact",
-        tags: ["UX", "Pricing", "Copy"],
-      },
-      {
-        title: "Launch Motion Kit",
-        description: "Created reusable motion assets for product updates, social, and launch pages.",
-        image: null,
-        link: "/contact",
-        tags: ["Animation", "Launch assets", "Social"],
+        tags: ["Internal build", "SaaS", "In progress"],
       },
     ],
   },
@@ -364,42 +339,23 @@ export const CONTENT: Content = {
     nextLabel: "Next",
     items: [
       {
-        quote:
-          "Clear direction before design starts. You should know what the site needs to say, who it needs to convince, and what action matters most.",
-        name: "Direction",
-        role: "Positioning, hierarchy, and launch intent",
+        quote: "Quote pending — kind words from the Miller More team coming soon.",
+        name: "Miller More Handiwork",
+        role: "Local home services, client since launch",
         avatar: null,
         rating: 5,
       },
       {
-        quote:
-          "A small team that stays close to the work. Fewer handoffs, faster answers, and a cleaner path from feedback to finished pages.",
-        name: "Communication",
-        role: "Direct access and tight feedback loops",
+        quote: "Quote pending — hand-off from the Main Street Pub & Grub crew on the way.",
+        name: "Main Street Pub & Grub",
+        role: "Hospitality, brand and web partner",
         avatar: null,
         rating: 5,
       },
       {
-        quote:
-          "Design that feels current without becoming hard to use. Motion, visuals, and copy should support the offer, not bury it.",
-        name: "Craft",
-        role: "Brand, web, content, and motion",
-        avatar: null,
-        rating: 5,
-      },
-      {
-        quote:
-          "A launch-ready system you can keep using after handoff. Pages, assets, and rules should make the next campaign easier.",
-        name: "Handoff",
-        role: "Reusable systems and practical assets",
-        avatar: null,
-        rating: 5,
-      },
-      {
-        quote:
-          "Local enough to be reachable, ambitious enough to serve brands anywhere. The standard is simple: make the next version easier to trust.",
-        name: "Reach",
-        role: "Local and global creative support",
+        quote: "Quote pending — sharing notes from Arpit shortly.",
+        name: "Arpit",
+        role: "Founder, partner brand",
         avatar: null,
         rating: 5,
       },
@@ -407,10 +363,10 @@ export const CONTENT: Content = {
   },
 
   trust: {
-    eyebrow: "Why work with us",
-    title: "The future still has to ship.",
+    eyebrow: "Why Maser Media",
+    title: "Built as the response to clients being let down.",
     subtitle:
-      "Maser Media is built for companies, startups, and brands that need a polished digital presence without slow agency layers.",
+      "Maser Media was created as a biproduct of two creatives seeing other companies let clients down. We strive to be the change in the industry that accelerates businesses in organic and vibrant ways.",
     items: [
       {
         title: "Small team, fast loops",
