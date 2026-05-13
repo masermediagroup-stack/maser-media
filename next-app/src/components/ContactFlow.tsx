@@ -127,6 +127,8 @@ export function ContactFlow() {
   const reduceMotion = useReducedMotion();
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [data, setData] = useState<ContactData>(INITIAL_DATA);
 
   const totalSteps = 5;
@@ -140,21 +142,56 @@ export function ContactFlow() {
     return data.firstName.trim().length > 0 && data.email.trim().length > 0;
   }, [data, step]);
 
+  const submitBooking = async () => {
+    setSubmitting(true);
+    setErrorMessage(null);
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...data, callTimezone: "America/Chicago" }),
+      });
+      const body = (await response.json().catch(() => null)) as
+        | { ok: boolean; error?: string }
+        | null;
+
+      if (!response.ok || !body?.ok) {
+        setErrorMessage(
+          body?.error ??
+            "We could not book the call right now. Please try again or email masermediagroup@gmail.com.",
+        );
+        return;
+      }
+
+      setSubmitted(true);
+    } catch (error) {
+      console.error("[ContactFlow] submit failed", error);
+      setErrorMessage(
+        "Network error. Please check your connection and try again, or email masermediagroup@gmail.com.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const next = () => {
-    if (!canContinue) return;
+    if (!canContinue || submitting) return;
     if (step < totalSteps - 1) {
       setStep((currentStep) => currentStep + 1);
       return;
     }
-    setSubmitted(true);
+    void submitBooking();
   };
 
   const back = () => {
+    if (submitting) return;
+    setErrorMessage(null);
     setStep((currentStep) => Math.max(0, currentStep - 1));
   };
 
   const resetToStart = () => {
     setSubmitted(false);
+    setErrorMessage(null);
     setStep(0);
   };
 
@@ -165,15 +202,15 @@ export function ContactFlow() {
           <div className="contact-flow-success-icon" aria-hidden>
             <CheckCircle2 size={30} />
           </div>
-          <p className="contact-flow-step-label">Submitted</p>
+          <p className="contact-flow-step-label">Booked</p>
           <h1 id="contact-success-title" className="contact-flow-title">
-            Thanks. We received your project intake.
+            You&apos;re on the calendar.
           </h1>
           <p className="contact-flow-subtitle">
-            We will review the details and send a Google Calendar invite for your selected intro call.
+            Check your inbox - a Google Calendar invite for your intro call is on its way. You can reschedule or cancel from the invite itself.
           </p>
           <button className="contact-flow-primary contact-flow-primary--compact" type="button" onClick={resetToStart}>
-            Review answers
+            Book another
           </button>
         </div>
       </section>
@@ -231,13 +268,33 @@ export function ContactFlow() {
           </motion.div>
         </AnimatePresence>
 
+        {errorMessage ? (
+          <p className="contact-flow-error" role="alert">
+            {errorMessage}
+          </p>
+        ) : null}
+
         <footer className="contact-flow-actions">
-          <button type="button" className="contact-flow-back" onClick={back} disabled={step === 0}>
+          <button
+            type="button"
+            className="contact-flow-back"
+            onClick={back}
+            disabled={step === 0 || submitting}
+          >
             <ArrowLeft size={20} aria-hidden />
             Back
           </button>
-          <button type="submit" className="contact-flow-primary" disabled={!canContinue}>
-            {step === totalSteps - 1 ? "Submit & Book a Call" : "Continue"}
+          <button
+            type="submit"
+            className="contact-flow-primary"
+            disabled={!canContinue || submitting}
+            aria-busy={submitting}
+          >
+            {step === totalSteps - 1
+              ? submitting
+                ? "Booking your call..."
+                : "Submit & Book a Call"
+              : "Continue"}
             <ArrowRight size={20} aria-hidden />
           </button>
         </footer>
