@@ -24,6 +24,7 @@ import { useGsapLandingMotion } from '@/hooks/useGsapLandingMotion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { LiquidNav } from './LiquidNav';
 import { ContactFlow } from './ContactFlow';
+import { AboutFounders } from './AboutFounders';
 import { AsciiWaveFooter } from './AsciiWaveFooter';
 import { FooterCoolButton } from './FooterCoolButton';
 
@@ -719,9 +720,9 @@ export function InnerPage({ kind }: { kind: InnerPageKind }) {
     },
     about: {
       eyebrow: 'About',
-      title: 'A lean creative crew for teams that need senior taste and real output.',
-      copy: 'Maser Media works close to the decision makers, keeps the process direct, and builds brand experiences that are clear enough to sell.',
-      body: <TrustSection />,
+      title: 'Two creatives, tired of seeing people fall short.',
+      copy: 'Strategy, identity, websites, launch content, and motion — built together so the brand feels clear from first impression to the follow-up.',
+      body: <AboutFounders />,
     },
   } satisfies Record<InnerPageKind, { eyebrow: string; title: string; copy: string; body: React.ReactNode }>;
 
