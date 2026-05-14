@@ -239,7 +239,6 @@ export function Hero({ entrance, onIntroDone }: HeroProps) {
         <div className="mm-hero__smokey">
           <SmokeyBackground color="#10A4FF" backdropBlurAmount="none" className="h-full min-h-0 w-full" />
         </div>
-        <div className="mm-hero__grain" aria-hidden />
       </div>
       <div className="mm-hero__exit-splash" aria-hidden />
       {entrance && hydrated

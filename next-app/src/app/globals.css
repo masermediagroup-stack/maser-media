@@ -229,28 +229,18 @@ body {
   background: var(--color-bg);
 }
 
-[data-page-transition-wrapper] {
-  position: relative;
-  min-height: 100vh;
-  isolation: isolate;
-}
-
-[data-page-transition-container] {
-  min-height: 100vh;
-  backface-visibility: hidden;
-  transform: translateZ(0);
-}
-
-[data-page-transition-state='entering'] {
+.mm-route-fade {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  background: #000;
+  opacity: 0;
+  visibility: hidden;
   pointer-events: none;
 }
 
-body.mm-page-transition-active [data-page-transition-wrapper] {
+body.mm-page-transition-active {
   cursor: progress;
-}
-
-body.mm-page-transition-active [data-page-transition-container] {
-  pointer-events: none;
 }
 
 .cursor-aura-layer {
@@ -4241,12 +4231,16 @@ body {
   inset: 0;
   z-index: 999;
   background-color: #000 !important;
-  opacity: 1;
-  visibility: visible;
+  opacity: 0;
+  visibility: hidden;
   pointer-events: none;
 }
 
-body.mm-intro-mounted .mm-preload-fallback,
+body.mm-intro-mounted .mm-preload-fallback {
+  opacity: 1;
+  visibility: visible;
+}
+
 body.mm-intro-complete .mm-preload-fallback {
   opacity: 0;
   visibility: hidden;
@@ -4515,48 +4509,6 @@ body.mm-intro-complete .mm-preload-fallback {
   opacity: calc(0.12 + 0.88 * (1 - var(--hero-exit-p)));
 }
 
-/* Hero-only grain: above smokey (z-index 1 inside .mm-hero__bg-scale), below exit-splash / content */
-.mm-hero__grain {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.mm-hero__grain::before {
-  content: '';
-  position: absolute;
-  inset: -35%;
-  width: 170%;
-  height: 170%;
-  mix-blend-mode: overlay;
-  opacity: 0.24;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 120px 120px;
-  animation: mm-hero-grain-drift 6s linear infinite, mm-hero-grain-opacity 3.4s ease-in-out infinite alternate;
-}
-
-@keyframes mm-hero-grain-drift {
-  0% {
-    transform: translate(0, 0);
-  }
-
-  100% {
-    transform: translate(-2.2%, -1.6%);
-  }
-}
-
-@keyframes mm-hero-grain-opacity {
-  0% {
-    opacity: 0.16;
-  }
-
-  100% {
-    opacity: 0.28;
-  }
-}
-
 /* Accent “splash” band — scroll-linked via --hero-exit-p; brand #10A4FF + deeper blue */
 @property --mm-hero-reveal-r {
   syntax: '<length>';
@@ -4748,12 +4700,6 @@ body.mm-intro-complete .mm-preload-fallback {
 @media (prefers-reduced-motion: reduce) {
   .mm-hero {
     --hero-exit-p: 0 !important;
-  }
-
-  .mm-hero__grain::before {
-    animation: none;
-    opacity: 0.22;
-    transform: none;
   }
 
   .mm-hero__smokey {
