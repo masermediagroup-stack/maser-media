@@ -4,6 +4,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { CursorAura } from "@/components/CursorAura";
 import { GlobalShaderLayer } from "@/components/GlobalShaderLayer";
+import { PageTransitionShell } from "@/components/PageTransitionShell";
 import { cn } from "@/lib/utils";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
@@ -34,7 +35,7 @@ export default function RootLayout({
         </a>
         <GlobalShaderLayer />
         <CursorAura />
-        {children}
+        <PageTransitionShell>{children}</PageTransitionShell>
         <SpeedInsights />
       </body>
     </html>

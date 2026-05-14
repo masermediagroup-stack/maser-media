@@ -229,6 +229,30 @@ body {
   background: var(--color-bg);
 }
 
+[data-page-transition-wrapper] {
+  position: relative;
+  min-height: 100vh;
+  isolation: isolate;
+}
+
+[data-page-transition-container] {
+  min-height: 100vh;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+[data-page-transition-state='entering'] {
+  pointer-events: none;
+}
+
+body.mm-page-transition-active [data-page-transition-wrapper] {
+  cursor: progress;
+}
+
+body.mm-page-transition-active [data-page-transition-container] {
+  pointer-events: none;
+}
+
 .cursor-aura-layer {
   position: fixed;
   inset: 0;
