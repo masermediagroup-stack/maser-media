@@ -202,8 +202,8 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
         className={`liquid-nav${isScrolled && !morphing ? " liquid-nav--expanded" : ""}${morphing ? " liquid-nav--morph" : ""}`}
         aria-label="Primary navigation"
         initial={entrance ? { y: -36, opacity: 0 } : false}
-        animate={entrance && introReady ? { y: 0, opacity: 1 } : entrance ? { y: -36, opacity: 0 } : false}
-        transition={entrance ? { duration: 0.5, ease: [0.22, 1, 0.36, 1] } : undefined}
+        animate={entrance && !introReady ? { y: -36, opacity: 0 } : { y: 0, opacity: 1 }}
+        transition={entrance ? { duration: 0.5, ease: [0.22, 1, 0.36, 1] } : { duration: 0 }}
       >
         <div className="liquid-nav-bubble-shell">
           <div className="liquid-nav-bubble">

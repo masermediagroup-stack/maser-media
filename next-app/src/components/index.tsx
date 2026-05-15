@@ -386,8 +386,8 @@ export function Hero({ entrance, onIntroDone }: HeroProps) {
       <motion.div
         className="mm-hero__content"
         initial={entrance ? { opacity: 0, y: 24 } : false}
-        animate={entrance && curtainDone ? { opacity: 1, y: 0 } : entrance ? { opacity: 0, y: 24 } : false}
-        transition={entrance ? { duration: 0.8, ease: [0.22, 1, 0.36, 1] } : undefined}
+        animate={entrance && !curtainDone ? { opacity: 0, y: 24 } : { opacity: 1, y: 0 }}
+        transition={entrance ? { duration: 0.8, ease: [0.22, 1, 0.36, 1] } : { duration: 0 }}
       >
         <div className="mm-hero__content-shift">
           <div className="mm-hero__copy">
