@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import type React from 'react';
 import { useReducedMotion } from 'motion/react';
 
@@ -9,12 +9,17 @@ export function GsapSmoothScroll({ children }: { children: React.ReactNode }) {
   const contentRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
 
-  useEffect(() => {
-    if (reduceMotion || !wrapperRef.current || !contentRef.current) return;
-    if (window.matchMedia('(max-width: 767px)').matches) return;
+  useLayoutEffect(() => {
+    if (reduceMotion || !wrapperRef.current || !contentRef.current) {
+      return;
+    }
 
-    let cleanup = () => {};
+    if (window.matchMedia('(max-width: 767px), (pointer: coarse)').matches) {
+      return;
+    }
+
     let cancelled = false;
+    let cleanup = () => {};
 
     const run = async () => {
       const [{ gsap }, { ScrollTrigger }, { ScrollSmoother }] = await Promise.all([
@@ -23,21 +28,28 @@ export function GsapSmoothScroll({ children }: { children: React.ReactNode }) {
         import('gsap/ScrollSmoother'),
       ]);
 
-      if (cancelled || !wrapperRef.current || !contentRef.current) return;
+      if (cancelled || !wrapperRef.current || !contentRef.current) {
+        return;
+      }
 
       gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+      ScrollSmoother.get()?.kill();
 
       const smoother = ScrollSmoother.create({
         wrapper: wrapperRef.current,
         content: contentRef.current,
-        smooth: 0.65,
-        normalizeScroll: true,
+        smooth: 0.35,
+        smoothTouch: false,
+        normalizeScroll: false,
         ignoreMobileResize: true,
         effects: false,
       });
 
+      ScrollTrigger.refresh();
+
       cleanup = () => {
         smoother.kill();
+        ScrollTrigger.refresh();
       };
     };
 
