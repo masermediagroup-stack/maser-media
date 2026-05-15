@@ -4892,6 +4892,11 @@ body.mm-intro-complete .mm-preload-fallback {
   will-change: transform, opacity;
 }
 
+.mm-main[data-hero-motion='pending'] .mm-hero__title,
+.mm-main[data-hero-motion='pending'] .mm-hero__lead {
+  visibility: hidden;
+}
+
 .mm-services__intro .mm-type-display {
   color: var(--mm-ink);
   max-width: none;

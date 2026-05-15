@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import type { RefObject } from 'react';
 
 function prefersReducedMotion(): boolean {
@@ -19,8 +19,11 @@ function stToggleActive(target: Element | Element[] | string | null | undefined)
   };
 }
 
-export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
-  useEffect(() => {
+export function useGsapLandingMotion(
+  rootRef: RefObject<HTMLElement | null>,
+  { animateHeroIntro = true }: { animateHeroIntro?: boolean } = {},
+) {
+  useLayoutEffect(() => {
     if (!rootRef.current) return;
 
     let cleanup = () => {};
@@ -44,6 +47,7 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
         const heroLead = hero?.querySelector<HTMLElement>('.mm-hero__lead');
 
         if (reduced) {
+          root.dataset.heroMotion = 'ready';
           if (hero) gsap.set(hero, { '--hero-exit-p': 1 });
           gsap.utils
             .toArray<HTMLElement>(root.querySelectorAll('.mm-section, .marquee-system'))
@@ -75,7 +79,11 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
         const heroLeadGap = 0.01;
         let heroTitleLineCount = 1;
 
-        if (heroTitle) {
+        if (!animateHeroIntro) {
+          root.dataset.heroMotion = 'ready';
+        }
+
+        if (animateHeroIntro && heroTitle) {
           SplitText.create(heroTitle, {
             type: 'lines',
             mask: 'lines',
@@ -99,7 +107,7 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
           });
         }
 
-        if (heroLead) {
+        if (animateHeroIntro && heroLead) {
           SplitText.create(heroLead, {
             type: 'lines',
             mask: 'lines',
@@ -124,6 +132,10 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
               });
             },
           });
+        }
+
+        if (animateHeroIntro) {
+          root.dataset.heroMotion = 'running';
         }
 
         mm.add(
@@ -444,5 +456,5 @@ export function useGsapLandingMotion(rootRef: RefObject<HTMLElement | null>) {
       cancelled = true;
       cleanup();
     };
-  }, [rootRef]);
+  }, [animateHeroIntro, rootRef]);
 }

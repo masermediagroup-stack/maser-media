@@ -769,10 +769,15 @@ export function LandingPage({
   onHeroIntroDone?: () => void;
 }) {
   const rootRef = useRef<HTMLElement>(null);
-  useGsapLandingMotion(rootRef);
+  useGsapLandingMotion(rootRef, { animateHeroIntro: entrance });
 
   return (
-    <main ref={rootRef} id="main-content" className="site-main mm-main">
+    <main
+      ref={rootRef}
+      id="main-content"
+      className="site-main mm-main"
+      data-hero-motion={entrance ? 'pending' : 'ready'}
+    >
       <Hero entrance={entrance} onIntroDone={onHeroIntroDone} />
       <Clients />
       <Services />

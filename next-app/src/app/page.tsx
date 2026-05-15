@@ -28,12 +28,11 @@ function markHomeIntroPlayed() {
 }
 
 export default function Home() {
-  const [introHasPlayed, setIntroHasPlayed] = useState(hasHomeIntroPlayed);
-  const introEnabled = !introHasPlayed;
-  const [introReady, setIntroReady] = useState(introHasPlayed);
+  const [skipIntro] = useState(hasHomeIntroPlayed);
+  const introEnabled = !skipIntro;
+  const [introReady, setIntroReady] = useState(skipIntro);
   const handleHeroIntroDone = useCallback(() => {
     markHomeIntroPlayed();
-    setIntroHasPlayed(true);
     setIntroReady(true);
   }, []);
 
