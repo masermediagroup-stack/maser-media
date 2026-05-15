@@ -761,13 +761,19 @@ export function Footer() {
   );
 }
 
-export function LandingPage({ onHeroIntroDone }: { onHeroIntroDone?: () => void }) {
+export function LandingPage({
+  entrance = true,
+  onHeroIntroDone,
+}: {
+  entrance?: boolean;
+  onHeroIntroDone?: () => void;
+}) {
   const rootRef = useRef<HTMLElement>(null);
   useGsapLandingMotion(rootRef);
 
   return (
     <main ref={rootRef} id="main-content" className="site-main mm-main">
-      <Hero entrance onIntroDone={onHeroIntroDone} />
+      <Hero entrance={entrance} onIntroDone={onHeroIntroDone} />
       <Clients />
       <Services />
       <Work />
