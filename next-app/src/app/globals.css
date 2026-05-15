@@ -4301,10 +4301,10 @@ body.mm-intro-complete .mm-preload-fallback {
 .mm-work__ripple-layer {
   --foreground: oklch(0.93 0.045 240);
   --color-foreground: oklch(0.93 0.045 240);
-  inset: -28% -22% -18%;
-  transform: scale(1.38);
-  transform-origin: 52% 36%;
-  opacity: 0.9;
+  inset: -72% -58% -48%;
+  transform: scale(1.96);
+  transform-origin: 50% 28%;
+  opacity: 0.95;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -7713,11 +7713,12 @@ body.mm-intro-complete .mm-preload-fallback {
 }
 
 .mm-section.mm-section--work.mm-work {
+  --mm-work-bg-size: 170%;
   background:
     radial-gradient(ellipse 72% 54% at 78% 18%, rgba(16, 164, 255, 0.28), transparent 64%),
     radial-gradient(ellipse 90% 66% at 18% 42%, rgba(0, 101, 163, 0.46), transparent 68%),
     linear-gradient(128deg, #04101d 0%, #063a5f 34%, #0a75b6 58%, #05223a 100%);
-  background-size: 170% 170%;
+  background-size: var(--mm-work-bg-size) var(--mm-work-bg-size);
   animation: mm-work-gradient-drift 18s ease-in-out infinite alternate;
   color: #fff;
 }
@@ -7763,6 +7764,26 @@ body.mm-intro-complete .mm-preload-fallback {
   gap: clamp(2rem, 5vw, 4rem);
   width: min(1180px, calc(100% - 2rem));
   margin: clamp(3rem, 6vw, 4.75rem) auto 0;
+}
+
+.mm-work--stacked .mm-work-projects {
+  gap: 0;
+  perspective: 1600px;
+  transform-style: preserve-3d;
+}
+
+.mm-work-card-pin {
+  position: relative;
+  min-height: clamp(22rem, 34vw, 30rem);
+  margin-bottom: clamp(2rem, 5vw, 4rem);
+  transform-style: preserve-3d;
+}
+
+.mm-work-card-pin .mm-work-card {
+  position: relative;
+  z-index: 1;
+  transform-origin: top center;
+  will-change: transform;
 }
 
 .mm-work-projects .mm-work-card {
@@ -7838,6 +7859,8 @@ body.mm-intro-complete .mm-preload-fallback {
 }
 
 .mm-work-view-all {
+  position: relative;
+  z-index: 20;
   display: inline-flex;
   align-items: center;
   gap: 1rem;
@@ -7863,6 +7886,10 @@ body.mm-intro-complete .mm-preload-fallback {
 
 .mm-section.mm-section--work.mm-work {
   padding-bottom: clamp(5.5rem, 10vw, 8rem);
+}
+
+.mm-work--stacked.mm-section.mm-section--work.mm-work {
+  padding-bottom: clamp(7rem, 12vw, 10rem);
 }
 
 .mm-section.mm-section--process.stack-motion {
