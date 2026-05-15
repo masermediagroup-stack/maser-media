@@ -31,6 +31,7 @@ type EntranceProps = { entrance?: boolean };
 type NavProps = EntranceProps & { introReady?: boolean };
 type HeroProps = EntranceProps & { onIntroDone?: () => void };
 type InnerPageKind = 'work' | 'about';
+type WorkProps = { stacked?: boolean };
 
 const CASE_IMAGE = '/assets/generated/maser-case-wall.png';
 
@@ -74,6 +75,133 @@ const secondaryMarqueeItems = [
   ...Array.from({ length: 18 }, () => secondaryMotionBeforeBrand).flat(),
   ...Array.from({ length: 10 }, () => secondaryMotionPanels).flat(),
 ];
+
+function useStackedWorkPosters(
+  sectionRef: React.RefObject<HTMLElement | null>,
+  enabled: boolean,
+  reduceMotion: boolean | null,
+) {
+  useEffect(() => {
+    if (!enabled || reduceMotion) {
+      return;
+    }
+
+    let cancelled = false;
+    let cleanup = () => {};
+
+    const runStack = async () => {
+      const section = sectionRef.current;
+
+      if (!section) {
+        return;
+      }
+
+      const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+        import('gsap'),
+        import('gsap/ScrollTrigger'),
+      ]);
+
+      if (cancelled || !sectionRef.current) {
+        return;
+      }
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      const context = gsap.context(() => {
+        const wrappers = gsap.utils.toArray<HTMLElement>('.mm-work-card-pin');
+        const cards = gsap.utils.toArray<HTMLElement>('.mm-work-card');
+        const viewAll = section.querySelector<HTMLElement>('.mm-work-view-all');
+        const matchMedia = gsap.matchMedia();
+
+        if (!wrappers.length || !cards.length || !viewAll) {
+          return;
+        }
+
+        gsap.set(section, { '--mm-work-bg-size': '170%' });
+        gsap.set(cards, {
+          transformOrigin: 'top center',
+          force3D: true,
+          willChange: 'transform',
+        });
+
+        matchMedia.add('(min-width: 761px) and (pointer: fine)', () => {
+          gsap.to(section, {
+            '--mm-work-bg-size': '230%',
+            ease: 'none',
+            scrollTrigger: {
+              trigger: section,
+              start: 'top bottom',
+              endTrigger: viewAll,
+              end: 'top 82%',
+              scrub: 0.8,
+              invalidateOnRefresh: true,
+            },
+          });
+
+          wrappers.forEach((wrapper, index) => {
+            const card = wrapper.querySelector<HTMLElement>('.mm-work-card');
+
+            if (!card) {
+              return;
+            }
+
+            gsap.set(wrapper, { zIndex: index + 1 });
+
+            gsap.to(card, {
+              y: () => -index * 12,
+              scale: () => Math.max(0.9, 1 - (wrappers.length - index - 1) * 0.035),
+              rotate: index % 2 === 0 ? -0.7 : 0.7,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: wrapper,
+                start: 'top top+=112',
+                endTrigger: viewAll,
+                end: 'top 78%',
+                pin: wrapper,
+                pinSpacing: false,
+                scrub: 0.85,
+                anticipatePin: 1,
+                invalidateOnRefresh: true,
+              },
+            });
+          });
+
+          ScrollTrigger.refresh();
+        });
+
+        matchMedia.add('(max-width: 760px), (pointer: coarse)', () => {
+          gsap.fromTo(
+            cards,
+            { autoAlpha: 0, y: 28 },
+            {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.72,
+              stagger: 0.09,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: section,
+                start: 'top 78%',
+                once: true,
+              },
+            },
+          );
+        });
+      }, section);
+
+      cleanup = () => {
+        context.revert();
+      };
+    };
+
+    void runStack();
+
+    return () => {
+      cancelled = true;
+      cleanup();
+    };
+  }, [enabled, reduceMotion, sectionRef]);
+}
 
 const serviceSummaries: Record<string, string> = {
   Brand:
@@ -391,14 +519,53 @@ export function Services() {
   );
 }
 
-export function Work() {
+export function Work({ stacked = true }: WorkProps = {}) {
   const sectionRef = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
   const rippleVisible = useInView(sectionRef, { amount: 0.01, margin: '45% 0px 45% 0px' });
   const landingProjects = CONTENT.work.items.slice(0, 3);
+  const stackEnabled = stacked && landingProjects.length > 1;
+
+  useStackedWorkPosters(sectionRef, stackEnabled, reduceMotion);
+
+  const renderProjectCard = (project: (typeof landingProjects)[number]) => (
+    <Link
+      key={project.title}
+      href={project.link}
+      className="mm-work-card"
+      target={project.link.startsWith('http') ? '_blank' : undefined}
+      rel={project.link.startsWith('http') ? 'noopener noreferrer' : undefined}
+    >
+      <div className="mm-work-card__image">
+        <Image
+          src={project.image ?? CASE_IMAGE}
+          alt=""
+          fill
+          sizes="(max-width: 900px) 92vw, 1180px"
+        />
+      </div>
+      <div className="mm-work-card__body">
+        <h3>{project.title}</h3>
+        <p>{project.description}</p>
+        {project.tags?.length ? (
+          <div className="mm-work-card__tags" aria-label="Project tags">
+            {project.tags.slice(0, 3).map((tag) => (
+              <span key={tag} className="mm-work-card__tag">
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </Link>
+  );
 
   return (
-    <section ref={sectionRef} className="mm-section mm-section--work mm-work relative overflow-hidden" id="work">
+    <section
+      ref={sectionRef}
+      className={`mm-section mm-section--work mm-work relative overflow-hidden${stackEnabled ? ' mm-work--stacked' : ''}`}
+      id="work"
+    >
       <div className="mm-work__ripple-layer absolute inset-0 z-0" aria-hidden>
         {rippleVisible && !reduceMotion ? <Ripple numCircles={6} /> : null}
       </div>
@@ -412,37 +579,19 @@ export function Work() {
           {CONTENT.work.subtitle ? <p>{CONTENT.work.subtitle}</p> : null}
         </div>
         <div className="mm-work-projects">
-          {landingProjects.map((project) => (
-            <Link
-              key={project.title}
-              href={project.link}
-              className="mm-work-card"
-              target={project.link.startsWith('http') ? '_blank' : undefined}
-              rel={project.link.startsWith('http') ? 'noopener noreferrer' : undefined}
-            >
-              <div className="mm-work-card__image">
-                <Image
-                  src={project.image ?? CASE_IMAGE}
-                  alt=""
-                  fill
-                  sizes="(max-width: 900px) 92vw, 1180px"
-                />
+          {landingProjects.map((project, index) =>
+            stackEnabled ? (
+              <div
+                key={project.title}
+                className="mm-work-card-pin"
+                style={{ '--mm-work-card-index': index } as React.CSSProperties}
+              >
+                {renderProjectCard(project)}
               </div>
-              <div className="mm-work-card__body">
-                <h3>{project.title}</h3>
-                <p>{project.description}</p>
-                {project.tags?.length ? (
-                  <div className="mm-work-card__tags" aria-label="Project tags">
-                    {project.tags.slice(0, 3).map((tag) => (
-                      <span key={tag} className="mm-work-card__tag">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-            </Link>
-          ))}
+            ) : (
+              renderProjectCard(project)
+            ),
+          )}
         </div>
         <Link href="/work#main-content" className="mm-work-view-all">
           <span>View all projects</span>
@@ -714,7 +863,7 @@ export function InnerPage({ kind }: { kind: InnerPageKind }) {
       eyebrow: 'Work',
       title: 'Proof that clarity can still feel cinematic.',
       copy: 'A focused look at the launch surfaces we shape: websites, product stories, identities, and motion systems.',
-      body: <Work />,
+      body: <Work stacked={false} />,
     },
     about: {
       eyebrow: 'About',
