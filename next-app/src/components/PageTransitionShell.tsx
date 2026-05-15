@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { useReducedMotion } from 'motion/react';
 
-const INNER_ROUTES = new Set(['/work', '/about', '/pricing', '/contact']);
+const SITE_ROUTES = new Set(['/', '/work', '/about', '/pricing', '/contact']);
+const TRANSITION_FAILSAFE_MS = 1400;
 
 function normalizePath(pathname: string): string {
   if (pathname.length > 1 && pathname.endsWith('/')) {
@@ -14,8 +15,8 @@ function normalizePath(pathname: string): string {
   return pathname || '/';
 }
 
-function isInnerRoute(pathname: string): boolean {
-  return INNER_ROUTES.has(normalizePath(pathname));
+function isSiteRoute(pathname: string): boolean {
+  return SITE_ROUTES.has(normalizePath(pathname));
 }
 
 function resetScroll() {
@@ -31,16 +32,31 @@ export function PageTransitionShell({ children }: { children: ReactNode }) {
   const previousPathRef = useRef(pathname);
   const routeClickPendingRef = useRef(false);
   const lockedRef = useRef(false);
+  const unlockTimerRef = useRef<number | null>(null);
+
+  const clearUnlockTimer = useCallback(() => {
+    if (unlockTimerRef.current === null) return;
+    window.clearTimeout(unlockTimerRef.current);
+    unlockTimerRef.current = null;
+  }, []);
 
   useEffect(() => {
     const showOverlay = () => {
       const overlay = overlayRef.current;
       if (!overlay || reduceMotion) return;
 
+      clearUnlockTimer();
       overlay.style.opacity = '1';
       overlay.style.visibility = 'visible';
       document.body.classList.add('mm-page-transition-active');
       lockedRef.current = true;
+      unlockTimerRef.current = window.setTimeout(() => {
+        lockedRef.current = false;
+        routeClickPendingRef.current = false;
+        document.body.classList.remove('mm-page-transition-active');
+        overlay.style.opacity = '0';
+        overlay.style.visibility = 'hidden';
+      }, TRANSITION_FAILSAFE_MS);
     };
 
     const onClick = (event: MouseEvent) => {
@@ -59,7 +75,7 @@ export function PageTransitionShell({ children }: { children: ReactNode }) {
 
       const nextPath = normalizePath(url.pathname);
       const currentPath = normalizePath(window.location.pathname);
-      if (nextPath === currentPath || url.hash || !isInnerRoute(nextPath)) return;
+      if (nextPath === currentPath || url.hash || !isSiteRoute(nextPath) || !isSiteRoute(currentPath)) return;
 
       if (lockedRef.current) {
         event.preventDefault();
@@ -72,8 +88,11 @@ export function PageTransitionShell({ children }: { children: ReactNode }) {
     };
 
     document.addEventListener('click', onClick, true);
-    return () => document.removeEventListener('click', onClick, true);
-  }, [reduceMotion]);
+    return () => {
+      clearUnlockTimer();
+      document.removeEventListener('click', onClick, true);
+    };
+  }, [clearUnlockTimer, reduceMotion]);
 
   useLayoutEffect(() => {
     const previousPath = previousPathRef.current;
@@ -82,11 +101,12 @@ export function PageTransitionShell({ children }: { children: ReactNode }) {
 
     if (!routeChanged) return;
 
-    if (isInnerRoute(pathname)) {
+    if (isSiteRoute(pathname)) {
       resetScroll();
     }
 
-    if (reduceMotion || !isInnerRoute(pathname)) {
+    if (reduceMotion || !isSiteRoute(pathname)) {
+      clearUnlockTimer();
       routeClickPendingRef.current = false;
       lockedRef.current = false;
       document.body.classList.remove('mm-page-transition-active');
@@ -103,6 +123,7 @@ export function PageTransitionShell({ children }: { children: ReactNode }) {
       const { gsap } = await import('gsap');
       if (cancelled) return;
 
+      clearUnlockTimer();
       if (!routeClickPendingRef.current) {
         gsap.set(overlay, { autoAlpha: 1 });
         document.body.classList.add('mm-page-transition-active');
@@ -117,6 +138,7 @@ export function PageTransitionShell({ children }: { children: ReactNode }) {
         ease: 'power2.out',
         onComplete: () => {
           if (cancelled) return;
+          clearUnlockTimer();
           lockedRef.current = false;
           document.body.classList.remove('mm-page-transition-active');
         },
@@ -132,11 +154,12 @@ export function PageTransitionShell({ children }: { children: ReactNode }) {
 
     return () => {
       cancelled = true;
+      clearUnlockTimer();
       cleanup();
       lockedRef.current = false;
       document.body.classList.remove('mm-page-transition-active');
     };
-  }, [pathname, reduceMotion]);
+  }, [clearUnlockTimer, pathname, reduceMotion]);
 
   return (
     <>

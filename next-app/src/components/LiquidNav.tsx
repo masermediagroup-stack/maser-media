@@ -178,7 +178,7 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
   const morphing = morphCompact && !isNarrow;
   const fullscreenMenuOpen = open && (morphing || isNarrow);
   const fullscreenClipOrigin = isNarrow
-    ? "calc(100% - 3rem) 3rem"
+    ? "calc(100% - 2.125rem) 2.125rem"
     : "50% 3.1rem";
   const closedFullscreenClip = `circle(0px at ${fullscreenClipOrigin})`;
   const openFullscreenClip = `circle(150% at ${fullscreenClipOrigin})`;
