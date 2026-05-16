@@ -27,8 +27,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth" className={cn("font-sans", geist.variable)}>
+    <html lang="en" data-scroll-behavior="smooth" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
       <body className={poppins.variable}>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(() => {
+try {
+  const isHome = location.pathname === '/' || location.pathname === '';
+  const played = sessionStorage.getItem('mm-home-intro-played') === 'true';
+  if (isHome && !played) document.documentElement.classList.add('mm-intro-pending');
+} catch {
+  if (location.pathname === '/' || location.pathname === '') document.documentElement.classList.add('mm-intro-pending');
+}
+})();`,
+          }}
+        />
+        <style
+          dangerouslySetInnerHTML={{
+            __html:
+              'html.mm-intro-pending .mm-preload-fallback{opacity:1!important;visibility:visible!important}body.mm-intro-mounted .mm-preload-fallback,body.mm-intro-complete .mm-preload-fallback{opacity:0!important;visibility:hidden!important}',
+          }}
+        />
         <div className="mm-preload-fallback" aria-hidden="true" />
         <a href="#main-content" className="skip-to-content">
           Skip to main content

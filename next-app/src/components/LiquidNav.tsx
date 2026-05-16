@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -31,10 +31,27 @@ function getFocusable(container: HTMLElement) {
   return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE));
 }
 
+function subscribeToHydration() {
+  return () => {};
+}
+
+function getHydratedSnapshot() {
+  return true;
+}
+
+function getServerHydratedSnapshot() {
+  return false;
+}
+
 type Props = { entrance?: boolean; introReady?: boolean };
 
 export function LiquidNav({ entrance, introReady = !entrance }: Props) {
   const reduceMotion = useReducedMotion();
+  const hydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getHydratedSnapshot,
+    getServerHydratedSnapshot,
+  );
   const [open, setOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -50,6 +67,7 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
   const triggerRef = useRef<HTMLElement | null>(null);
   /** Mirrors `morphCompact` for scroll handler (avoids nested setState + strict double-invoke). */
   const morphCompactRef = useRef(morphCompact);
+
   useEffect(() => {
     morphCompactRef.current = morphCompact;
   }, [morphCompact]);
@@ -195,6 +213,7 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
           duration: LIQUID_NAV_FLIP_DURATION,
           ease: LIQUID_NAV_FLIP_EASE,
         };
+  const navHiddenForIntro = entrance && (!hydrated || !introReady);
 
   return (
     <>
@@ -202,7 +221,7 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
         className={`liquid-nav${isScrolled && !morphing ? " liquid-nav--expanded" : ""}${morphing ? " liquid-nav--morph" : ""}`}
         aria-label="Primary navigation"
         initial={entrance ? { y: -36, opacity: 0 } : false}
-        animate={entrance && !introReady ? { y: -36, opacity: 0 } : { y: 0, opacity: 1 }}
+        animate={navHiddenForIntro ? { y: -36, opacity: 0 } : { y: 0, opacity: 1 }}
         transition={entrance ? { duration: 0.5, ease: [0.22, 1, 0.36, 1] } : { duration: 0 }}
       >
         <div className="liquid-nav-bubble-shell">

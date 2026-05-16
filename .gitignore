@@ -17,3 +17,8 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Local browser verification profiles
+.chrome*/
+next-app/.chrome*/
+next-app/preloader-check*/

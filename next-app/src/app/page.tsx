@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useSyncExternalStore } from 'react';
 import { MotionConfig } from 'motion/react';
 import { GalaxyBackground, LandingPage, Nav } from '@/components';
 import { GsapSmoothScroll } from '@/components/GsapSmoothScroll';
@@ -27,13 +27,30 @@ function markHomeIntroPlayed() {
   }
 }
 
+function subscribeToIntroStorage() {
+  return () => {};
+}
+
+function getIntroStorageSnapshot() {
+  return hasHomeIntroPlayed();
+}
+
+function getServerIntroStorageSnapshot() {
+  return false;
+}
+
 export default function Home() {
-  const [skipIntro] = useState(hasHomeIntroPlayed);
+  const skipIntro = useSyncExternalStore(
+    subscribeToIntroStorage,
+    getIntroStorageSnapshot,
+    getServerIntroStorageSnapshot,
+  );
   const introEnabled = !skipIntro;
-  const [introReady, setIntroReady] = useState(skipIntro);
+  const [introDone, setIntroDone] = useState(false);
+  const introReady = skipIntro || introDone;
   const handleHeroIntroDone = useCallback(() => {
     markHomeIntroPlayed();
-    setIntroReady(true);
+    setIntroDone(true);
   }, []);
 
   return (

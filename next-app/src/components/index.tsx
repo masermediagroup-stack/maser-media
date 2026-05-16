@@ -308,6 +308,139 @@ function FlipText({ text, className = '', stagger = 0.04 }: { text: string; clas
   );
 }
 
+function RevealText({
+  text,
+  className = '',
+  wordClassName = '',
+  delay = 0,
+  stagger = 0.035,
+  amount = 0.45,
+}: {
+  text: string;
+  className?: string;
+  wordClassName?: string;
+  delay?: number;
+  stagger?: number;
+  amount?: number;
+}) {
+  const parts = useMemo(() => text.split(/(\s+)/).filter(Boolean), [text]);
+  const reduceMotion = useReducedMotion();
+
+  if (reduceMotion) {
+    return <span className={`mm-reveal-text ${className}`}>{text}</span>;
+  }
+
+  return (
+    <motion.span
+      className={`mm-reveal-text ${className}`}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, amount }}
+      variants={{
+        hidden: {},
+        show: {
+          transition: {
+            delayChildren: delay,
+            staggerChildren: stagger,
+          },
+        },
+      }}
+      aria-label={text}
+    >
+      {parts.map((part, index) => {
+        if (/^\s+$/.test(part)) {
+          return (
+            <span className="mm-reveal-space" aria-hidden key={`space-${index}`}>
+              {part}
+            </span>
+          );
+        }
+
+        return (
+          <motion.span
+            className={`mm-reveal-word ${wordClassName}`}
+            variants={{
+              hidden: { opacity: 0.14, y: 16, filter: 'blur(4px)' },
+              show: { opacity: 1, y: 0, filter: 'blur(0px)' },
+            }}
+            transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
+            key={`${part}-${index}`}
+            aria-hidden
+          >
+            {part}
+          </motion.span>
+        );
+      })}
+    </motion.span>
+  );
+}
+
+function TypingText({
+  text,
+  className = '',
+  delay = 0,
+  duration = 1.65,
+}: {
+  text: string;
+  className?: string;
+  delay?: number;
+  duration?: number;
+}) {
+  const characters = useMemo(() => Array.from(text), [text]);
+  const characterDelay = characters.length > 0 ? duration / characters.length : 0;
+  const reduceMotion = useReducedMotion();
+
+  if (reduceMotion) {
+    return (
+      <span className={`mm-typing-text ${className}`}>
+        {characters.map((character, index) =>
+          character === '\n' ? (
+            <span className="mm-typing-break" key={`break-${index}`} aria-hidden />
+          ) : (
+            <span key={`${character}-${index}`}>{character}</span>
+          ),
+        )}
+      </span>
+    );
+  }
+
+  return (
+    <motion.span
+      className={`mm-typing-text ${className}`}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, amount: 0.68 }}
+      aria-label={text}
+      role="text"
+    >
+      {characters.map((character, index) => {
+        if (character === '\n') {
+          return <span className="mm-typing-break" key={`break-${index}`} aria-hidden />;
+        }
+
+        return (
+          <motion.span
+            className="mm-typing-char"
+            variants={{
+              hidden: { opacity: 0, scale: 0.96 },
+              show: { opacity: 1, scale: 1 },
+            }}
+            transition={{
+              delay: delay + index * characterDelay,
+              duration: 0.28,
+              ease: 'easeInOut',
+            }}
+            key={`${character}-${index}`}
+            aria-hidden
+          >
+            {character === ' ' ? '\u00A0' : character}
+          </motion.span>
+        );
+      })}
+    </motion.span>
+  );
+}
+
 export function Nav({ entrance, introReady }: NavProps) {
   return <LiquidNav entrance={entrance} introReady={introReady} />;
 }
@@ -371,15 +504,22 @@ export function Hero({ entrance, onIntroDone }: HeroProps) {
       <div className="mm-hero__exit-splash" aria-hidden />
       {entrance && hydrated
         ? createPortal(
-            <div
-              className={`mm-hero__load-curtain${curtainDone ? ' mm-hero__load-curtain--done' : ''}`}
-              aria-hidden="true"
-              ref={(node) => {
-                document.body.classList.toggle('mm-intro-mounted', Boolean(node && !curtainDone));
-              }}
-            >
-              <span className="mm-hero__reveal-dot" />
-            </div>,
+            <>
+              <div
+                className={`mm-hero__load-curtain${curtainDone ? ' mm-hero__load-curtain--done' : ''}`}
+                aria-hidden="true"
+                ref={(node) => {
+                  document.documentElement.classList.toggle('mm-intro-pending', false);
+                  document.body.classList.toggle('mm-intro-mounted', Boolean(node && !curtainDone));
+                }}
+              />
+              <div
+                className={`mm-hero__dot-stage${curtainDone ? ' mm-hero__dot-stage--done' : ''}`}
+                aria-hidden="true"
+              >
+                <span className="mm-hero__reveal-dot" />
+              </div>
+            </>,
             document.body,
           )
         : null}
@@ -454,6 +594,9 @@ export function Clients() {
 export function Services() {
   const pillars = CONTENT.services.items;
   const defaultService = pillars[0]?.title.toLowerCase() ?? 'brand';
+  const servicesSubtitle =
+    CONTENT.services.subtitle ||
+    'Brand, web, and content systems built with one launch language: a single, coherent design vocabulary that scales from your logo to your last social post.';
 
   return (
     <section
@@ -468,22 +611,26 @@ export function Services() {
             <span className="mm-services__title-line">Serious Craft.</span>
             <span className="mm-services__title-line">Playful Energy.</span>
           </h2>
-          <p className="mm-services__lede">
-            {CONTENT.services.subtitle ||
-              'Brand, web, and content systems built with one launch language: a single, coherent design vocabulary that scales from your logo to your last social post.'}
-          </p>
+          <p className="mm-services__lede">{servicesSubtitle}</p>
         </div>
 
         <Accordion className="mm-services__accordion" defaultValue={[defaultService]}>
           {pillars.map((pillar) => {
             const value = pillar.title.toLowerCase();
+            const summary = serviceSummaries[pillar.title] ?? pillar.items[0]?.description ?? '';
             return (
               <AccordionItem className="mm-services__accordion-item" key={pillar.title} value={value}>
                 <AccordionTrigger className="mm-services__accordion-trigger">
                   <span className="mm-services__accordion-trigger-copy">
-                    <span className="mm-services__accordion-title">{pillar.title}</span>
+                    <span className="mm-services__accordion-title">
+                      <RevealText text={pillar.title} amount={0.6} />
+                    </span>
                     <span className="mm-services__accordion-summary">
-                      {serviceSummaries[pillar.title] ?? pillar.items[0]?.description}
+                      <RevealText
+                        text={summary}
+                        stagger={0.015}
+                        amount={0.55}
+                      />
                     </span>
                   </span>
                 </AccordionTrigger>
@@ -493,6 +640,9 @@ export function Services() {
                       <motion.li
                         className="mm-services__service-card"
                         key={service.label}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.35 }}
                         transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
                       >
                         <h3>{service.label}</h3>
@@ -575,8 +725,14 @@ export function Work({ stacked = true }: WorkProps = {}) {
       />
       <div className="relative z-10">
         <div className="mm-section-heading mm-section-heading--wide">
-          <h2 className="mm-work__title">{CONTENT.work.title}</h2>
-          {CONTENT.work.subtitle ? <p>{CONTENT.work.subtitle}</p> : null}
+          <h2 className="mm-work__title">
+            <RevealText text={CONTENT.work.title} className="mm-splitting-text" stagger={0.045} amount={0.62} />
+          </h2>
+          {CONTENT.work.subtitle ? (
+            <p>
+              <RevealText text={CONTENT.work.subtitle} className="mm-splitting-text" stagger={0.018} delay={0.12} />
+            </p>
+          ) : null}
         </div>
         <div className="mm-work-projects">
           {landingProjects.map((project, index) =>
@@ -622,12 +778,44 @@ export function MotionSystem() {
 export function ProcessStack() {
   const [activeStep, setActiveStep] = useState(0);
   const nextStep = () => setActiveStep((index) => (index + 1) % processSteps.length);
+  const updatePointerGlow = (event: React.PointerEvent<HTMLElement>) => {
+    if (
+      event.pointerType !== 'mouse' ||
+      window.matchMedia('(hover: none), (pointer: coarse), (prefers-reduced-motion: reduce)').matches
+    ) {
+      return;
+    }
+
+    const section = event.currentTarget;
+    const targets = section.querySelectorAll<HTMLElement>('.mm-process-hover-text');
+
+    targets.forEach((target) => {
+      const rect = target.getBoundingClientRect();
+
+      target.style.setProperty('--process-pointer-x', `${event.clientX - rect.left}px`);
+      target.style.setProperty('--process-pointer-y', `${event.clientY - rect.top}px`);
+    });
+  };
+  const resetPointerGlow = (event: React.PointerEvent<HTMLElement>) => {
+    event.currentTarget.querySelectorAll<HTMLElement>('.mm-process-hover-text').forEach((target) => {
+      target.style.removeProperty('--process-pointer-x');
+      target.style.removeProperty('--process-pointer-y');
+    });
+  };
 
   return (
-    <section className="mm-section mm-section--process stack-motion">
-      <div className="mm-section-heading">
-        <h2>Why Maser Media</h2>
-        <p>{whyMaserMediaSubtitle}</p>
+    <section
+      className="mm-section mm-section--process stack-motion"
+      onPointerMove={updatePointerGlow}
+      onPointerLeave={resetPointerGlow}
+    >
+      <div className="mm-section-heading mm-process-heading">
+        <h2 className="mm-process-hover-text">
+          <TypingText text="Why Maser Media" />
+        </h2>
+        <p className="mm-process-hover-text">
+          <TypingText text={whyMaserMediaSubtitle} delay={0.12} duration={1.9} />
+        </p>
       </div>
       <div className="stack-grid stack-grid--interactive" role="list" aria-label="Process steps">
         {processSteps.map((step, index) => {
@@ -781,8 +969,8 @@ export function LandingPage({
       <Hero entrance={entrance} onIntroDone={onHeroIntroDone} />
       <Clients />
       <Services />
-      <Work />
       <ProcessStack />
+      <Work />
       <Testimonials />
       <Cta />
       <Footer />
