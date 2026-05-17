@@ -1,5 +1,7 @@
 # Contact form -> Google Calendar setup
 
+> **Already merged to `main`?** Code is deployed with the site; Google and Vercel setup are still required. Start with **[CONTACT_FORM_GO_LIVE.md](./CONTACT_FORM_GO_LIVE.md)** for a short post-merge checklist (env vars, redeploy, production test). Use this document for the full Google Cloud walkthrough.
+
 The site's contact form (`/contact`, wired through `next-app/src/components/ContactFlow.tsx`) submits to `next-app/src/app/api/contact/route.ts`, which uses the Google Calendar API to create a real event on `masermediagroup@gmail.com`'s primary calendar with the prospective client as a co-attendee. Google itself then sends the invite, reminders, and any reschedule update emails.
 
 This document walks through the one-time setup so the form actually books calls.
@@ -100,7 +102,7 @@ Re-deploy the project (or merge a new commit) so the new env vars are picked up.
 
 ## Step 7 - Test it
 
-1. On the Vercel Preview deployment for the contact-form PR, open `/contact`.
+1. On your **production** site (or a Preview deployment if you are still validating), open `/contact`.
 2. Walk through the five-step form using a throwaway email address you own.
 3. Submit. You should:
    - See the "You're on the calendar" success screen.

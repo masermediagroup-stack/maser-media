@@ -8,6 +8,7 @@ For agents and future client-site work, read:
 - `.codex/skills/agency-nextjs-website/SKILL.md`
 - `.codex/skills/high-motion-web-performance/SKILL.md`
 - `docs/AGENCY_WEBSITE_PLAYBOOK.md`
+- `docs/CONTACT_FORM_GO_LIVE.md` — post-merge checklist to turn on Google Calendar bookings on production
 
 ## Commands
 
