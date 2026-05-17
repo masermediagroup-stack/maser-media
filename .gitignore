@@ -15,8 +15,12 @@ Thumbs.db
 
 # Editor
 .vscode/
+.cursor/
 *.swp
 *.swo
+
+# Local logs
+*.log
 
 # Local browser verification profiles
 .chrome*/
