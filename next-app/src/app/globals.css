@@ -7960,6 +7960,8 @@ body.mm-intro-complete .mm-preload-fallback {
 
 .mm-process-hover-text {
   color: #07111f;
+  position: relative;
+  z-index: 0;
 }
 
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
@@ -7973,9 +7975,32 @@ body.mm-intro-complete .mm-preload-fallback {
     background: none !important;
   }
 
+  .mm-process-hover-text::after {
+    content: "";
+    position: absolute;
+    left: var(--process-pointer-x, 50%);
+    top: var(--process-pointer-y, 50%);
+    width: clamp(5.5rem, 10vw, 8.5rem);
+    aspect-ratio: 1;
+    border-radius: 999px;
+    background:
+      radial-gradient(circle, rgba(16, 164, 255, 0.2) 0%, rgba(16, 164, 255, 0.1) 34%, transparent 68%);
+    filter: blur(10px);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: opacity 180ms ease;
+    mix-blend-mode: multiply;
+    z-index: 0;
+  }
+
+  .mm-process-heading:hover .mm-process-hover-text::after {
+    opacity: 1;
+  }
+
   .mm-process-heading:hover .mm-process-hover-text .mm-typing-char {
-    color: #10a4ff;
-    text-shadow: 0 0 18px rgba(16, 164, 255, 0.28);
+    color: inherit;
+    text-shadow: none;
   }
 }
 
@@ -8086,6 +8111,8 @@ body.mm-intro-complete .mm-preload-fallback {
 .mm-process-hover-text .mm-typing-text {
   justify-content: center;
   max-width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .mm-section.mm-section--process.stack-motion .stack-card--flip,
