@@ -31,6 +31,7 @@ type EntranceProps = { entrance?: boolean };
 type NavProps = EntranceProps & { introReady?: boolean };
 type HeroProps = EntranceProps & { onIntroDone?: () => void };
 type InnerPageKind = 'work' | 'about';
+type WorkProps = { stacked?: boolean };
 
 const CASE_IMAGE = '/assets/generated/maser-case-wall.png';
 
@@ -74,6 +75,133 @@ const secondaryMarqueeItems = [
   ...Array.from({ length: 18 }, () => secondaryMotionBeforeBrand).flat(),
   ...Array.from({ length: 10 }, () => secondaryMotionPanels).flat(),
 ];
+
+function useStackedWorkPosters(
+  sectionRef: React.RefObject<HTMLElement | null>,
+  enabled: boolean,
+  reduceMotion: boolean | null,
+) {
+  useEffect(() => {
+    if (!enabled || reduceMotion) {
+      return;
+    }
+
+    let cancelled = false;
+    let cleanup = () => {};
+
+    const runStack = async () => {
+      const section = sectionRef.current;
+
+      if (!section) {
+        return;
+      }
+
+      const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+        import('gsap'),
+        import('gsap/ScrollTrigger'),
+      ]);
+
+      if (cancelled || !sectionRef.current) {
+        return;
+      }
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      const context = gsap.context(() => {
+        const wrappers = gsap.utils.toArray<HTMLElement>('.mm-work-card-pin');
+        const cards = gsap.utils.toArray<HTMLElement>('.mm-work-card');
+        const viewAll = section.querySelector<HTMLElement>('.mm-work-view-all');
+        const matchMedia = gsap.matchMedia();
+
+        if (!wrappers.length || !cards.length || !viewAll) {
+          return;
+        }
+
+        gsap.set(section, { '--mm-work-bg-size': '170%' });
+        gsap.set(cards, {
+          transformOrigin: 'top center',
+          force3D: true,
+          willChange: 'transform',
+        });
+
+        matchMedia.add('(min-width: 761px) and (pointer: fine)', () => {
+          gsap.to(section, {
+            '--mm-work-bg-size': '230%',
+            ease: 'none',
+            scrollTrigger: {
+              trigger: section,
+              start: 'top bottom',
+              endTrigger: viewAll,
+              end: 'top 82%',
+              scrub: 0.8,
+              invalidateOnRefresh: true,
+            },
+          });
+
+          wrappers.forEach((wrapper, index) => {
+            const card = wrapper.querySelector<HTMLElement>('.mm-work-card');
+
+            if (!card) {
+              return;
+            }
+
+            gsap.set(wrapper, { zIndex: index + 1 });
+
+            gsap.to(card, {
+              y: () => -index * 12,
+              scale: () => Math.max(0.9, 1 - (wrappers.length - index - 1) * 0.035),
+              rotate: index % 2 === 0 ? -0.7 : 0.7,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: wrapper,
+                start: 'top top+=112',
+                endTrigger: viewAll,
+                end: 'top 78%',
+                pin: wrapper,
+                pinSpacing: false,
+                scrub: 0.85,
+                anticipatePin: 1,
+                invalidateOnRefresh: true,
+              },
+            });
+          });
+
+          ScrollTrigger.refresh();
+        });
+
+        matchMedia.add('(max-width: 760px), (pointer: coarse)', () => {
+          gsap.fromTo(
+            cards,
+            { autoAlpha: 0, y: 28 },
+            {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.72,
+              stagger: 0.09,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: section,
+                start: 'top 78%',
+                once: true,
+              },
+            },
+          );
+        });
+      }, section);
+
+      cleanup = () => {
+        context.revert();
+      };
+    };
+
+    void runStack();
+
+    return () => {
+      cancelled = true;
+      cleanup();
+    };
+  }, [enabled, reduceMotion, sectionRef]);
+}
 
 const serviceSummaries: Record<string, string> = {
   Brand:
@@ -180,6 +308,139 @@ function FlipText({ text, className = '', stagger = 0.04 }: { text: string; clas
   );
 }
 
+function RevealText({
+  text,
+  className = '',
+  wordClassName = '',
+  delay = 0,
+  stagger = 0.035,
+  amount = 0.45,
+}: {
+  text: string;
+  className?: string;
+  wordClassName?: string;
+  delay?: number;
+  stagger?: number;
+  amount?: number;
+}) {
+  const parts = useMemo(() => text.split(/(\s+)/).filter(Boolean), [text]);
+  const reduceMotion = useReducedMotion();
+
+  if (reduceMotion) {
+    return <span className={`mm-reveal-text ${className}`}>{text}</span>;
+  }
+
+  return (
+    <motion.span
+      className={`mm-reveal-text ${className}`}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, amount }}
+      variants={{
+        hidden: {},
+        show: {
+          transition: {
+            delayChildren: delay,
+            staggerChildren: stagger,
+          },
+        },
+      }}
+      aria-label={text}
+    >
+      {parts.map((part, index) => {
+        if (/^\s+$/.test(part)) {
+          return (
+            <span className="mm-reveal-space" aria-hidden key={`space-${index}`}>
+              {part}
+            </span>
+          );
+        }
+
+        return (
+          <motion.span
+            className={`mm-reveal-word ${wordClassName}`}
+            variants={{
+              hidden: { opacity: 0.14, y: 16, filter: 'blur(4px)' },
+              show: { opacity: 1, y: 0, filter: 'blur(0px)' },
+            }}
+            transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
+            key={`${part}-${index}`}
+            aria-hidden
+          >
+            {part}
+          </motion.span>
+        );
+      })}
+    </motion.span>
+  );
+}
+
+function TypingText({
+  text,
+  className = '',
+  delay = 0,
+  duration = 1.65,
+}: {
+  text: string;
+  className?: string;
+  delay?: number;
+  duration?: number;
+}) {
+  const characters = useMemo(() => Array.from(text), [text]);
+  const characterDelay = characters.length > 0 ? duration / characters.length : 0;
+  const reduceMotion = useReducedMotion();
+
+  if (reduceMotion) {
+    return (
+      <span className={`mm-typing-text ${className}`}>
+        {characters.map((character, index) =>
+          character === '\n' ? (
+            <span className="mm-typing-break" key={`break-${index}`} aria-hidden />
+          ) : (
+            <span key={`${character}-${index}`}>{character}</span>
+          ),
+        )}
+      </span>
+    );
+  }
+
+  return (
+    <motion.span
+      className={`mm-typing-text ${className}`}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, amount: 0.68 }}
+      aria-label={text}
+      role="text"
+    >
+      {characters.map((character, index) => {
+        if (character === '\n') {
+          return <span className="mm-typing-break" key={`break-${index}`} aria-hidden />;
+        }
+
+        return (
+          <motion.span
+            className="mm-typing-char"
+            variants={{
+              hidden: { opacity: 0, scale: 0.96 },
+              show: { opacity: 1, scale: 1 },
+            }}
+            transition={{
+              delay: delay + index * characterDelay,
+              duration: 0.28,
+              ease: 'easeInOut',
+            }}
+            key={`${character}-${index}`}
+            aria-hidden
+          >
+            {character === ' ' ? '\u00A0' : character}
+          </motion.span>
+        );
+      })}
+    </motion.span>
+  );
+}
+
 export function Nav({ entrance, introReady }: NavProps) {
   return <LiquidNav entrance={entrance} introReady={introReady} />;
 }
@@ -239,28 +500,34 @@ export function Hero({ entrance, onIntroDone }: HeroProps) {
         <div className="mm-hero__smokey">
           <SmokeyBackground color="#10A4FF" backdropBlurAmount="none" className="h-full min-h-0 w-full" />
         </div>
-        <div className="mm-hero__grain" aria-hidden />
       </div>
       <div className="mm-hero__exit-splash" aria-hidden />
       {entrance && hydrated
         ? createPortal(
-            <div
-              className={`mm-hero__load-curtain${curtainDone ? ' mm-hero__load-curtain--done' : ''}`}
-              aria-hidden="true"
-              ref={(node) => {
-                document.body.classList.toggle('mm-intro-mounted', Boolean(node && !curtainDone));
-              }}
-            >
-              <span className="mm-hero__reveal-dot" />
-            </div>,
+            <>
+              <div
+                className={`mm-hero__load-curtain${curtainDone ? ' mm-hero__load-curtain--done' : ''}`}
+                aria-hidden="true"
+                ref={(node) => {
+                  document.documentElement.classList.toggle('mm-intro-pending', false);
+                  document.body.classList.toggle('mm-intro-mounted', Boolean(node && !curtainDone));
+                }}
+              />
+              <div
+                className={`mm-hero__dot-stage${curtainDone ? ' mm-hero__dot-stage--done' : ''}`}
+                aria-hidden="true"
+              >
+                <span className="mm-hero__reveal-dot" />
+              </div>
+            </>,
             document.body,
           )
         : null}
       <motion.div
         className="mm-hero__content"
         initial={entrance ? { opacity: 0, y: 24 } : false}
-        animate={entrance && curtainDone ? { opacity: 1, y: 0 } : entrance ? { opacity: 0, y: 24 } : false}
-        transition={entrance ? { duration: 0.8, ease: [0.22, 1, 0.36, 1] } : undefined}
+        animate={entrance && !curtainDone ? { opacity: 0, y: 24 } : { opacity: 1, y: 0 }}
+        transition={entrance ? { duration: 0.8, ease: [0.22, 1, 0.36, 1] } : { duration: 0 }}
       >
         <div className="mm-hero__content-shift">
           <div className="mm-hero__copy">
@@ -327,6 +594,9 @@ export function Clients() {
 export function Services() {
   const pillars = CONTENT.services.items;
   const defaultService = pillars[0]?.title.toLowerCase() ?? 'brand';
+  const servicesSubtitle =
+    CONTENT.services.subtitle ||
+    'Brand, web, and content systems built with one launch language: a single, coherent design vocabulary that scales from your logo to your last social post.';
 
   return (
     <section
@@ -341,22 +611,26 @@ export function Services() {
             <span className="mm-services__title-line">Serious Craft.</span>
             <span className="mm-services__title-line">Playful Energy.</span>
           </h2>
-          <p className="mm-services__lede">
-            {CONTENT.services.subtitle ||
-              'Brand, web, and content systems built with one launch language: a single, coherent design vocabulary that scales from your logo to your last social post.'}
-          </p>
+          <p className="mm-services__lede">{servicesSubtitle}</p>
         </div>
 
         <Accordion className="mm-services__accordion" defaultValue={[defaultService]}>
           {pillars.map((pillar) => {
             const value = pillar.title.toLowerCase();
+            const summary = serviceSummaries[pillar.title] ?? pillar.items[0]?.description ?? '';
             return (
               <AccordionItem className="mm-services__accordion-item" key={pillar.title} value={value}>
                 <AccordionTrigger className="mm-services__accordion-trigger">
                   <span className="mm-services__accordion-trigger-copy">
-                    <span className="mm-services__accordion-title">{pillar.title}</span>
+                    <span className="mm-services__accordion-title">
+                      <RevealText text={pillar.title} amount={0.6} />
+                    </span>
                     <span className="mm-services__accordion-summary">
-                      {serviceSummaries[pillar.title] ?? pillar.items[0]?.description}
+                      <RevealText
+                        text={summary}
+                        stagger={0.015}
+                        amount={0.55}
+                      />
                     </span>
                   </span>
                 </AccordionTrigger>
@@ -366,6 +640,9 @@ export function Services() {
                       <motion.li
                         className="mm-services__service-card"
                         key={service.label}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.35 }}
                         transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
                       >
                         <h3>{service.label}</h3>
@@ -392,14 +669,53 @@ export function Services() {
   );
 }
 
-export function Work() {
+export function Work({ stacked = true }: WorkProps = {}) {
   const sectionRef = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
   const rippleVisible = useInView(sectionRef, { amount: 0.01, margin: '45% 0px 45% 0px' });
   const landingProjects = CONTENT.work.items.slice(0, 3);
+  const stackEnabled = stacked && landingProjects.length > 1;
+
+  useStackedWorkPosters(sectionRef, stackEnabled, reduceMotion);
+
+  const renderProjectCard = (project: (typeof landingProjects)[number]) => (
+    <Link
+      key={project.title}
+      href={project.link}
+      className="mm-work-card"
+      target={project.link.startsWith('http') ? '_blank' : undefined}
+      rel={project.link.startsWith('http') ? 'noopener noreferrer' : undefined}
+    >
+      <div className="mm-work-card__image">
+        <Image
+          src={project.image ?? CASE_IMAGE}
+          alt=""
+          fill
+          sizes="(max-width: 900px) 92vw, 1180px"
+        />
+      </div>
+      <div className="mm-work-card__body">
+        <h3>{project.title}</h3>
+        <p>{project.description}</p>
+        {project.tags?.length ? (
+          <div className="mm-work-card__tags" aria-label="Project tags">
+            {project.tags.slice(0, 3).map((tag) => (
+              <span key={tag} className="mm-work-card__tag">
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </Link>
+  );
 
   return (
-    <section ref={sectionRef} className="mm-section mm-section--work mm-work relative overflow-hidden" id="work">
+    <section
+      ref={sectionRef}
+      className={`mm-section mm-section--work mm-work relative overflow-hidden${stackEnabled ? ' mm-work--stacked' : ''}`}
+      id="work"
+    >
       <div className="mm-work__ripple-layer absolute inset-0 z-0" aria-hidden>
         {rippleVisible && !reduceMotion ? <Ripple numCircles={6} /> : null}
       </div>
@@ -409,41 +725,29 @@ export function Work() {
       />
       <div className="relative z-10">
         <div className="mm-section-heading mm-section-heading--wide">
-          <h2 className="mm-work__title">{CONTENT.work.title}</h2>
-          {CONTENT.work.subtitle ? <p>{CONTENT.work.subtitle}</p> : null}
+          <h2 className="mm-work__title">
+            <RevealText text={CONTENT.work.title} className="mm-splitting-text" stagger={0.045} amount={0.62} />
+          </h2>
+          {CONTENT.work.subtitle ? (
+            <p>
+              <RevealText text={CONTENT.work.subtitle} className="mm-splitting-text" stagger={0.018} delay={0.12} />
+            </p>
+          ) : null}
         </div>
         <div className="mm-work-projects">
-          {landingProjects.map((project) => (
-            <Link
-              key={project.title}
-              href={project.link}
-              className="mm-work-card"
-              target={project.link.startsWith('http') ? '_blank' : undefined}
-              rel={project.link.startsWith('http') ? 'noopener noreferrer' : undefined}
-            >
-              <div className="mm-work-card__image">
-                <Image
-                  src={project.image ?? CASE_IMAGE}
-                  alt=""
-                  fill
-                  sizes="(max-width: 900px) 92vw, 1180px"
-                />
+          {landingProjects.map((project, index) =>
+            stackEnabled ? (
+              <div
+                key={project.title}
+                className="mm-work-card-pin"
+                style={{ '--mm-work-card-index': index } as React.CSSProperties}
+              >
+                {renderProjectCard(project)}
               </div>
-              <div className="mm-work-card__body">
-                <h3>{project.title}</h3>
-                <p>{project.description}</p>
-                {project.tags?.length ? (
-                  <div className="mm-work-card__tags" aria-label="Project tags">
-                    {project.tags.slice(0, 3).map((tag) => (
-                      <span key={tag} className="mm-work-card__tag">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-            </Link>
-          ))}
+            ) : (
+              renderProjectCard(project)
+            ),
+          )}
         </div>
         <Link href="/work#main-content" className="mm-work-view-all">
           <span>View all projects</span>
@@ -474,12 +778,44 @@ export function MotionSystem() {
 export function ProcessStack() {
   const [activeStep, setActiveStep] = useState(0);
   const nextStep = () => setActiveStep((index) => (index + 1) % processSteps.length);
+  const updatePointerGlow = (event: React.PointerEvent<HTMLElement>) => {
+    if (
+      event.pointerType !== 'mouse' ||
+      window.matchMedia('(hover: none), (pointer: coarse), (prefers-reduced-motion: reduce)').matches
+    ) {
+      return;
+    }
+
+    const section = event.currentTarget;
+    const targets = section.querySelectorAll<HTMLElement>('.mm-process-hover-text');
+
+    targets.forEach((target) => {
+      const rect = target.getBoundingClientRect();
+
+      target.style.setProperty('--process-pointer-x', `${event.clientX - rect.left}px`);
+      target.style.setProperty('--process-pointer-y', `${event.clientY - rect.top}px`);
+    });
+  };
+  const resetPointerGlow = (event: React.PointerEvent<HTMLElement>) => {
+    event.currentTarget.querySelectorAll<HTMLElement>('.mm-process-hover-text').forEach((target) => {
+      target.style.removeProperty('--process-pointer-x');
+      target.style.removeProperty('--process-pointer-y');
+    });
+  };
 
   return (
-    <section className="mm-section mm-section--process stack-motion">
-      <div className="mm-section-heading">
-        <h2>Why Maser Media</h2>
-        <p>{whyMaserMediaSubtitle}</p>
+    <section
+      className="mm-section mm-section--process stack-motion"
+      onPointerMove={updatePointerGlow}
+      onPointerLeave={resetPointerGlow}
+    >
+      <div className="mm-section-heading mm-process-heading">
+        <h2 className="mm-process-hover-text">
+          <TypingText text="Why Maser Media" />
+        </h2>
+        <p className="mm-process-hover-text">
+          <TypingText text={whyMaserMediaSubtitle} delay={0.12} duration={1.9} />
+        </p>
       </div>
       <div className="stack-grid stack-grid--interactive" role="list" aria-label="Process steps">
         {processSteps.map((step, index) => {
@@ -613,17 +949,28 @@ export function Footer() {
   );
 }
 
-export function LandingPage({ onHeroIntroDone }: { onHeroIntroDone?: () => void }) {
+export function LandingPage({
+  entrance = true,
+  onHeroIntroDone,
+}: {
+  entrance?: boolean;
+  onHeroIntroDone?: () => void;
+}) {
   const rootRef = useRef<HTMLElement>(null);
-  useGsapLandingMotion(rootRef);
+  useGsapLandingMotion(rootRef, { animateHeroIntro: entrance });
 
   return (
-    <main ref={rootRef} id="main-content" className="site-main mm-main">
-      <Hero entrance onIntroDone={onHeroIntroDone} />
+    <main
+      ref={rootRef}
+      id="main-content"
+      className="site-main mm-main"
+      data-hero-motion={entrance ? 'pending' : 'ready'}
+    >
+      <Hero entrance={entrance} onIntroDone={onHeroIntroDone} />
       <Clients />
       <Services />
-      <Work />
       <ProcessStack />
+      <Work />
       <Testimonials />
       <Cta />
       <Footer />
@@ -715,7 +1062,7 @@ export function InnerPage({ kind }: { kind: InnerPageKind }) {
       eyebrow: 'Work',
       title: 'Proof that clarity can still feel cinematic.',
       copy: 'A focused look at the launch surfaces we shape: websites, product stories, identities, and motion systems.',
-      body: <Work />,
+      body: <Work stacked={false} />,
     },
     about: {
       eyebrow: 'About',
