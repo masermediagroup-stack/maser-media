@@ -141,6 +141,7 @@ function useStackedWorkPosters(
 
           wrappers.forEach((wrapper, index) => {
             const card = wrapper.querySelector<HTMLElement>('.mm-work-card');
+            const isLastCard = index === wrappers.length - 1;
 
             if (!card) {
               return;
@@ -148,10 +149,15 @@ function useStackedWorkPosters(
 
             gsap.set(wrapper, { zIndex: index + 1 });
 
+            if (isLastCard) {
+              gsap.set(card, { y: 0, scale: 1, rotate: 0 });
+              return;
+            }
+
             gsap.to(card, {
-              y: () => -index * 12,
-              scale: () => Math.max(0.9, 1 - (wrappers.length - index - 1) * 0.035),
-              rotate: index % 2 === 0 ? -0.7 : 0.7,
+              y: -10,
+              scale: () => Math.max(0.94, 1 - (wrappers.length - index - 1) * 0.028),
+              rotate: index % 2 === 0 ? -0.45 : 0.45,
               ease: 'none',
               scrollTrigger: {
                 trigger: wrapper,
@@ -160,7 +166,7 @@ function useStackedWorkPosters(
                 end: 'top 78%',
                 pin: wrapper,
                 pinSpacing: false,
-                scrub: 0.85,
+                scrub: 0.65,
                 anticipatePin: 1,
                 invalidateOnRefresh: true,
               },
@@ -556,6 +562,50 @@ export function Clients() {
   const clientHeading = CONTENT.clients.label;
   const headingAccent = clientHeading.endsWith('Us') ? 'Us' : '';
   const headingBase = headingAccent ? clientHeading.slice(0, -headingAccent.length).trimEnd() : clientHeading;
+  const reduceMotion = useReducedMotion();
+  const stripRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (reduceMotion) {
+      return;
+    }
+
+    const strip = stripRef.current;
+    const track = trackRef.current;
+
+    if (!strip || !track) {
+      return;
+    }
+
+    strip.style.setProperty('overflow', 'visible', 'important');
+    strip.style.setProperty('mask-image', 'none', 'important');
+    strip.style.setProperty('position', 'relative');
+    strip.style.setProperty('isolation', 'isolate');
+
+    track.style.setProperty('width', 'max-content', 'important');
+    track.style.setProperty('max-width', 'none', 'important');
+    track.style.setProperty('justify-content', 'flex-start', 'important');
+    track.style.setProperty('flex-wrap', 'nowrap', 'important');
+    track.style.setProperty('transform', 'none', 'important');
+    track.style.setProperty('will-change', 'transform');
+    track.style.setProperty('animation', 'mm-client-strip-marquee 55s linear infinite', 'important');
+
+    return () => {
+      strip.style.removeProperty('overflow');
+      strip.style.removeProperty('mask-image');
+      strip.style.removeProperty('position');
+      strip.style.removeProperty('isolation');
+
+      track.style.removeProperty('width');
+      track.style.removeProperty('max-width');
+      track.style.removeProperty('justify-content');
+      track.style.removeProperty('flex-wrap');
+      track.style.removeProperty('transform');
+      track.style.removeProperty('will-change');
+      track.style.removeProperty('animation');
+    };
+  }, [reduceMotion]);
 
   return (
     <section className="mm-section mm-section--clients mm-clients" aria-labelledby="clients-heading">
@@ -570,8 +620,36 @@ export function Clients() {
           ) : null}
         </span>
       </h2>
-      <div className="mm-client-strip">
-        <div className="mm-client-strip__track">
+      <div ref={stripRef} className="mm-client-strip">
+        <div
+          aria-hidden="true"
+          className="mm-client-strip__fade mm-client-strip__fade--left"
+          style={{
+            position: 'absolute',
+            top: '-0.35rem',
+            bottom: '-0.35rem',
+            left: 0,
+            width: 'clamp(1.5rem, 4vw, 4rem)',
+            pointerEvents: 'none',
+            zIndex: 2,
+            background: 'linear-gradient(90deg, #fff 0%, rgba(255, 255, 255, 0.82) 42%, rgba(255, 255, 255, 0) 100%)',
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="mm-client-strip__fade mm-client-strip__fade--right"
+          style={{
+            position: 'absolute',
+            top: '-0.35rem',
+            bottom: '-0.35rem',
+            right: 0,
+            width: 'clamp(1.5rem, 4vw, 4rem)',
+            pointerEvents: 'none',
+            zIndex: 2,
+            background: 'linear-gradient(270deg, #fff 0%, rgba(255, 255, 255, 0.82) 42%, rgba(255, 255, 255, 0) 100%)',
+          }}
+        />
+        <div ref={trackRef} className="mm-client-strip__track">
           <div className="mm-client-strip__segment">
             {items.map((item) => (
               <span key={item.name} className="mm-client-pill">
@@ -674,7 +752,7 @@ export function Work({ stacked = true }: WorkProps = {}) {
   const sectionRef = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
   const rippleVisible = useInView(sectionRef, { amount: 0.01, margin: '45% 0px 45% 0px' });
-  const landingProjects = CONTENT.work.items.slice(0, 3);
+  const landingProjects = CONTENT.work.items.slice(0, 2);
   const stackEnabled = stacked && landingProjects.length > 1;
 
   useStackedWorkPosters(sectionRef, stackEnabled, reduceMotion);

@@ -7678,20 +7678,42 @@ body.mm-intro-complete .mm-preload-fallback {
   margin-inline: auto;
   display: flex;
   justify-content: center;
+  position: relative;
+  overflow: visible;
+  isolation: isolate;
   mask-image: none !important;
 }
 
+.mm-client-strip::before,
+.mm-client-strip::after {
+  content: '';
+  position: absolute;
+  top: -0.35rem;
+  bottom: -0.35rem;
+  width: clamp(1.5rem, 4vw, 4rem);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.mm-client-strip::before {
+  left: -0.05rem;
+  background: linear-gradient(90deg, #fff 0%, rgba(255, 255, 255, 0.82) 42%, rgba(255, 255, 255, 0) 100%);
+}
+
+.mm-client-strip::after {
+  right: -0.05rem;
+  background: linear-gradient(270deg, #fff 0%, rgba(255, 255, 255, 0.82) 42%, rgba(255, 255, 255, 0) 100%);
+}
+
 .mm-clients .mm-client-strip__track {
-  width: 100%;
-  max-width: 100%;
-  justify-content: center;
-  animation: none !important;
-  transform: none !important;
-  will-change: auto;
+  justify-content: flex-start;
+  animation: mm-client-strip-marquee 55s linear infinite;
+  transform: none;
+  will-change: transform;
 }
 
 .mm-clients .mm-client-strip__segment {
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .mm-clients .mm-client-strip__segment[aria-hidden='true'] {
@@ -7702,7 +7724,9 @@ body.mm-intro-complete .mm-preload-fallback {
   border-color: rgba(10, 47, 76, 0.15);
   background: #0a2f4c;
   color: #ffffff;
-  box-shadow: none;
+  box-shadow:
+    0 10px 24px rgba(7, 17, 31, 0.14),
+    0 1px 0 rgba(255, 255, 255, 0.16) inset;
 }
 
 .mm-client-strip__supporting {
