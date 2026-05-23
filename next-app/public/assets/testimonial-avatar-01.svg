@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Illustrated profile avatar 1</title>
+  <desc id="desc">Clean white line art portrait on a blue background.</desc>
+  <rect width="512" height="512" rx="128" fill="#10a4ff"/>
+  <g fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M174 392c22-30 49-45 82-45s60 15 82 45"/>
+    <path d="M156 258c0 72 43 126 100 126s100-54 100-126"/>
+    <path d="M143 243c5-75 48-117 113-117s108 42 113 117"/>
+    <path d="M156 238c37-31 90-42 158-31 26 4 47 15 63 31"/>
+    <path d="M168 206c-8-39 17-72 74-78 46-5 83 10 105 46"/>
+    <path d="M196 273c16 18 37 18 53 0"/>
+    <path d="M263 273c16 18 37 18 53 0"/>
+    <path d="M252 289c-9 20-16 39-21 58 13 9 29 10 47 3"/>
+    <path d="M217 354c24 18 53 18 78 0"/>
+    <path d="M143 260c-23 3-37 21-33 44 4 22 20 36 43 38"/>
+    <path d="M369 260c23 3 37 21 33 44-4 22-20 36-43 38"/>
+  </g>
+</svg>

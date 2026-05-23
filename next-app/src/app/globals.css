@@ -2086,6 +2086,7 @@ button.testimonial-card {
   width: 44px;
   height: 44px;
   border-radius: 999px;
+  display: block;
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -5731,6 +5732,13 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
     gap: clamp(2rem, 8vw, 3rem);
   }
 
+  .mm-cta__column,
+  .mm-cta__title,
+  .mm-cta__lead {
+    margin-inline: auto;
+    text-align: center;
+  }
+
   .mm-cta__logo-stage {
     justify-content: center;
     align-items: center;
@@ -5742,7 +5750,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
   .mm-cta .mm-cta__actions {
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
+    justify-content: center;
+    margin-inline: auto;
   }
 
   .mm-cta .mm-cta__actions--contact {

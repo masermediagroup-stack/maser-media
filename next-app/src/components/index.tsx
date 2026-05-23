@@ -1023,11 +1023,13 @@ function TestimonialCardArticle({
   quote,
   name,
   role,
+  avatar,
   className = '',
 }: {
   quote: string;
   name: string;
   role: string;
+  avatar?: string | null;
   className?: string;
 }) {
   return (
@@ -1041,7 +1043,18 @@ function TestimonialCardArticle({
       <Sparkles className="testimonial-card-quote-icon" size={22} aria-hidden />
       <p className="testimonial-card-text">{quote}</p>
       <div className="testimonial-card-footer">
-        <div className="testimonial-card-avatar testimonial-card-avatar--placeholder" aria-hidden />
+        {avatar ? (
+          <Image
+            src={avatar}
+            alt=""
+            width={44}
+            height={44}
+            className="testimonial-card-avatar"
+            aria-hidden
+          />
+        ) : (
+          <div className="testimonial-card-avatar testimonial-card-avatar--placeholder" aria-hidden />
+        )}
         <div className="testimonial-card-who">
           <strong className="testimonial-card-name">{name}</strong>
           <span className="testimonial-card-role">{role}</span>
@@ -1121,6 +1134,7 @@ export function Testimonials() {
                       quote={item.quote}
                       name={item.name}
                       role={item.role}
+                      avatar={item.avatar}
                     />
                   </AnimatePresence>
                 </li>
