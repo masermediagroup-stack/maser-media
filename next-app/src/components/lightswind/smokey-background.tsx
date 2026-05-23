@@ -96,7 +96,6 @@ function SmokeyBackground({
 
     const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false });
     if (!gl) {
-      console.error("WebGL not supported");
       return;
     }
 
@@ -106,7 +105,7 @@ function SmokeyBackground({
       gl.shaderSource(shader, source);
       gl.compileShader(shader);
       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.error("Shader compilation error:", gl.getShaderInfoLog(shader));
+        console.warn("Shader compilation warning:", gl.getShaderInfoLog(shader));
         gl.deleteShader(shader);
         return null;
       }
@@ -124,7 +123,7 @@ function SmokeyBackground({
     gl.linkProgram(program);
 
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      console.error("Program linking error:", gl.getProgramInfoLog(program));
+      console.warn("Program linking warning:", gl.getProgramInfoLog(program));
       return;
     }
 
