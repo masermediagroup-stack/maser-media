@@ -13,7 +13,7 @@ Before changing components, routes, motion, forms, assets, or dependencies, read
 
 - Active app: `next-app`
 - Framework: Next.js App Router
-- Routes: `/`, `/about`, `/work`, `/pricing`, `/contact`
+- Routes: `/`, `/about`, `/work` (contact opens via nav/CTA modal; `/contact` redirects to `/`)
 - Shared content: `next-app/src/lib/content.ts`
 - Main composed sections: `next-app/src/components/index.tsx`
 - Global styles: `next-app/src/app/globals.css`

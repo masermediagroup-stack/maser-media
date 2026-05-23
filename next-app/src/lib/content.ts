@@ -57,10 +57,21 @@ export interface ServiceItem {
 
 export interface WorkItem {
   title: string;
+  /** Optional two-line card heading (line 1 + line 2). */
+  titleLines?: readonly [string, string];
   description: string;
   image: string | null;
   link: string;
   tags?: string[];
+  /** Homepage stacked card layout: white panel + logo (no cover image). */
+  cardLayout?: 'cover' | 'logo-panel';
+  /** Client logo for `logo-panel` cards (right-aligned on white). */
+  logo?: string;
+  /** Intrinsic logo dimensions (transparent PNG) for `next/image` sizing. */
+  logoWidth?: number;
+  logoHeight?: number;
+  /** Optional card modifier for cover framing (helm = scale + translateX). */
+  cardVariant?: 'helm' | 'main-street' | 'miller-more';
 }
 
 export interface TestimonialCarouselItem {
@@ -126,6 +137,18 @@ export interface Content {
       text: string;
     }[];
   };
+  whyMaserMedia: {
+    title: string;
+    subtitle: string;
+    pullQuote: string;
+    items: {
+      id: string;
+      title: string;
+      text: string;
+      icon: 'direct' | 'system' | 'launch';
+      variant: 'hero' | 'accent' | 'card';
+    }[];
+  };
   cta: CtaConfig;
   faqs: {
     title: string;
@@ -135,21 +158,14 @@ export interface Content {
     }[];
   };
   footer: FooterConfig;
-  pricing: {
-    eyebrow: string;
+  aboutPage: {
     title: string;
-    subtitle: string;
-    plans: {
-      name: string;
-      summary: string;
-      bestFor: string;
-      cadence: string;
-      price: string;
-      bullets: string[];
-      primaryCta: { text: string; href: string };
-      secondaryCta: { text: string; href: string };
-      featured?: boolean;
-    }[];
+    lead: string;
+    foundersOutro: string;
+  };
+  workPage: {
+    title: string;
+    lead: string;
   };
 }
 
@@ -160,9 +176,9 @@ export const CONTENT: Content = {
     logoWidth: 1024,
     logoHeight: 519,
     logoAlt: "Maser Media",
-    primaryCta: { text: "Book a call", href: "/contact" },
+    primaryCta: { text: "Book a call", href: "#open-contact" },
     secondaryCta: { text: "Send a message", href: "mailto:hello@masermedia.com" },
-    startProjectCta: { text: "Start project", href: "/contact" },
+    startProjectCta: { text: "Start project", href: "#open-contact" },
   },
 
   hero: {
@@ -194,7 +210,7 @@ export const CONTENT: Content = {
     },
     pillNav: {
       showWork: { text: "View work", href: "/work" },
-      bookCall: { text: "Book a call", href: "/contact" },
+      bookCall: { text: "Book a call", href: "#open-contact" },
     },
   },
 
@@ -205,6 +221,9 @@ export const CONTENT: Content = {
       { name: "Paradox Customs", logo: null },
       { name: "Main Street Pub & Grub", logo: null },
       { name: "Cat Eye Construction", logo: null },
+      { name: "Harbor Lane Bakery", logo: null },
+      { name: "Summit Auto Detail", logo: null },
+      { name: "Riverside Dental Studio", logo: null },
     ],
     supportingLabel: "",
     categories: [],
@@ -316,18 +335,38 @@ export const CONTENT: Content = {
       {
         title: "Miller More Handiwork",
         description:
-          "A website build focused on gathering local clients for home improvement and handiwork services.",
+          "A website build focused on gathering local clients for home improvement and handiwork services. - showing off a professional portfolio",
         image: null,
+        logo: "/assets/miller-more-logo.png",
+        logoWidth: 997,
+        logoHeight: 551,
+        cardLayout: "logo-panel",
         link: "https://millermorehandiwork.com",
         tags: ["Local services", "Lead capture", "Web build"],
+        cardVariant: "miller-more",
       },
       {
-        title: "In-House SaaS — name pending",
+        title: "Main Street Pub & Grub",
         description:
-          "A tool we are building ourselves to support how creative studios run client work. Description and link to come.",
+          "A neighborhood pub deserved an identity as welcoming as the room itself. We built the brand foundation — logo system, typography, and color.",
         image: null,
-        link: "/contact",
+        logo: "/assets/main-street-logo.png",
+        logoWidth: 988,
+        logoHeight: 346,
+        cardLayout: "logo-panel",
+        link: "#open-contact",
+        tags: ["Brand identity", "Logo system", "Hospitality"],
+        cardVariant: "main-street",
+      },
+      {
+        title: "Helm - In-House SAAS",
+        titleLines: ["Helm", "In-House SAAS"],
+        description:
+          "A tool we are building ourselves to support how creative studios run client work.",
+        image: "/assets/helm-work-card.png",
+        link: "#open-contact",
         tags: ["Internal build", "SaaS", "In progress"],
+        cardVariant: "helm",
       },
     ],
   },
@@ -358,6 +397,36 @@ export const CONTENT: Content = {
         role: "Founder, partner brand",
         avatar: null,
         rating: 5,
+      },
+    ],
+  },
+
+  whyMaserMedia: {
+    title: "Why Maser Media",
+    subtitle:
+      "Maser Media is built for companies, startups, and brands that need a polished brand presence without slow layers.",
+    pullQuote: "One studio. Clear decisions. Launch-ready work.",
+    items: [
+      {
+        id: "direct",
+        title: "Direct communication",
+        text: "You work close to the people making the decisions and the work, so feedback stays visible and turns into progress quickly.",
+        icon: "direct",
+        variant: "hero",
+      },
+      {
+        id: "system",
+        title: "One connected system",
+        text: "Brand, website, content, and launch assets share one point of view, so the final experience feels aligned instead of stitched together.",
+        icon: "system",
+        variant: "card",
+      },
+      {
+        id: "launch",
+        title: "Built for launch pressure",
+        text: "Every sprint is scoped around clear decisions, realistic timelines, reusable assets, and what your team needs to send next.",
+        icon: "launch",
+        variant: "accent",
       },
     ],
   },
@@ -411,51 +480,27 @@ export const CONTENT: Content = {
     ],
   },
 
+  aboutPage: {
+    title: "Two creatives, tired of seeing people fall short.",
+    lead:
+      "Brand, web, and launch as one studio | same crew, no handoffs.",
+    foundersOutro:
+      "Less “professional”, more relatable. The work still has to be sharp — we just don’t think you should need a punk attitude to get there.",
+  },
+
+  workPage: {
+    title: "Proof that clarity can still feel cinematic.",
+    lead:
+      "A focused look at the launch surfaces we shape: websites, product stories, identities, and digital systems.",
+  },
+
   footer: {
     nav: [
       { text: "Home", href: "/" },
       { text: "Work", href: "/work" },
-      { text: "Pricing", href: "/pricing" },
       { text: "About", href: "/about" },
-      { text: "Contact", href: "/contact" },
+      { text: "Contact", href: "#open-contact" },
     ],
     copyright: "Maser Media Group. All rights reserved.",
-  },
-
-  pricing: {
-    eyebrow: "Simple plans",
-    title: "Simple ways to start.",
-    subtitle: "Choose a focused sprint or ongoing creative support. Both are built around direct communication and visible progress.",
-    plans: [
-      {
-        name: "Project",
-        summary: "One clear goal, scoped tightly.",
-        bestFor: "Best for: launches, redesigns, and one-off initiatives.",
-        cadence: "Delivery rhythm: scoped kickoff, weekly progress, clean launch handoff.",
-        price: "Quoted",
-        bullets: [
-          "Scoped and quoted before production starts",
-          "Custom design and build, not cookie-cutter templates",
-          "Launch-ready assets for outreach, sales, and campaigns",
-        ],
-        primaryCta: { text: "Book Call", href: "/contact" },
-        secondaryCta: { text: "Email", href: "mailto:hello@masermedia.com" },
-      },
-      {
-        name: "Retainer",
-        summary: "Ongoing creative execution.",
-        bestFor: "Best for: teams shipping regularly across web, product, and campaign work.",
-        cadence: "Delivery rhythm: active queue, recurring check-ins, continuous iteration.",
-        price: "$2k/month",
-        bullets: [
-          "Design, web, content, and strategy in one active queue",
-          "Recurring check-ins with direct communication",
-          "Built for teams that keep launching and improving",
-        ],
-        primaryCta: { text: "Book Call", href: "/contact" },
-        secondaryCta: { text: "Email", href: "mailto:hello@masermedia.com" },
-        featured: true,
-      },
-    ],
   },
 };

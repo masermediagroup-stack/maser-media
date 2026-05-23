@@ -7,7 +7,7 @@ This playbook is for the Maser Media website and future Maser Media client websi
 Professional creative sites are not just animated pages. The best ones combine:
 
 - A strong first impression that makes the brand obvious in the first viewport.
-- Clear page architecture: Home, Work, About, Services/Pricing, Contact, and case studies.
+- Clear page architecture: Home, Work, About, Services, Contact, and case studies.
 - A repeatable content model so the client can add work without rebuilding the site.
 - Motion that supports the story instead of fighting the browser.
 - Production-grade performance, accessibility, SEO, analytics, and deployment checks.
@@ -149,7 +149,7 @@ npm run dev
 
 Then verify:
 
-- Home, About, Work, Pricing/Services, Contact.
+- Home, About, Work, Services, Contact.
 - Mobile viewport around 390px wide.
 - Desktop viewport around 1440px wide.
 - Reduced motion.

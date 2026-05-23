@@ -245,8 +245,15 @@ export function GalaxyBackground() {
       lastDrawTime = time;
     };
 
+    const introBlocking = () =>
+      document.documentElement.classList.contains('mm-intro-pending') &&
+      !document.body.classList.contains('mm-intro-complete');
+
     const shouldAnimate = () =>
-      visible && !document.hidden && scrollY < window.innerHeight * ACTIVE_SCROLL_VH;
+      visible &&
+      !document.hidden &&
+      !introBlocking() &&
+      scrollY < window.innerHeight * ACTIVE_SCROLL_VH;
 
     const animate = (time: number = 0) => {
       if (!shouldAnimate()) {

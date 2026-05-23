@@ -49,6 +49,12 @@ export function GsapSmoothScroll({ children }: { children: React.ReactNode }) {
 
       cleanup = () => {
         smoother.kill();
+        wrapperRef.current?.removeAttribute('style');
+        contentRef.current?.removeAttribute('style');
+        document.querySelectorAll('.pin-spacer').forEach((node) => {
+          node.remove();
+        });
+        ScrollTrigger.clearScrollMemory?.();
         ScrollTrigger.refresh();
       };
     };

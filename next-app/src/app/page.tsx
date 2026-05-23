@@ -1,43 +1,16 @@
 'use client';
 
-import { useCallback, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { MotionConfig } from 'motion/react';
 import { GalaxyBackground, LandingPage, Nav } from '@/components';
 import { GsapSmoothScroll } from '@/components/GsapSmoothScroll';
-
-const HOME_INTRO_STORAGE_KEY = 'mm-home-intro-played';
-
-function hasHomeIntroPlayed() {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  try {
-    return window.sessionStorage.getItem(HOME_INTRO_STORAGE_KEY) === 'true';
-  } catch {
-    return false;
-  }
-}
-
-function markHomeIntroPlayed() {
-  try {
-    window.sessionStorage.setItem(HOME_INTRO_STORAGE_KEY, 'true');
-  } catch {
-    // Session storage can be unavailable in locked-down browser modes.
-  }
-}
-
-function subscribeToIntroStorage() {
-  return () => {};
-}
-
-function getIntroStorageSnapshot() {
-  return hasHomeIntroPlayed();
-}
-
-function getServerIntroStorageSnapshot() {
-  return false;
-}
+import { preloadLandingMotionModules } from '@/hooks/useGsapLandingMotion';
+import {
+  getIntroStorageSnapshot,
+  getServerIntroStorageSnapshot,
+  markHomeIntroPlayed,
+  subscribeToIntroStorage,
+} from '@/lib/homeIntro';
 
 export default function Home() {
   const skipIntro = useSyncExternalStore(
@@ -46,19 +19,31 @@ export default function Home() {
     getServerIntroStorageSnapshot,
   );
   const introEnabled = !skipIntro;
-  const [introDone, setIntroDone] = useState(false);
-  const introReady = skipIntro || introDone;
+  const [curtainRevealed, setCurtainRevealed] = useState(skipIntro);
+  const introReady = skipIntro || curtainRevealed;
+  const handleCurtainReveal = useCallback(() => {
+    setCurtainRevealed(true);
+  }, []);
   const handleHeroIntroDone = useCallback(() => {
     markHomeIntroPlayed();
-    setIntroDone(true);
   }, []);
+
+  useEffect(() => {
+    if (!introEnabled) return;
+    void preloadLandingMotionModules();
+  }, [introEnabled]);
 
   return (
     <MotionConfig reducedMotion="user">
       <GalaxyBackground />
       <Nav entrance={introEnabled} introReady={introReady} />
       <GsapSmoothScroll>
-        <LandingPage entrance={introEnabled} onHeroIntroDone={handleHeroIntroDone} />
+        <LandingPage
+          key={introEnabled ? 'home-intro' : 'home-ready'}
+          entrance={introEnabled}
+          onCurtainReveal={handleCurtainReveal}
+          onHeroIntroDone={handleHeroIntroDone}
+        />
       </GsapSmoothScroll>
     </MotionConfig>
   );

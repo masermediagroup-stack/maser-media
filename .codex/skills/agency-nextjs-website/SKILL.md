@@ -25,7 +25,6 @@ src/app/
   page.tsx
   about/page.tsx
   work/page.tsx
-  pricing/page.tsx
   contact/page.tsx
 src/components/
   ui/
@@ -45,7 +44,7 @@ For small sites, colocating all sections in `src/components/index.tsx` is workab
 ## Page And Section Rules
 
 - Every public page needs a clear H1, metadata, responsive layout, and a conversion path.
-- Inner pages should feel like first-class pages, not copied landing sections. Give About, Work, Pricing, and Contact their own structure.
+- Inner pages should feel like first-class pages, not copied landing sections. Give About, Work, and Contact their own structure.
 - Case studies should follow: context, problem, constraints, solution, proof, deliverables, next step.
 - Contact pages should be fast, calm, and direct. Validate inputs, show errors near fields, preserve user input, and make success/failure states explicit.
 - Navigation should use `next/link`; images should use `next/image` when dimensions and optimization matter.

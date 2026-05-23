@@ -4,14 +4,13 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowUpRight, ChevronRight, Menu, X } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ChevronRight, Menu, X } from "lucide-react";
 import { ContactFlow } from "@/components/ContactFlow";
 import { OPEN_CONTACT_MODAL_EVENT } from "@/lib/contactModalEvents";
 
 const NAV_ITEMS = [
   { label: "OUR WORK", href: "/work" },
   { label: "ABOUT US", href: "/about" },
-  { label: "THE COST", href: "/pricing" },
 ] as const;
 
 /** Match `.liquid-nav-bubble` / drawer breakpoint in `globals.css`. */
@@ -222,7 +221,9 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
         aria-label="Primary navigation"
         initial={entrance ? { y: -36, opacity: 0 } : false}
         animate={navHiddenForIntro ? { y: -36, opacity: 0 } : { y: 0, opacity: 1 }}
-        transition={entrance ? { duration: 0.5, ease: [0.22, 1, 0.36, 1] } : { duration: 0 }}
+        transition={
+          entrance ? { duration: 0.45, delay: 0.04, ease: [0.22, 1, 0.36, 1] } : { duration: 0 }
+        }
       >
         <div className="liquid-nav-bubble-shell">
           <div className="liquid-nav-bubble">
@@ -240,7 +241,14 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
                   transition={flipTransition(0)}
                   style={{ transformOrigin: "50% 0%" }}
                 >
-                  <Image src="/assets/MaserMedia-White-SVG_1.svg" alt="" width={120} height={32} className="liquid-nav-logo-img" priority />
+                  <Image
+                    src="/assets/MaserMedia-White-SVG_1.svg"
+                    alt=""
+                    width={120}
+                    height={32}
+                    className="liquid-nav-logo-img"
+                    priority
+                  />
                 </motion.span>
               </Link>
               <div className="liquid-nav-bubble-main" inert={morphing ? true : undefined}>
@@ -265,8 +273,8 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
                     transition={flipTransition(0.04 + (NAV_ITEMS.length + 1) * LIQUID_NAV_FLIP_STAGGER)}
                     style={{ transformOrigin: "50% 0%" }}
                   >
-                    Contact
-                    <ArrowUpRight className="liquid-contact-arrow" size={15} aria-hidden />
+                    <ArrowRight className="liquid-contact-arrow" size={18} aria-hidden />
+                    <span className="liquid-contact-text">Contact</span>
                   </motion.span>
                 </button>
               </div>
@@ -285,8 +293,8 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
         </div>
 
         <button type="button" className="liquid-nav-contact liquid-nav-contact--mobile" onClick={() => setContactOpen(true)}>
-          Contact
-          <ArrowUpRight className="liquid-contact-arrow" size={15} aria-hidden />
+          <ArrowRight className="liquid-contact-arrow" size={18} aria-hidden />
+          <span className="liquid-contact-text">Contact</span>
         </button>
 
         <button

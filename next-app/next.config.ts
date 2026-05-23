@@ -6,6 +6,20 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.dirname(fileURLToPath(import.meta.url)),
   },
+  async redirects() {
+    return [
+      {
+        source: "/pricing",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/contact",
+        destination: "/",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

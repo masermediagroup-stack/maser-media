@@ -119,7 +119,7 @@ function AccordionTrigger({
         aria-controls={item.contentId}
         aria-expanded={item.open}
         className={cn(
-          "focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 items-center justify-between gap-4 rounded-md py-4 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:ring-3 disabled:pointer-events-none disabled:opacity-50 [&[data-panel-open]>svg]:rotate-180",
+          "focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 items-center justify-between gap-4 rounded-md py-4 text-left text-sm font-medium outline-none hover:underline focus-visible:ring-3 disabled:pointer-events-none disabled:opacity-50",
           className,
         )}
         onClick={(event) => {
@@ -131,7 +131,13 @@ function AccordionTrigger({
         {...props}
       >
         {children}
-        <ChevronDown className="size-4 shrink-0 transition-transform duration-200" />
+        <ChevronDown
+          aria-hidden
+          className={cn(
+            "accordion-chevron size-4 shrink-0",
+            item.open && "accordion-chevron--open",
+          )}
+        />
       </button>
     </h3>
   )

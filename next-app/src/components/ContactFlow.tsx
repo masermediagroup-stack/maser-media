@@ -78,17 +78,6 @@ const STEP_COPY = [
   },
 ];
 
-const INITIAL_DATA: ContactData = {
-  service: "web",
-  brief: "",
-  budget: "5000-15000",
-  firstName: "",
-  email: "",
-  phone: "",
-  callDate: "",
-  callTime: "",
-};
-
 const TIME_SLOTS = ["8:00am", "8:20am", "8:40am", "9:00am", "9:20am", "9:40am", "10:00am", "10:20am"];
 const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 
@@ -123,13 +112,27 @@ function formatBookingDate(dateId: string) {
   }).format(date);
 }
 
+function createInitialContactData(): ContactData {
+  const firstDate = getBookingDates()[0];
+  return {
+    service: "web",
+    brief: "",
+    budget: "5000-15000",
+    firstName: "",
+    email: "",
+    phone: "",
+    callDate: firstDate ? toDateId(firstDate) : "",
+    callTime: TIME_SLOTS[0] ?? "",
+  };
+}
+
 export function ContactFlow() {
   const reduceMotion = useReducedMotion();
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [data, setData] = useState<ContactData>(INITIAL_DATA);
+  const [data, setData] = useState<ContactData>(() => createInitialContactData());
 
   const totalSteps = 5;
   const copy = STEP_COPY[step];
@@ -417,8 +420,10 @@ function ScheduleStep({
         <div className="contact-flow-call-icon" aria-hidden>
           <CalendarDays size={20} />
         </div>
-        <h2>Intro Call</h2>
-        <p>A focused 20 minute conversation about scope, timeline, and the cleanest next step.</p>
+        <div className="contact-flow-call-copy">
+          <h2>Intro Call</h2>
+          <p>A focused 20 minute conversation about scope, timeline, and the cleanest next step.</p>
+        </div>
         <dl>
           <div>
             <Clock3 size={16} aria-hidden />

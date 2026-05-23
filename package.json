@@ -4,6 +4,11 @@
     "build": "npm run build --prefix next-app",
     "start": "npm run start --prefix next-app",
     "lint": "npm run lint --prefix next-app",
-    "typecheck": "npm run typecheck --prefix next-app"
+    "typecheck": "npm run typecheck --prefix next-app",
+    "verify": "npm run typecheck && npm run lint && npm run build",
+    "sync:check": "node scripts/start-work-check.mjs",
+    "sync:pull": "node scripts/start-work-check.mjs --pull-ff-only",
+    "live:check": "node scripts/check-live-site.mjs",
+    "hooks:install": "git config core.hooksPath .githooks"
   }
 }

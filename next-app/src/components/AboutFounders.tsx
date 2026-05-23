@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { CONTENT } from '@/lib/content';
+import { ScrollReveal } from '@/components/ScrollReveal';
 
 interface Founder {
   /** Full name displayed under the headshot. Replace placeholders when real names are confirmed. */
@@ -36,42 +38,26 @@ const FOUNDERS: Founder[] = [
 ];
 
 export function AboutFounders() {
-  return (
-    <section className="mm-about-founders mm-section" aria-labelledby="about-founders-heading">
-      <div className="mm-about-founders__inner">
-        <header className="mm-about-founders__manifesto">
-          <p className="mm-kicker">The honest version</p>
-          <h2 id="about-founders-heading">
-            A small team with nothing but time, building in the open.
-          </h2>
-          <p>
-            Two creatives with different backgrounds — graphic design, business building, storytelling, creative
-            direction — who got tired of watching agencies leave clients behind. So we made our own crew.
-          </p>
-          <p>
-            Striving to evolve in this new AI-world while keeping humans first. We work as one team from kickoff to
-            launch, same hands the whole way through.
-          </p>
-        </header>
+  const { foundersOutro } = CONTENT.aboutPage;
 
+  return (
+    <section className="mm-about-founders mm-section" aria-label="Founders">
+      <div className="mm-about-founders__inner">
         <div className="mm-about-founders__grid" role="list">
-          {FOUNDERS.map((founder) => (
-            <FounderCard key={founder.name} founder={founder} />
+          {FOUNDERS.map((founder, index) => (
+            <FounderCard key={founder.name} founder={founder} revealDelay={index * 0.1} />
           ))}
         </div>
 
-        <footer className="mm-about-founders__outro">
-          <p>
-            Less &ldquo;professional&rdquo;, more relatable. The work still has to be sharp — we just don&rsquo;t think
-            you should need a punk attitude to get there.
-          </p>
-        </footer>
+        <ScrollReveal as="footer" className="mm-about-founders__outro" variant="fade" amount={0.35}>
+          <p>{foundersOutro}</p>
+        </ScrollReveal>
       </div>
     </section>
   );
 }
 
-function FounderCard({ founder }: { founder: Founder }) {
+function FounderCard({ founder, revealDelay }: { founder: Founder; revealDelay: number }) {
   const [hasImage, setHasImage] = useState(true);
   const initials = founder.name
     .split(' ')
@@ -81,7 +67,14 @@ function FounderCard({ founder }: { founder: Founder }) {
     .toUpperCase();
 
   return (
-    <article className="mm-founder-card" role="listitem">
+    <ScrollReveal
+      as="article"
+      className="mm-founder-card"
+      role="listitem"
+      variant="fade"
+      delay={revealDelay}
+      amount={0.28}
+    >
       <div className="mm-founder-card__portrait">
         {hasImage ? (
           <Image
@@ -108,6 +101,6 @@ function FounderCard({ founder }: { founder: Founder }) {
           </p>
         ))}
       </div>
-    </article>
+    </ScrollReveal>
   );
 }

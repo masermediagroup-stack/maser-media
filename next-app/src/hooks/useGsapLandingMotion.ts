@@ -12,6 +12,83 @@ const scrollTriggerDefaults = {
   anticipatePin: 1,
 } as const;
 
+type LandingMotionModules = [
+  typeof import('gsap'),
+  typeof import('gsap/ScrollTrigger'),
+  typeof import('gsap/SplitText'),
+];
+
+let landingMotionModulesPromise: Promise<LandingMotionModules> | null = null;
+
+function loadLandingMotionModules() {
+  landingMotionModulesPromise ??= Promise.all([
+    import('gsap'),
+    import('gsap/ScrollTrigger'),
+    import('gsap/SplitText'),
+  ]) as Promise<LandingMotionModules>;
+
+  return landingMotionModulesPromise;
+}
+
+export function preloadLandingMotionModules() {
+  return loadLandingMotionModules();
+}
+
+export function useMmScrollReveals(rootRef: RefObject<HTMLElement | null>, enabled = true) {
+  useLayoutEffect(() => {
+    if (!enabled || !rootRef.current) return;
+
+    let cleanup = () => {};
+    let cancelled = false;
+
+    const run = async () => {
+      const [{ gsap }, { ScrollTrigger }] = await loadLandingMotionModules();
+      if (cancelled || !rootRef.current) return;
+
+      gsap.registerPlugin(ScrollTrigger);
+      const root = rootRef.current;
+      const reduced = prefersReducedMotion();
+
+      const ctx = gsap.context(() => {
+        if (reduced) {
+          gsap.set(root.querySelectorAll('[data-mm-reveal]'), {
+            autoAlpha: 1,
+            y: 0,
+            clearProps: 'filter',
+          });
+          return;
+        }
+
+        const mm = gsap.matchMedia();
+        mm.add(
+          {
+            isNarrow: '(max-width: 767px)',
+            isWide: '(min-width: 768px)',
+          },
+          (context) => {
+            const isNarrow = Boolean(context.conditions?.isNarrow);
+
+            gsap.utils.toArray<HTMLElement>('[data-mm-reveal]', root).forEach((el) => {
+              const kind = (el.dataset.mmReveal === 'blur' ? 'blur' : 'fade') as RevealKind;
+              gsap.set(el, revealFromVars(kind, isNarrow));
+            });
+            bindLandingScrollReveals(gsap, root, isNarrow, scrollTriggerDefaults);
+          },
+        );
+      }, root);
+
+      cleanup = () => ctx.revert();
+    };
+
+    void run();
+
+    return () => {
+      cancelled = true;
+      cleanup();
+    };
+  }, [enabled, rootRef]);
+}
+
 function stToggleActive(target: Element | Element[] | string | null | undefined) {
   if (!target) return {};
   return {
@@ -19,22 +96,101 @@ function stToggleActive(target: Element | Element[] | string | null | undefined)
   };
 }
 
+type RevealKind = 'fade' | 'blur';
+
+function revealFromVars(kind: RevealKind, isNarrow: boolean) {
+  if (kind === 'blur') {
+    return { autoAlpha: 0, y: isNarrow ? 12 : 18, filter: 'blur(8px)' };
+  }
+  return { autoAlpha: 0, y: isNarrow ? 14 : 20 };
+}
+
+function revealToVars(kind: RevealKind) {
+  if (kind === 'blur') {
+    return { autoAlpha: 1, y: 0, filter: 'blur(0px)', clearProps: 'filter' };
+  }
+  return { autoAlpha: 1, y: 0 };
+}
+
+function bindLandingScrollReveals(
+  gsap: typeof import('gsap').gsap,
+  scope: Element,
+  isNarrow: boolean,
+  stDefaults: typeof scrollTriggerDefaults,
+) {
+  const singles = gsap.utils.toArray<HTMLElement>('[data-mm-reveal]', scope);
+
+  singles.forEach((el) => {
+    if (el.closest('[data-mm-reveal-group]')) return;
+
+    const kind = (el.dataset.mmReveal === 'blur' ? 'blur' : 'fade') as RevealKind;
+    const trigger = el.dataset.mmRevealTrigger
+      ? scope.querySelector<HTMLElement>(el.dataset.mmRevealTrigger) ?? el
+      : el;
+
+    gsap.fromTo(el, revealFromVars(kind, isNarrow), {
+      ...revealToVars(kind),
+      duration: kind === 'blur' ? 0.88 : 0.72,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger,
+        start: el.dataset.mmRevealStart ?? 'top 88%',
+        toggleActions: 'play none none none',
+        ...stDefaults,
+      },
+    });
+  });
+
+  gsap.utils.toArray<HTMLElement>('[data-mm-reveal-group]', scope).forEach((group) => {
+    const items = gsap.utils.toArray<HTMLElement>('[data-mm-reveal]', group);
+    if (!items.length) return;
+
+    const kind = (group.dataset.mmRevealGroup === 'blur' ? 'blur' : 'fade') as RevealKind;
+    const stagger = Number.parseFloat(group.dataset.mmRevealStagger ?? '') || (isNarrow ? 0.1 : 0.12);
+
+    gsap.fromTo(items, revealFromVars(kind, isNarrow), {
+      ...revealToVars(kind),
+      duration: kind === 'blur' ? 0.82 : 0.68,
+      ease: 'power2.out',
+      stagger: { each: stagger, from: 'start' },
+      scrollTrigger: {
+        trigger: group,
+        start: group.dataset.mmRevealStart ?? 'top 86%',
+        toggleActions: 'play none none none',
+        ...stDefaults,
+      },
+    });
+  });
+}
+
 export function useGsapLandingMotion(
   rootRef: RefObject<HTMLElement | null>,
-  { animateHeroIntro = true }: { animateHeroIntro?: boolean } = {},
+  {
+    animateHeroIntro = true,
+    holdHeroIntro = false,
+    onHeroIntroStart,
+    onHeroIntroDone,
+  }: {
+    animateHeroIntro?: boolean;
+    holdHeroIntro?: boolean;
+    onHeroIntroStart?: () => void;
+    onHeroIntroDone?: () => void;
+  } = {},
 ) {
   useLayoutEffect(() => {
     if (!rootRef.current) return;
+
+    if (holdHeroIntro) {
+      rootRef.current.dataset.heroMotion = 'pending';
+      void loadLandingMotionModules();
+      return;
+    }
 
     let cleanup = () => {};
     let cancelled = false;
 
     const run = async () => {
-      const [{ gsap }, { ScrollTrigger }, { SplitText }] = await Promise.all([
-        import('gsap'),
-        import('gsap/ScrollTrigger'),
-        import('gsap/SplitText'),
-      ]);
+      const [{ gsap }, { ScrollTrigger }, { SplitText }] = await loadLandingMotionModules();
       if (cancelled || !rootRef.current) return;
 
       gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -48,6 +204,10 @@ export function useGsapLandingMotion(
 
         if (reduced) {
           root.dataset.heroMotion = 'ready';
+          if (animateHeroIntro) {
+            onHeroIntroStart?.();
+            onHeroIntroDone?.();
+          }
           if (hero) gsap.set(hero, { '--hero-exit-p': 1 });
           gsap.utils
             .toArray<HTMLElement>(root.querySelectorAll('.mm-section, .marquee-system'))
@@ -68,16 +228,37 @@ export function useGsapLandingMotion(
                 },
               );
             });
+          gsap.set(root.querySelectorAll('[data-mm-reveal]'), {
+            autoAlpha: 1,
+            y: 0,
+            clearProps: 'filter',
+          });
           return;
         }
 
         const mm = gsap.matchMedia();
 
-        const heroTitleDelay = 1.15;
-        const heroTitleDuration = 1.05;
-        const heroTitleStagger = 0.095;
-        const heroLeadGap = 0.01;
+        const heroTitleDelay = 0.05;
+        const heroTitleDuration = 0.88;
+        const heroTitleStagger = 0.08;
+        const heroLeadGap = 0.02;
         let heroTitleLineCount = 1;
+        let heroIntroCompleteCount = 0;
+        const heroIntroSegmentCount = (heroTitle ? 1 : 0) + (heroLead ? 1 : 0);
+        let heroIntroDone = false;
+
+        const markHeroIntroReady = () => {
+          if (!animateHeroIntro) {
+            root.dataset.heroMotion = 'ready';
+            return;
+          }
+          heroIntroCompleteCount += 1;
+          if (!heroIntroDone && heroIntroCompleteCount >= heroIntroSegmentCount) {
+            heroIntroDone = true;
+            root.dataset.heroMotion = 'ready';
+            onHeroIntroDone?.();
+          }
+        };
 
         if (!animateHeroIntro) {
           root.dataset.heroMotion = 'ready';
@@ -102,6 +283,7 @@ export function useGsapLandingMotion(
                 stagger: { each: heroTitleStagger, from: 'start' },
                 ease: 'power4.out',
                 delay: heroTitleDelay,
+                onComplete: markHeroIntroReady,
               });
             },
           });
@@ -129,13 +311,19 @@ export function useGsapLandingMotion(
                   heroTitleDuration +
                   heroTitleStagger * (heroTitleLineCount - 1) +
                   heroLeadGap,
+                onComplete: markHeroIntroReady,
               });
             },
           });
         }
 
-        if (animateHeroIntro) {
+        if (animateHeroIntro && heroIntroSegmentCount === 0) {
+          root.dataset.heroMotion = 'ready';
+          onHeroIntroStart?.();
+          onHeroIntroDone?.();
+        } else if (animateHeroIntro) {
           root.dataset.heroMotion = 'running';
+          onHeroIntroStart?.();
         }
 
         mm.add(
@@ -146,6 +334,19 @@ export function useGsapLandingMotion(
           (context) => {
             const isNarrow = Boolean(context.conditions?.isNarrow);
             const isWide = !isNarrow;
+
+            if (animateHeroIntro && isNarrow && hero) {
+              const mobileLogo = hero.querySelector<HTMLElement>('.mm-hero__mobile-logo');
+              if (mobileLogo) {
+                gsap.from(mobileLogo, {
+                  autoAlpha: 0,
+                  y: 14,
+                  duration: 0.75,
+                  delay: heroTitleDelay,
+                  ease: 'power3.out',
+                });
+              }
+            }
 
             if (hero) {
               gsap.fromTo(
@@ -187,69 +388,44 @@ export function useGsapLandingMotion(
             }
 
             const clientsSection = root.querySelector<HTMLElement>('.mm-clients');
-            const clientsHeadline = root.querySelector<HTMLElement>('.mm-clients__headline');
-            const clientPills = clientsSection?.querySelectorAll<HTMLElement>('.mm-client-pill');
+            const clientsHeadlineText = root.querySelector<HTMLElement>('.mm-clients__headline-text');
+            const clientPanelFadeItems = clientsSection?.querySelectorAll<HTMLElement>(
+              '.mm-client-name, .mm-clients__more',
+            );
 
-            if (clientsHeadline) {
-              if (isWide) {
-                gsap.fromTo(
-                  clientsHeadline,
-                  {
-                    rotationX: -82,
-                    autoAlpha: 0,
-                    transformOrigin: '50% 78%',
-                    transformPerspective: 1200,
-                  },
-                  {
-                    rotationX: 0,
-                    autoAlpha: 1,
-                    transformPerspective: 1200,
-                    duration: 0.95,
-                    ease: 'power3.out',
-                    scrollTrigger: {
-                      trigger: clientsHeadline,
-                      start: 'top 88%',
-                      toggleActions: 'play none none none',
-                      ...stToggleActive(clientsHeadline),
-                      ...scrollTriggerDefaults,
-                    },
-                  },
-                );
-              } else {
-                gsap.fromTo(
-                  clientsHeadline,
-                  { autoAlpha: 0, y: 20 },
-                  {
-                    autoAlpha: 1,
-                    y: 0,
-                    duration: 0.55,
-                    ease: 'power2.out',
-                    scrollTrigger: {
-                      trigger: clientsHeadline,
-                      start: 'top 90%',
-                      toggleActions: 'play none none none',
-                      ...stToggleActive(clientsHeadline),
-                      ...scrollTriggerDefaults,
-                    },
-                  },
-                );
-              }
-            }
-
-            if (hero && clientPills && clientPills.length) {
+            if (clientsHeadlineText) {
               gsap.fromTo(
-                clientPills,
-                { autoAlpha: 0, y: isNarrow ? 10 : 18 },
+                clientsHeadlineText,
+                { autoAlpha: 0, y: isNarrow ? 14 : 22 },
                 {
                   autoAlpha: 1,
                   y: 0,
-                  ease: 'none',
-                  stagger: { each: isNarrow ? 0.03 : 0.045, from: 'start' },
+                  duration: isNarrow ? 1.45 : 1.85,
+                  ease: 'power2.out',
                   scrollTrigger: {
-                    trigger: hero,
-                    start: 'bottom 88%',
-                    end: 'bottom 52%',
-                    scrub: 0.55,
+                    trigger: clientsSection ?? clientsHeadlineText,
+                    start: 'top 88%',
+                    toggleActions: 'play none none none',
+                    ...stToggleActive(clientsHeadlineText),
+                    ...scrollTriggerDefaults,
+                  },
+                },
+              );
+            }
+
+            if (clientsSection && clientPanelFadeItems && clientPanelFadeItems.length) {
+              gsap.fromTo(
+                clientPanelFadeItems,
+                { autoAlpha: 0, y: isNarrow ? 12 : 16 },
+                {
+                  autoAlpha: 1,
+                  y: 0,
+                  duration: 0.9,
+                  ease: 'power2.out',
+                  scrollTrigger: {
+                    trigger: clientsSection,
+                    start: 'top 82%',
+                    toggleActions: 'play none none none',
                     ...scrollTriggerDefaults,
                   },
                 },
@@ -396,52 +572,24 @@ export function useGsapLandingMotion(
               },
             );
 
-            const testimonialsSection = root.querySelector<HTMLElement>('#testimonials');
-            /** Animate the headline wrapper — not `.title-line` nodes inside `background-clip: text`
-             *  (AuroraText); GSAP transform/opacity on those descendants breaks the gradient mask. */
-            const testimonialTitleAnim = testimonialsSection?.querySelector<HTMLElement>(
-              '.mm-testimonials-wave__title-anim',
+            const testimonialsGrid = root.querySelector<HTMLElement>(
+              '.mm-testimonials-wave__static--live',
             );
-            const testimonialGrid = testimonialsSection?.querySelector<HTMLElement>(
-              '.mm-testimonials-wave__grid',
-            );
-
-            if (testimonialTitleAnim) {
-              gsap.fromTo(
-                testimonialTitleAnim,
-                { autoAlpha: 0, y: isNarrow ? 10 : 18 },
-                {
-                  autoAlpha: 1,
-                  y: 0,
-                  ease: 'power2.out',
-                  scrollTrigger: {
-                    trigger: testimonialsSection,
-                    start: 'top 86%',
-                    toggleActions: 'play none none none',
-                    ...scrollTriggerDefaults,
-                  },
-                },
-              );
+            if (testimonialsGrid) {
+              ScrollTrigger.create({
+                trigger: testimonialsGrid,
+                start: 'top 78%',
+                toggleActions: 'play none none none',
+                ...stToggleActive(testimonialsGrid),
+                ...scrollTriggerDefaults,
+              });
             }
 
-            if (testimonialGrid) {
-              gsap.fromTo(
-                testimonialGrid,
-                { autoAlpha: 0.75, y: isNarrow ? 8 : 16 },
-                {
-                  autoAlpha: 1,
-                  y: 0,
-                  ease: 'power2.out',
-                  scrollTrigger: {
-                    trigger: testimonialsSection,
-                    start: 'top 78%',
-                    toggleActions: 'play none none none',
-                    ...stToggleActive(testimonialGrid),
-                    ...scrollTriggerDefaults,
-                  },
-                },
-              );
-            }
+            gsap.utils.toArray<HTMLElement>('[data-mm-reveal]', root).forEach((el) => {
+              const kind = (el.dataset.mmReveal === 'blur' ? 'blur' : 'fade') as RevealKind;
+              gsap.set(el, revealFromVars(kind, isNarrow));
+            });
+            bindLandingScrollReveals(gsap, root, isNarrow, scrollTriggerDefaults);
 
           },
         );
@@ -456,5 +604,5 @@ export function useGsapLandingMotion(
       cancelled = true;
       cleanup();
     };
-  }, [animateHeroIntro, rootRef]);
+  }, [animateHeroIntro, holdHeroIntro, onHeroIntroDone, onHeroIntroStart, rootRef]);
 }
