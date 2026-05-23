@@ -359,11 +359,15 @@ export const CONTENT: Content = {
         cardVariant: "main-street",
       },
       {
-        title: "Helm - In-House SAAS",
+        title: "Helm In-House SAAS",
         titleLines: ["Helm", "In-House SAAS"],
         description:
           "A tool we are building ourselves to support how creative studios run client work.",
-        image: "/assets/helm-work-card.png",
+        image: null,
+        logo: "/assets/helm-logo-clean.png",
+        logoWidth: 794,
+        logoHeight: 796,
+        cardLayout: "logo-panel",
         link: "#open-contact",
         tags: ["Internal build", "SaaS", "In progress"],
         cardVariant: "helm",

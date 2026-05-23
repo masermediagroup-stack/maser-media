@@ -7840,30 +7840,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   filter: saturate(1) contrast(1.08);
 }
 
-/* Helm card: dark black → purple base behind shifted cover art */
-.mm-work-projects .mm-work-card--helm {
-  background: linear-gradient(135deg, #050508 0%, #1a0a2e 52%, #2d1060 100%);
-}
-
-.mm-work-projects .mm-work-card--helm .mm-work-card__image {
-  overflow: hidden;
-  background: linear-gradient(135deg, #050508 0%, #1a0a2e 52%, #2d1060 100%);
-}
-
-.mm-work-projects .mm-work-card--helm .mm-work-card__image img {
-  object-position: center center;
-  transform: scale(1.34) translateX(22%);
-  transform-origin: center center;
-}
-
-.mm-work-projects .mm-work-card--helm:hover img,
-.mm-work-projects .mm-work-card--helm:focus-visible img {
-  transform: scale(1.38) translateX(22%);
-  transform-origin: center center;
-  filter: saturate(1) contrast(1.08);
-}
-
-/* Miller More / Main Street: white logo-panel cards */
+/* Logo-panel work cards */
 .mm-work-projects .mm-work-card--logo-panel {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(15rem, min(42%, 25rem));
@@ -7929,6 +7906,11 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 .mm-work-projects .mm-work-card--main-street .mm-work-card__logo {
   min-height: clamp(6.5rem, 48%, 12rem);
   height: min(64%, 14rem);
+}
+
+.mm-work-projects .mm-work-card--helm .mm-work-card__logo {
+  min-height: clamp(8.5rem, 68%, 16rem);
+  height: min(84%, 18rem);
 }
 
 .mm-work-projects .mm-work-card--logo-panel .mm-work-card__logo-img {
@@ -8774,18 +8756,6 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
     line-height: 1.1;
   }
 
-  .mm-work-projects .mm-work-card--helm .mm-work-card__image img {
-    object-position: center center;
-    transform: scale(1.28) translateX(18%);
-    transform-origin: center center;
-  }
-
-  .mm-work-projects .mm-work-card--helm:hover img,
-  .mm-work-projects .mm-work-card--helm:focus-visible img {
-    transform: scale(1.32) translateX(18%);
-    transform-origin: center center;
-  }
-
   .mm-work-projects .mm-work-card--logo-panel {
     grid-template-columns: minmax(0, 58%) minmax(8.25rem, 42%);
   }
@@ -8843,6 +8813,11 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   .mm-work-projects .mm-work-card--main-street .mm-work-card__logo {
     min-height: clamp(4.8rem, 27vw, 7.1rem);
     height: min(48%, 7.6rem);
+  }
+
+  .mm-work-projects .mm-work-card--helm .mm-work-card__logo {
+    min-height: clamp(5.75rem, 34vw, 8.8rem);
+    height: min(58%, 9.5rem);
   }
 
   .mm-inner-hero--work .mm-inner-hero__content {
