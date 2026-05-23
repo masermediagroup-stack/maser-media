@@ -8044,28 +8044,45 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   z-index: 20;
   display: inline-flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
-  width: fit-content;
-  min-height: 3.4rem;
+  width: min(100%, 18rem);
+  min-height: 4.25rem;
   margin: clamp(2rem, 4vw, 3rem) 0 0;
   align-self: flex-start;
-  padding: 0 1.35rem;
-  border: 1px solid rgba(10, 18, 30, 0.18);
+  padding: 0 1.4rem;
+  border: 0;
   border-radius: 999px;
-  color: var(--mm-ink);
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  color: #f8f8f8;
+  background: #090909;
   text-decoration: none;
-  box-shadow: 0 14px 32px rgba(10, 18, 30, 0.12);
-  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+  font-size: clamp(1rem, 0.92rem + 0.35vw, 1.15rem);
+  font-weight: 720;
+  line-height: 1;
+  box-shadow: 0 16px 34px rgba(9, 9, 9, 0.16);
+  transition: background 180ms ease, box-shadow 180ms ease, color 180ms ease;
+}
+
+.mm-work-view-all svg {
+  flex: 0 0 auto;
+  transition: transform 180ms ease;
 }
 
 .mm-work-view-all:hover,
 .mm-work-view-all:focus-visible {
-  border-color: rgba(16, 164, 255, 0.6);
-  background: rgba(255, 255, 255, 0.92);
-  transform: translateY(-2px);
+  background: var(--mm-blue, #10a4ff);
+  color: #fff;
+  box-shadow: 0 18px 38px rgba(16, 164, 255, 0.24);
+}
+
+.mm-work-view-all:hover svg,
+.mm-work-view-all:focus-visible svg {
+  transform: translate3d(0.2rem, -0.2rem, 0);
+}
+
+.mm-work-view-all:focus-visible {
+  outline: 2px solid rgba(16, 164, 255, 0.42);
+  outline-offset: 0.35rem;
 }
 
 .mm-section.mm-section--work.mm-work {
