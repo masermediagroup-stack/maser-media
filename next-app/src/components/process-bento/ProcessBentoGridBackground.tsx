@@ -7,7 +7,7 @@ import { useReducedMotionGate } from '@/hooks/useReducedMotionGate';
 const MOBILE_LITE_MQ = '(max-width: 760px)';
 const GRID_SIZE = 32;
 const TRAIL_LENGTH = 4;
-const DARK_GRID_COLOR = 'rgba(16, 164, 255, 0.15)';
+const DARK_GRID_COLOR = 'rgba(226, 232, 240, 0.16)';
 const DARK_EFFECT_COLOR = 'rgba(16, 164, 255, 0.65)';
 
 

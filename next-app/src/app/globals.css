@@ -8462,8 +8462,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 .mm-process-bento__poster--launch-grid {
   background-color: #07111f;
   background-image:
-    linear-gradient(rgba(16, 164, 255, 0.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(16, 164, 255, 0.12) 1px, transparent 1px);
+    linear-gradient(rgba(226, 232, 240, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(226, 232, 240, 0.14) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
