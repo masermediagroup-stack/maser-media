@@ -8481,10 +8481,17 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-process-bento__tile--accent .mm-process-bento__icon-wrap {
+  width: clamp(6rem, 10vw, 8rem);
+  height: clamp(6rem, 10vw, 8rem);
   border: 0;
   background: transparent;
   box-shadow: none;
   color: #ffffff;
+}
+
+.mm-process-bento__tile--accent .mm-process-bento__icon {
+  width: clamp(5.5rem, 9vw, 7rem);
+  height: clamp(5.5rem, 9vw, 7rem);
 }
 
 .mm-process-bento__tile--quote {
