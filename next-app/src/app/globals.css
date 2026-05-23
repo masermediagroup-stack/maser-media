@@ -6697,27 +6697,37 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   }
 
   .mm-hero {
-    min-height: clamp(48rem, 126svh, 74rem);
-    padding-top: 7.5rem;
-    padding-bottom: clamp(2.4rem, 7vw, 4rem);
+    min-height: 100svh;
+    grid-template-rows: minmax(0, 1fr);
+    align-items: center;
+    padding-top: clamp(5.75rem, 16svh, 7.25rem);
+    padding-bottom: max(clamp(2.75rem, 9svh, 4.5rem), env(safe-area-inset-bottom));
   }
 
   .mm-hero__content {
     grid-template-columns: 1fr;
     justify-items: center;
+    align-self: center;
+    min-height: calc(100svh - clamp(5.75rem, 16svh, 7.25rem) - max(clamp(2.75rem, 9svh, 4.5rem), env(safe-area-inset-bottom)));
     text-align: center;
   }
 
+  .mm-hero__content-shift {
+    align-self: center;
+  }
+
   .mm-hero__copy {
+    width: min(100%, 34rem);
     max-width: 100%;
-    transform: translateY(clamp(-2rem, -5svh, -1rem));
+    align-self: center;
+    transform: translateY(clamp(-1.25rem, -3svh, -0.35rem));
   }
 
   .mm-hero__mobile-logo {
     display: block;
-    width: min(11rem, 46vw);
+    width: clamp(11rem, 48vw, 12.75rem);
     height: auto;
-    margin: 0 auto clamp(1.9rem, 7vw, 3rem);
+    margin: 0 auto clamp(1.35rem, 5.25vw, 2.15rem);
     filter:
       drop-shadow(0 2px 10px rgba(0, 0, 0, 0.36))
       drop-shadow(0 0 24px rgba(44, 175, 255, 0.18));
@@ -6751,9 +6761,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   }
 
   .mm-hero__title {
-    font-size: clamp(1.55rem, 5.1vw, 2.05rem);
-    line-height: 1.1;
-    max-width: 100%;
+    max-width: min(100%, 23rem);
+    font-size: clamp(1.6rem, 6.3vw, 2.15rem);
+    line-height: 1.12;
   }
 
   .mm-type-display {
@@ -6761,7 +6771,10 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   }
 
   .mm-hero__lead {
-    font-size: 0.98rem;
+    max-width: min(100%, 20.75rem);
+    margin-top: clamp(1.05rem, 4.8vw, 1.45rem);
+    font-size: clamp(0.98rem, 4vw, 1.12rem);
+    line-height: 1.45;
   }
 
   .mm-hero__actions,
@@ -7917,7 +7930,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   grid-column: 1;
   grid-row: 1;
   z-index: 2;
-  align-self: end;
+  align-self: center;
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
@@ -8718,6 +8731,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   }
 
   .mm-work-projects .mm-work-card--logo-panel .mm-work-card__body {
+    align-self: center;
     padding: clamp(1.25rem, 5vw, 1.7rem);
   }
 
