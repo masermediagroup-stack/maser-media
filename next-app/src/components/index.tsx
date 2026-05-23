@@ -189,6 +189,57 @@ function useStackedWorkPosters(
   }, [enabled, reduceMotion, sectionRef]);
 }
 
+function useWorkCardContentReveal(
+  sectionRef: React.RefObject<HTMLElement | null>,
+  reduceMotion: boolean | null,
+) {
+  useEffect(() => {
+    const section = sectionRef.current;
+
+    if (!section) {
+      return;
+    }
+
+    const cards = Array.from(section.querySelectorAll<HTMLElement>('.mm-work-card'));
+
+    if (!cards.length) {
+      return;
+    }
+
+    if (reduceMotion || typeof IntersectionObserver === 'undefined') {
+      cards.forEach((card) => {
+        card.classList.add('mm-work-card--content-visible');
+      });
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) {
+            return;
+          }
+
+          entry.target.classList.add('mm-work-card--content-visible');
+          observer.unobserve(entry.target);
+        });
+      },
+      {
+        rootMargin: '0px 0px -16% 0px',
+        threshold: 0.28,
+      },
+    );
+
+    cards.forEach((card) => {
+      observer.observe(card);
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [sectionRef, reduceMotion]);
+}
+
 const serviceSummaries: Record<string, string> = {
   Brand:
     'The foundation of every system we build: positioning, identity, and visual rules that hold up across every surface.',
@@ -611,6 +662,7 @@ export function Work({ stacked = true }: WorkProps = {}) {
   const stackEnabled = stacked && landingProjects.length > 1;
 
   useStackedWorkPosters(sectionRef, stackEnabled, reduceMotion);
+  useWorkCardContentReveal(sectionRef, reduceMotion);
 
   const renderProjectCard = (project: (typeof landingProjects)[number]) => {
     const isLogoPanel = project.cardLayout === 'logo-panel';

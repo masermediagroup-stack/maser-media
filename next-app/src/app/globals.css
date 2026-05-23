@@ -7893,9 +7893,18 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   height: min(78%, 17rem);
   max-height: calc(100% - 1.75rem);
   padding: 0;
-  transform: none;
+  opacity: 0;
+  transform: translate3d(0, 1rem, 0) scale(0.97);
+  transition:
+    opacity 680ms cubic-bezier(0.16, 1, 0.3, 1) 80ms,
+    transform 680ms cubic-bezier(0.16, 1, 0.3, 1) 80ms;
   pointer-events: none;
   overflow: visible;
+}
+
+.mm-work-projects .mm-work-card--content-visible.mm-work-card--logo-panel .mm-work-card__logo {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
 }
 
 .mm-work-projects .mm-work-card--miller-more .mm-work-card__logo {
@@ -7980,6 +7989,46 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   font-weight: 620;
   line-height: 1.05;
   overflow: visible;
+}
+
+.mm-work-projects .mm-work-card__body h3,
+.mm-work-projects .mm-work-card__body p,
+.mm-work-projects .mm-work-card__tags {
+  opacity: 0;
+  transform: translate3d(0, 0.9rem, 0);
+  transition:
+    opacity 620ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 620ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mm-work-projects .mm-work-card--content-visible .mm-work-card__body h3,
+.mm-work-projects .mm-work-card--content-visible .mm-work-card__body p,
+.mm-work-projects .mm-work-card--content-visible .mm-work-card__tags {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.mm-work-projects .mm-work-card--content-visible .mm-work-card__body h3 {
+  transition-delay: 20ms;
+}
+
+.mm-work-projects .mm-work-card--content-visible .mm-work-card__body p {
+  transition-delay: 120ms;
+}
+
+.mm-work-projects .mm-work-card--content-visible .mm-work-card__tags {
+  transition-delay: 220ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-work-projects .mm-work-card--logo-panel .mm-work-card__logo,
+  .mm-work-projects .mm-work-card__body h3,
+  .mm-work-projects .mm-work-card__body p,
+  .mm-work-projects .mm-work-card__tags {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 .mm-work-projects .mm-work-card__body h3 .mm-work-card__title-line {
