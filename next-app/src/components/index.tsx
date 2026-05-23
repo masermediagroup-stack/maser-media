@@ -351,12 +351,40 @@ export function Nav({ entrance, introReady }: NavProps) {
 
 export function Hero({ entrance, onCurtainDone }: HeroProps) {
   const [curtainDone, setCurtainDone] = useState(!entrance);
+  const [canMountCurtain, setCanMountCurtain] = useState(false);
   const curtainRef = useRef<HTMLDivElement>(null);
-  const canMountCurtain = entrance && typeof document !== 'undefined';
+
+  useEffect(() => {
+    if (!entrance) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      setCanMountCurtain(true);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [entrance]);
+
+  useEffect(() => {
+    if (!canMountCurtain || curtainDone) {
+      document.body.classList.remove('mm-intro-mounted');
+      return;
+    }
+
+    document.body.classList.add('mm-intro-mounted');
+    return () => {
+      document.body.classList.remove('mm-intro-mounted');
+    };
+  }, [canMountCurtain, curtainDone]);
 
   useLayoutEffect(() => {
     if (!entrance) {
       onCurtainDone?.();
+      return;
+    }
+
+    if (!canMountCurtain) {
       return;
     }
 
@@ -377,15 +405,6 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
       document.documentElement.classList.remove('mm-intro-pending');
       document.body.classList.add('mm-intro-complete');
     };
-
-    if (!canMountCurtain) {
-      return () => {
-        window.history.scrollRestoration = previousScrollRestoration;
-        document.documentElement.style.overflow = previousOverflow;
-        document.body.style.overflow = previousBodyOverflow;
-        document.body.classList.remove('mm-intro-mounted');
-      };
-    }
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const curtain = curtainRef.current;
@@ -423,11 +442,8 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
     <header className={`mm-hero${curtainDone ? ' mm-hero--curtain-done' : ''}`}>
       <div className="mm-hero__bg-scale" aria-hidden>
         <div className="mm-hero__smokey">
-          {curtainDone ? (
-            <SmokeyBackground color="#10A4FF" backdropBlurAmount="none" className="h-full min-h-0 w-full" />
-          ) : (
-            <motion.div className="mm-hero__smokey-placeholder" aria-hidden />
-          )}
+          <div className="mm-hero__smokey-placeholder" aria-hidden />
+          <SmokeyBackground color="#10A4FF" backdropBlurAmount="none" className="mm-hero__smokey-canvas h-full min-h-0 w-full" />
         </div>
       </div>
       <div className="mm-hero__exit-splash" aria-hidden />
@@ -437,10 +453,7 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
               <div
                 className={`mm-hero__load-curtain${curtainDone ? ' mm-hero__load-curtain--done' : ''}`}
                 aria-hidden="true"
-                ref={(node) => {
-                  curtainRef.current = node;
-                  document.body.classList.toggle('mm-intro-mounted', Boolean(node && !curtainDone));
-                }}
+                ref={curtainRef}
               />
               <div
                 className={`mm-hero__dot-stage${curtainDone ? ' mm-hero__dot-stage--done' : ''}`}

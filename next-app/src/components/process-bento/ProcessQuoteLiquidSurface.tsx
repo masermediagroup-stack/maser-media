@@ -23,13 +23,27 @@ function isMobileLite(): boolean {
   return window.matchMedia(MOBILE_LITE_MQ).matches;
 }
 
+function supportsWebGl(): boolean {
+  if (typeof document === 'undefined') return false;
+
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = (canvas.getContext('webgl') ||
+      canvas.getContext('experimental-webgl')) as WebGLRenderingContext | null;
+    if (!gl) return false;
+
+    const loseContext = gl.getExtension('WEBGL_lose_context');
+    loseContext?.loseContext();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function ProcessQuoteLiquidSurface() {
   const containerRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotionGate();
-  const [usePosterOnly, setUsePosterOnly] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    return isMobileLite() || prefersReducedMotion();
-  });
+  const [usePosterOnly, setUsePosterOnly] = useState(true);
   const [inView, setInView] = useState(false);
   const [tabVisible, setTabVisible] = useState(true);
   const [tileEl, setTileEl] = useState<HTMLElement | null>(null);
@@ -42,7 +56,7 @@ export function ProcessQuoteLiquidSurface() {
 
     const mobileLite = isMobileLite();
     const motionReduced = reducedMotion || prefersReducedMotion();
-    if (mobileLite || motionReduced) {
+    if (mobileLite || motionReduced || !supportsWebGl()) {
       setUsePosterOnly(true);
       return;
     }
@@ -64,7 +78,7 @@ export function ProcessQuoteLiquidSurface() {
 
     const mobileMq = window.matchMedia(MOBILE_LITE_MQ);
     const onMobileChange = () => {
-      if (mobileMq.matches || prefersReducedMotion()) {
+      if (mobileMq.matches || prefersReducedMotion() || !supportsWebGl()) {
         setUsePosterOnly(true);
       } else if (!reducedMotion) {
         setUsePosterOnly(false);
