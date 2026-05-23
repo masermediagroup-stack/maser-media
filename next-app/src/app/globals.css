@@ -7747,10 +7747,21 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-work .mm-section-heading h2.mm-work__title {
-  color: var(--mm-ink);
+  color: #0a0f1a;
   font-size: clamp(3.5rem, 7vw, 6.5rem);
   font-weight: 520;
   line-height: 0.98;
+}
+
+.mm-work .mm-section-heading h2.mm-work__title .mm-reveal-text,
+.mm-work .mm-section-heading h2.mm-work__title .mm-reveal-word,
+.mm-work .mm-section-heading h2.mm-work__title .mm-reveal-space {
+  color: #0a0f1a !important;
+}
+
+.mm-work .mm-section-heading h2.mm-work__title .mm-reveal-word {
+  opacity: 1 !important;
+  filter: none !important;
 }
 
 .mm-work .mm-section-heading p {
