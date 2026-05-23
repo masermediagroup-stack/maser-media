@@ -8399,6 +8399,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-process-bento__tile-shell--hero .mm-process-bento__icon-wrap {
+  width: clamp(6rem, 10vw, 8rem);
+  height: clamp(6rem, 10vw, 8rem);
   border: 0;
   background: transparent;
   box-shadow: none;
@@ -8407,6 +8409,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-process-bento__tile-shell--hero .mm-process-bento__icon-wrap .mm-process-bento__icon,
 .mm-process-bento__tile-shell--hero [data-process-icon] {
+  width: clamp(5.5rem, 9vw, 7rem);
+  height: clamp(5.5rem, 9vw, 7rem);
   color: #ffffff;
 }
 
