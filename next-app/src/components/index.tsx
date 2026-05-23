@@ -651,7 +651,7 @@ export function Work({ stacked = true }: WorkProps = {}) {
             aria-label={`Project tags: ${project.tags.slice(0, 3).join(', ')}`}
           >
             <span className="mm-work-card__tag">
-              {project.tags.slice(0, 3).join(' — ')}
+              {project.tags.slice(0, 3).join(' â€“ ')}
             </span>
           </div>
         ) : null}
@@ -840,7 +840,7 @@ export function Footer() {
         ))}
       </nav>
       <p className="mm-footer__copy" data-mm-reveal="fade">
-        © {CONTENT.footer.copyright}
+        Â© {CONTENT.footer.copyright}
       </p>
       <AsciiWaveFooter color="#10A4FF" speed={1} />
       <FooterCoolButton />
