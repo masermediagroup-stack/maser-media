@@ -8682,6 +8682,14 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   font-weight: 600;
 }
 
+.mm-process-bento__quote-line {
+  display: block;
+}
+
+.mm-process-bento__quote-line--nowrap {
+  white-space: nowrap;
+}
+
 .mm-process-bento__quote-icon {
   position: relative;
   z-index: 1;

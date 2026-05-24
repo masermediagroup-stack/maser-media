@@ -35,6 +35,26 @@ function isDarkShaderTile(id: string) {
   return id === 'system';
 }
 
+function renderProcessPullQuote(quote: string) {
+  const lockedLine = 'Launch-ready work.';
+  const lockedLineIndex = quote.indexOf(lockedLine);
+
+  if (lockedLineIndex === -1) {
+    return quote;
+  }
+
+  return (
+    <>
+      <span className="mm-process-bento__quote-line">
+        {quote.slice(0, lockedLineIndex).trimEnd()}{' '}
+      </span>
+      <span className="mm-process-bento__quote-line mm-process-bento__quote-line--nowrap">
+        {lockedLine}
+      </span>
+    </>
+  );
+}
+
 export function ProcessBento() {
   return (
     <section
@@ -115,7 +135,7 @@ export function ProcessBento() {
               className="mm-process-bento__icon mm-process-bento__icon--quote"
             />
           </div>
-          <p className="mm-process-bento__quote">{pullQuote}</p>
+          <p className="mm-process-bento__quote">{renderProcessPullQuote(pullQuote)}</p>
           <span className="mm-process-bento__quote-accent" aria-hidden />
         </ProcessBentoTile>
       </div>
