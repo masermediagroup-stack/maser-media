@@ -282,6 +282,12 @@ body.mm-page-transition-hide-content .cursor-aura-layer {
   z-index: 80;
 }
 
+@media (max-width: 767px), (pointer: coarse) {
+  .cursor-aura-layer {
+    display: none;
+  }
+}
+
 /* Skip link — visible on focus */
 .skip-to-content {
   position: absolute;
@@ -5617,49 +5623,49 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   justify-content: flex-start;
 }
 
-/* CTA reuses `.liquid-nav-contact--inline`; nav layout hides that class <920px — keep the section button visible. */
-.mm-cta__actions--contact .mm-cta__contact-btn.liquid-nav-contact--inline {
-  margin-left: 0 !important;
-  width: auto;
-  max-width: 100%;
-  min-width: clamp(12.5rem, 28vw, 15.5rem);
-  min-height: 2.9rem;
-  padding: 0.58rem 1.2rem !important;
-  justify-content: center !important;
-  gap: 0.5rem !important;
-  white-space: nowrap;
-  overflow: visible;
-  text-overflow: clip;
-  line-height: 1.1;
-  color: #fff !important;
-  background: #0a0a0a !important;
-  border-color: rgba(255, 255, 255, 0.22) !important;
-  box-shadow: none !important;
-  /* Gradients do not interpolate — avoid background transitions (hover flash on mouseout). */
-  transition:
-    transform 220ms ease,
-    border-color 220ms ease,
-    box-shadow 220ms ease !important;
+.mm-cta__actions--contact .mm-cta__contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: min(100%, 18rem);
+  min-height: 4.25rem;
+  padding: 0 1.4rem;
+  border: 0;
+  border-radius: 999px;
+  color: #f8f8f8;
+  background: #090909;
+  cursor: pointer;
+  text-decoration: none;
+  font: inherit;
+  font-size: clamp(1rem, 0.92rem + 0.35vw, 1.15rem);
+  font-weight: 720;
+  line-height: 1;
+  box-shadow: 0 16px 34px rgba(9, 9, 9, 0.16);
+  transition: background 180ms ease, box-shadow 180ms ease, color 180ms ease;
 }
 
 .mm-cta__actions--contact .mm-cta__contact-btn .liquid-contact-arrow {
   flex: 0 0 auto;
+  color: currentColor;
+  transition: transform 180ms ease;
+}
+
+.mm-cta__actions--contact .mm-cta__contact-btn:hover,
+.mm-cta__actions--contact .mm-cta__contact-btn:focus-visible {
+  background: var(--mm-blue, #10a4ff);
   color: #fff;
+  box-shadow: 0 18px 38px rgba(16, 164, 255, 0.24);
 }
 
-@media (max-width: 920px) {
-  .mm-cta__actions--contact .mm-cta__contact-btn.liquid-nav-contact--inline {
-    display: inline-flex !important;
-  }
+.mm-cta__actions--contact .mm-cta__contact-btn:hover .liquid-contact-arrow,
+.mm-cta__actions--contact .mm-cta__contact-btn:focus-visible .liquid-contact-arrow {
+  transform: translate3d(0.2rem, -0.2rem, 0);
 }
 
-@media (max-width: 760px) {
-  .mm-cta__actions--contact .mm-cta__contact-btn.liquid-nav-contact--inline {
-    display: inline-flex !important;
-    min-width: min(100%, 12.5rem);
-    font-size: clamp(0.78rem, 2.8vw, 0.9rem);
-    padding-inline: 1rem !important;
-  }
+.mm-cta__actions--contact .mm-cta__contact-btn:focus-visible {
+  outline: 2px solid rgba(16, 164, 255, 0.42);
+  outline-offset: 0.35rem;
 }
 
 .mm-cta__pill {
@@ -7213,9 +7219,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   gap: 0.5rem;
 }
 
-/* Blue fill hover for CTA + mobile; nav pill chip uses text+arrow blue in bubble-scoped rules below. */
-.mm-cta__actions--contact .mm-cta__contact-btn.liquid-nav-contact--inline:hover,
-.mm-cta__actions--contact .mm-cta__contact-btn.liquid-nav-contact--inline:focus-visible,
+/* Blue fill hover for mobile contact; CTA and nav pill chips have scoped rules. */
 .liquid-nav-contact--mobile:hover {
   color: #fff !important;
   background:
@@ -7223,11 +7227,6 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   border-color: var(--mm-blue, #10a4ff) !important;
   box-shadow: 0 16px 30px rgba(16, 164, 255, 0.3) !important;
   transform: translateY(-1px);
-}
-
-.mm-cta__actions--contact .mm-cta__contact-btn.liquid-nav-contact--inline:hover .liquid-contact-arrow,
-.mm-cta__actions--contact .mm-cta__contact-btn.liquid-nav-contact--inline:focus-visible .liquid-contact-arrow {
-  transform: translateX(5px);
 }
 
 .liquid-nav-bubble-main > .liquid-nav-contact.liquid-nav-contact--inline:hover,
