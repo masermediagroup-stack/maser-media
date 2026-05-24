@@ -7549,8 +7549,12 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 @media (max-width: 760px) {
   .mm-services__title {
-    font-size: clamp(2.65rem, 8dvh, 3.6rem) !important;
-    line-height: 1.08 !important;
+    font-size: clamp(2.35rem, 11.5vw, 3rem) !important;
+    line-height: 1.04 !important;
+  }
+
+  .mm-services__title-line {
+    white-space: nowrap;
   }
 }
 
