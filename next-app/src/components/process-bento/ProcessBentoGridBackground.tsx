@@ -27,10 +27,6 @@ function getMobileLiteSnapshot() {
 function getMobileLiteServerSnapshot() {
   return false;
 }
-function isMobileLite(): boolean {
-  if (typeof window === 'undefined') return false;
-  return window.matchMedia(MOBILE_LITE_MQ).matches;
-}
 
 /**
  * Lightswind InteractiveGridBackground adapted for the Process bento launch tile.

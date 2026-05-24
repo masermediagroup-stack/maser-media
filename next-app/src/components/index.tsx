@@ -861,14 +861,14 @@ export function Cta() {
                 </p>
               ) : null}
               <div className="mm-cta__actions mm-cta__actions--contact">
-                <Link
-                  href="/"
-                  data-mm-native-nav="true"
-                  className="liquid-nav-contact liquid-nav-contact--inline mm-cta__contact-btn"
+                <button
+                  type="button"
+                  className="mm-cta__contact-btn"
+                  onClick={() => openContactModalFromApp()}
                 >
                   {CONTENT.cta.contactButtonLabel}
                   <ArrowUpRight className="liquid-contact-arrow" size={15} aria-hidden />
-                </Link>
+                </button>
               </div>
             </div>
             <motion.div

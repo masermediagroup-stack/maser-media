@@ -209,30 +209,31 @@ export function useGsapLandingMotion(
             onHeroIntroDone?.();
           }
           if (hero) gsap.set(hero, { '--hero-exit-p': 1 });
-          gsap.utils
-            .toArray<HTMLElement>(root.querySelectorAll('.mm-section, .marquee-system'))
-            .forEach((el) => {
-              gsap.fromTo(
-                el,
-                { opacity: 0.92 },
-                {
-                  opacity: 1,
-                  duration: 0.4,
-                  ease: 'power1.out',
-                  scrollTrigger: {
-                    trigger: el,
-                    start: 'top 94%',
-                    toggleActions: 'play none none none',
-                    ...scrollTriggerDefaults,
-                  },
+          gsap.utils.toArray<HTMLElement>('.mm-section, .marquee-system', root).forEach((el) => {
+            gsap.fromTo(
+              el,
+              { opacity: 0.92 },
+              {
+                opacity: 1,
+                duration: 0.4,
+                ease: 'power1.out',
+                scrollTrigger: {
+                  trigger: el,
+                  start: 'top 94%',
+                  toggleActions: 'play none none none',
+                  ...scrollTriggerDefaults,
                 },
-              );
-            });
-          gsap.set(root.querySelectorAll('[data-mm-reveal]'), {
-            autoAlpha: 1,
-            y: 0,
-            clearProps: 'filter',
+              },
+            );
           });
+          const revealEls = gsap.utils.toArray<HTMLElement>('[data-mm-reveal]', root);
+          if (revealEls.length) {
+            gsap.set(revealEls, {
+              autoAlpha: 1,
+              y: 0,
+              clearProps: 'filter',
+            });
+          }
           return;
         }
 
@@ -333,7 +334,6 @@ export function useGsapLandingMotion(
           },
           (context) => {
             const isNarrow = Boolean(context.conditions?.isNarrow);
-            const isWide = !isNarrow;
 
             if (animateHeroIntro && isNarrow && hero) {
               const mobileLogo = hero.querySelector<HTMLElement>('.mm-hero__mobile-logo');
@@ -552,25 +552,31 @@ export function useGsapLandingMotion(
             const primaryScrub = isNarrow ? 3.2 : 3.8;
             const secondaryScrub = isNarrow ? 4.2 : 4.8;
 
-            gsap.fromTo(
-              root.querySelectorAll('.marquee-row--primary'),
-              { xPercent: 0 },
-              {
-                xPercent: primaryTravel,
-                ease: 'none',
-                scrollTrigger: { ...marqueeScrollBase, scrub: primaryScrub, ...scrollTriggerDefaults },
-              },
-            );
+            const primaryMarqueeRows = gsap.utils.toArray<HTMLElement>('.marquee-row--primary', root);
+            if (primaryMarqueeRows.length) {
+              gsap.fromTo(
+                primaryMarqueeRows,
+                { xPercent: 0 },
+                {
+                  xPercent: primaryTravel,
+                  ease: 'none',
+                  scrollTrigger: { ...marqueeScrollBase, scrub: primaryScrub, ...scrollTriggerDefaults },
+                },
+              );
+            }
 
-            gsap.fromTo(
-              root.querySelectorAll('.marquee-row--secondary'),
-              { xPercent: secondaryFrom },
-              {
-                xPercent: secondaryTo,
-                ease: 'none',
-                scrollTrigger: { ...marqueeScrollBase, scrub: secondaryScrub, ...scrollTriggerDefaults },
-              },
-            );
+            const secondaryMarqueeRows = gsap.utils.toArray<HTMLElement>('.marquee-row--secondary', root);
+            if (secondaryMarqueeRows.length) {
+              gsap.fromTo(
+                secondaryMarqueeRows,
+                { xPercent: secondaryFrom },
+                {
+                  xPercent: secondaryTo,
+                  ease: 'none',
+                  scrollTrigger: { ...marqueeScrollBase, scrub: secondaryScrub, ...scrollTriggerDefaults },
+                },
+              );
+            }
 
             const testimonialsGrid = root.querySelector<HTMLElement>(
               '.mm-testimonials-wave__static--live',
