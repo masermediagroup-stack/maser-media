@@ -3922,7 +3922,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-section.mm-section--work.mm-work {
   /* White base under Lightswind WebGL shader (blue waves draw on top). */
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f6f8 100%);
 }
 
 .mm-work__blue-wash {
@@ -7709,7 +7709,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-section.mm-section--work.mm-work {
   /* White base — the Lightswind shader handles the blue wave field. */
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f6f8 100%);
   color: var(--mm-ink);
 }
 
@@ -8811,7 +8811,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-section.mm-section--work.mm-work {
   /* White base — Lightswind WebGL shader handles the blue wave field. */
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f6f8 100%);
   background-size: auto;
 }
 
@@ -8930,7 +8930,16 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
   .mm-inner-hero--work .mm-inner-hero__content {
     width: 100%;
-    margin-inline: 0;
+    align-items: center;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .mm-inner-hero--work .mm-inner-hero__content h1,
+  .mm-inner-hero--work .mm-inner-hero__content .mm-inner-hero__lead,
+  .mm-inner-hero--work .mm-inner-hero__content p {
+    margin-inline: auto;
+    text-align: center;
   }
 
   .mm-section.mm-section--process.mm-process-bento {
