@@ -131,12 +131,20 @@ export function AuroraShader({
 
       if (disposed || !containerRef.current) return;
 
-      const renderer = new Renderer({
-        alpha: true,
-        antialias: true,
-        dpr: Math.min(window.devicePixelRatio, 1.5),
-      });
+      let renderer: InstanceType<typeof Renderer>;
+      try {
+        renderer = new Renderer({
+          alpha: true,
+          antialias: true,
+          dpr: Math.min(window.devicePixelRatio, 1.5),
+        });
+      } catch {
+        return;
+      }
+
       const gl = renderer.gl;
+      if (!gl) return;
+
       gl.clearColor(0, 0, 0, 0);
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);

@@ -20,19 +20,19 @@ const FOUNDERS: Founder[] = [
   {
     name: 'Founder A',
     role: 'Design + Direction',
-    headshot: '/assets/about/founder-1.jpg',
+    headshot: '',
     bio: [
       "Graphic design first, business builder by habit. Years of pushing brand systems, decks, and launch surfaces for companies that needed their story to land in seconds.",
-      "Came out of the Paradox content team — two people, every asset, every week — and built the muscle for shipping creative work that actually moves a brand forward.",
+      "Came out of the Paradox content team - two people, every asset, every week - and built the muscle for shipping creative work that actually moves a brand forward.",
     ],
   },
   {
     name: 'Founder B',
     role: 'Strategy + Storytelling',
-    headshot: '/assets/about/founder-2.jpg',
+    headshot: '',
     bio: [
       "Storytelling and creative direction with a soft spot for the offer underneath the design. Spends as much time on what to say as on how it looks.",
-      "Same Paradox roots — running the visual-content guides, the campaign frames, and the day-to-day of a two-person creative team that had to actually deliver.",
+      "Same Paradox roots - running the visual-content guides, the campaign frames, and the day-to-day of a two-person creative team that had to actually deliver.",
     ],
   },
 ];
@@ -58,7 +58,7 @@ export function AboutFounders() {
 }
 
 function FounderCard({ founder, revealDelay }: { founder: Founder; revealDelay: number }) {
-  const [hasImage, setHasImage] = useState(true);
+  const [hasImage, setHasImage] = useState(Boolean(founder.headshot));
   const initials = founder.name
     .split(' ')
     .map((part) => part.charAt(0))

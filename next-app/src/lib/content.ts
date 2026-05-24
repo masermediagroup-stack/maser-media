@@ -232,22 +232,22 @@ export const CONTENT: Content = {
   services: {
     title: "Serious Craft. Playful Energy.",
     subtitle:
-      "Strategy, identity, websites, launch content, and motion built together so the brand feels clear from first impression to the follow-up.",
+      "Strategy, identity, websites, launch content, and motion shaped as one system, so the brand feels clear the first time people see it and sharper every time they come back.",
     items: [
       {
         title: "Brand",
         items: [
           {
             label: "Brand Strategy",
-            description: "Clarify positioning, audience, and message so every launch decision has a sharper reason behind it.",
+            description: "Clarify the audience, offer, and point of view so every launch decision has a reason behind it.",
           },
           {
             label: "Logo & Identity",
-            description: "Create a recognizable identity system that makes the brand easier to remember and easier to trust.",
+            description: "Create a recognizable identity system that feels distinct, trustworthy, and easy to use everywhere.",
           },
           {
             label: "Visual Systems",
-            description: "Build a flexible design language and practical guidelines that keep the brand consistent across web, social, decks, and campaigns.",
+            description: "Build the design rules, assets, and guidelines that keep web, social, decks, and campaigns aligned.",
           },
         ],
       },
@@ -256,19 +256,19 @@ export const CONTENT: Content = {
         items: [
           {
             label: "Web Design",
-            description: "Shape websites and landing pages that make the offer clear, credible, and easier to act on.",
+            description: "Design websites and landing pages that make the offer clear, credible, and easy to act on.",
           },
           {
             label: "UI/UX",
-            description: "Improve flows, hierarchy, and interaction patterns so users can move with less friction.",
+            description: "Tighten flows, hierarchy, and interactions so people know where they are and what to do next.",
           },
           {
             label: "Pitch Decks",
-            description: "Turn the story into a focused deck that helps buyers, partners, or investors understand the value fast.",
+            description: "Turn the story into a focused deck that helps buyers, partners, or investors understand the value quickly.",
           },
           {
             label: "E-commerce",
-            description: "Create storefront experiences that make products easier to browse, compare, and buy.",
+            description: "Shape storefront experiences that make products easier to browse, compare, and buy.",
           },
         ],
       },
@@ -277,31 +277,31 @@ export const CONTENT: Content = {
         items: [
           {
             label: "Photography",
-            description: "Produce image systems that make the brand feel specific, current, and ownable.",
+            description: "Produce image systems that make the brand feel specific, current, and unmistakably yours.",
           },
           {
             label: "Video",
-            description: "Filming, shooting, and motion assets that explain, sell, and hold attention across platforms.",
+            description: "Create filmed, edited, and motion-led assets that explain the offer and hold attention across platforms.",
           },
           {
             label: "Strategic Marketing",
-            description: "Turn goals, audience, offer, and channels into a focused plan so campaigns move with intent instead of guesswork.",
+            description: "Turn goals, audience, offer, and channels into a practical plan so campaigns move with intent.",
           },
           {
             label: "Creative AD Management",
-            description: "Manage paid creative from concept to iteration, keeping hooks, visuals, landing pages, and performance signals connected.",
+            description: "Manage paid creative from concept through iteration, keeping hooks, visuals, landing pages, and performance signals connected.",
           },
           {
             label: "SEO",
-            description: "Improve site structure, page copy, and content signals so search engines can understand the work and the right people can find it.",
+            description: "Improve site structure, page copy, and content signals so search engines understand the work and the right people can find it.",
           },
           {
             label: "Content Marketing",
-            description: "Build useful articles, emails, social posts, and campaign assets around one clear message so the brand stays visible between launches.",
+            description: "Build articles, emails, social posts, and campaign assets around one message so the brand stays visible between launches.",
           },
           {
             label: "Email Marketing",
-            description: "Create segmented email campaigns with sharper copy, stronger calls to action, and reporting that shows what people actually respond to.",
+            description: "Create segmented email campaigns with sharper copy, stronger calls to action, and reporting that shows what people respond to.",
           },
         ],
       },
@@ -348,13 +348,13 @@ export const CONTENT: Content = {
       {
         title: "Main Street Pub & Grub",
         description:
-          "A neighborhood pub deserved an identity as welcoming as the room itself. We built the brand foundation — logo system, typography, and color.",
+          "A neighborhood pub deserved an identity as welcoming as the room itself. We built the brand foundation - logo system, typography, and color.",
         image: null,
         logo: "/assets/main-street-logo-clean.png",
         logoWidth: 1326,
         logoHeight: 625,
         cardLayout: "logo-panel",
-        link: "#open-contact",
+        link: "/work/main-street-pub-grub",
         tags: ["Brand identity", "Logo system", "Hospitality"],
         cardVariant: "main-street",
       },
@@ -368,7 +368,7 @@ export const CONTENT: Content = {
         logoWidth: 794,
         logoHeight: 796,
         cardLayout: "logo-panel",
-        link: "#open-contact",
+        link: "/work/helm-in-house-saas",
         tags: ["Internal build", "SaaS", "In progress"],
         cardVariant: "helm",
       },
@@ -382,21 +382,21 @@ export const CONTENT: Content = {
     nextLabel: "Next",
     items: [
       {
-        quote: "Quote pending — kind words from the Miller More team coming soon.",
+        quote: "Quote pending - kind words from the Miller More team coming soon.",
         name: "Miller More Handiwork",
         role: "Local home services, client since launch",
         avatar: "/assets/testimonial-avatar-01.svg",
         rating: 5,
       },
       {
-        quote: "Quote pending — hand-off from the Main Street Pub & Grub crew on the way.",
+        quote: "Quote pending - hand-off from the Main Street Pub & Grub crew on the way.",
         name: "Main Street Pub & Grub",
         role: "Hospitality, brand and web partner",
         avatar: "/assets/testimonial-avatar-02.svg",
         rating: 5,
       },
       {
-        quote: "Quote pending — sharing notes from Arpit shortly.",
+        quote: "Quote pending - sharing notes from Arpit shortly.",
         name: "Arpit",
         role: "Founder, partner brand",
         avatar: "/assets/testimonial-avatar-03.svg",
@@ -489,7 +489,7 @@ export const CONTENT: Content = {
     lead:
       "Brand, web, and launch as one studio | same crew, no handoffs.",
     foundersOutro:
-      "Less “professional”, more relatable. The work still has to be sharp — we just don’t think you should need a punk attitude to get there.",
+      "Less “professional”, more relatable. The work still has to be sharp - we just don’t think you should need a punk attitude to get there.",
   },
 
   workPage: {

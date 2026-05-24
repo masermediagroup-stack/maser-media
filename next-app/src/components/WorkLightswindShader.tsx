@@ -28,7 +28,7 @@ const VERTEX_SHADER = /* glsl */ `
  * a designed surface rather than a flat panel.
  */
 const FRAGMENT_SHADER = /* glsl */ `
-  precision highp float;
+  precision mediump float;
 
   uniform vec2  iResolution;
   uniform float iTime;
@@ -88,8 +88,8 @@ const FRAGMENT_SHADER = /* glsl */ `
     glow *= smoothstep(1.25, 0.15, length(uv));   // gentle radial falloff
     glow = clamp(glow, 0.0, 1.0);
 
-    // White base, blue waves on top. Multiply-style blend keeps mids airy.
-    vec3 base = vec3(1.0);
+    // Landing-page surface base, blue waves on top. Multiply-style blend keeps mids airy.
+    vec3 base = vec3(0.937, 0.937, 0.937);
     vec3 color = base - glow * (base - u_color);
 
     // Faint vignette so the section reads as composed, not flat.
@@ -99,6 +99,9 @@ const FRAGMENT_SHADER = /* glsl */ `
     gl_FragColor = vec4(color, 1.0);
   }
 `;
+
+const WORK_SHADER_FALLBACK =
+  'radial-gradient(ellipse 82% 58% at 50% 12%, rgba(16, 164, 255, 0.1), transparent 62%), linear-gradient(180deg, var(--mm-section-surface, #efefef) 0%, #f4f7fa 48%, var(--mm-section-surface, #efefef) 100%)';
 
 function hexToRgb(hex: string): [number, number, number] {
   const normalized = hex.replace('#', '').trim();
@@ -136,7 +139,7 @@ function compileShader(gl: WebGLRenderingContext, type: number, source: string):
 
 export function WorkLightswindShader({
   color = '#10a4ff',
-  maxPixelRatio = 1.5,
+  maxPixelRatio = 1.35,
   className,
 }: WorkLightswindShaderProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -146,6 +149,8 @@ export function WorkLightswindShader({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    canvas.style.background = WORK_SHADER_FALLBACK;
+
     const gl = canvas.getContext('webgl', {
       antialias: false,
       alpha: false,
@@ -154,21 +159,21 @@ export function WorkLightswindShader({
     });
 
     if (!gl) {
-      // Graceful fallback: paint white so the section never collapses.
-      canvas.style.background = '#ffffff';
       return;
     }
 
     const vs = compileShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
     const fs = compileShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER);
     if (!vs || !fs) {
-      canvas.style.background = '#ffffff';
+      if (vs) gl.deleteShader(vs);
+      if (fs) gl.deleteShader(fs);
       return;
     }
 
     const program = gl.createProgram();
     if (!program) {
-      canvas.style.background = '#ffffff';
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
       return;
     }
     gl.attachShader(program, vs);
@@ -176,7 +181,8 @@ export function WorkLightswindShader({
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       gl.deleteProgram(program);
-      canvas.style.background = '#ffffff';
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
       return;
     }
     gl.useProgram(program);
@@ -206,9 +212,14 @@ export function WorkLightswindShader({
     let lastHeight = 0;
     const startedAt = performance.now();
 
+    const getPixelRatio = () => {
+      const mobileCap = window.matchMedia('(max-width: 760px)').matches ? 1.15 : maxPixelRatio;
+      return Math.min(window.devicePixelRatio || 1, maxPixelRatio, mobileCap);
+    };
+
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, maxPixelRatio);
+      const dpr = getPixelRatio();
       const w = Math.max(1, Math.floor(rect.width * dpr));
       const h = Math.max(1, Math.floor(rect.height * dpr));
       if (w === lastWidth && h === lastHeight) return;
@@ -223,7 +234,7 @@ export function WorkLightswindShader({
 
     const onPointerMove = (event: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, maxPixelRatio);
+      const dpr = getPixelRatio();
       mouse.x = (event.clientX - rect.left) * dpr;
       // Flip Y so shader space matches CSS space.
       mouse.y = (rect.height - (event.clientY - rect.top)) * dpr;
@@ -238,6 +249,7 @@ export function WorkLightswindShader({
         gl.uniform2f(uMouse, mouse.x, mouse.y);
         gl.uniform1f(uTime, reduceMotion ? 0 : elapsed);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
+        canvas.dataset.mmShaderReady = 'true';
 
         if (reduceMotion) {
           // Single frame, then idle until visibility/resize wakes us up.
@@ -273,6 +285,14 @@ export function WorkLightswindShader({
       }
     };
 
+    const handleContextLost = (event: Event) => {
+      event.preventDefault();
+      running = false;
+      cancelAnimationFrame(raf);
+      delete canvas.dataset.mmShaderReady;
+      canvas.style.background = WORK_SHADER_FALLBACK;
+    };
+
     const resizeObserver = new ResizeObserver(() => {
       resize();
       if (reduceMotion) {
@@ -284,6 +304,7 @@ export function WorkLightswindShader({
     resizeObserver.observe(canvas);
 
     document.addEventListener('visibilitychange', handleVisibility);
+    canvas.addEventListener('webglcontextlost', handleContextLost);
     canvas.addEventListener('pointermove', onPointerMove, { passive: true });
 
     resize();
@@ -295,6 +316,7 @@ export function WorkLightswindShader({
       observer.disconnect();
       resizeObserver.disconnect();
       document.removeEventListener('visibilitychange', handleVisibility);
+      canvas.removeEventListener('webglcontextlost', handleContextLost);
       canvas.removeEventListener('pointermove', onPointerMove);
 
       gl.deleteBuffer(buffer);
@@ -317,7 +339,7 @@ export function WorkLightswindShader({
         width: '100%',
         height: '100%',
         display: 'block',
-        background: '#ffffff',
+        background: WORK_SHADER_FALLBACK,
       }}
     />
   );

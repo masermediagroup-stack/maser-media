@@ -10,7 +10,6 @@ import {
   ArrowUpRight,
   BarChart3,
   MousePointer2,
-  Sparkles,
   Zap,
 } from 'lucide-react';
 import { CONTENT } from '@/lib/content';
@@ -242,11 +241,11 @@ function useWorkCardContentReveal(
 
 const serviceSummaries: Record<string, string> = {
   Brand:
-    'The foundation of every system we build: positioning, identity, and visual rules that hold up across every surface.',
+    'Positioning, identity, and visual rules that make the brand easier to recognize, trust, and extend.',
   Web:
-    'Where your brand becomes interactive: clear, polished pages and product surfaces built to convert without losing craft.',
-  Content:
-    'The fuel that keeps the system alive: image, video, illustration, and motion assets that make launches feel current.',
+    'Clear, polished pages and product surfaces built to convert without losing the craft that makes people remember you.',
+  Digital:
+    'Photo, video, content, search, email, and paid creative that keep the launch moving after the site goes live.',
 };
 
 const serviceAuroraBars = 28;
@@ -592,8 +591,7 @@ export function Services() {
       <div className="mm-services__shell">
         <div className="mm-services__masthead">
           <h2 id="services-heading" className="mm-services__title">
-            <span className="mm-services__title-line">Serious Craft.</span>
-            <span className="mm-services__title-line">Playful Energy.</span>
+            <span className="mm-services__title-line">Services</span>
           </h2>
           <p className="mm-services__lede">{servicesSubtitle}</p>
         </div>
@@ -715,9 +713,11 @@ export function Work({ stacked = true }: WorkProps = {}) {
             className="mm-work-card__tags"
             aria-label={`Project tags: ${project.tags.slice(0, 3).join(', ')}`}
           >
-            <span className="mm-work-card__tag">
-              {project.tags.slice(0, 3).join(' – ')}
-            </span>
+            {project.tags.slice(0, 3).map((tag) => (
+              <span className="mm-work-card__tag" key={tag}>
+                {tag}
+              </span>
+            ))}
           </div>
         ) : null}
       </div>
@@ -861,14 +861,14 @@ export function Cta() {
                 </p>
               ) : null}
               <div className="mm-cta__actions mm-cta__actions--contact">
-                <button
-                  type="button"
+                <Link
+                  href="/"
+                  data-mm-native-nav="true"
                   className="liquid-nav-contact liquid-nav-contact--inline mm-cta__contact-btn"
-                  onClick={() => openContactModalFromApp()}
                 >
                   {CONTENT.cta.contactButtonLabel}
                   <ArrowUpRight className="liquid-contact-arrow" size={15} aria-hidden />
-                </button>
+                </Link>
               </div>
             </div>
             <motion.div
@@ -1092,7 +1092,6 @@ function TestimonialCardArticle({
       exit={{ opacity: 0 }}
       transition={{ duration: 1.35, ease: 'easeInOut' }}
     >
-      <Sparkles className="testimonial-card-quote-icon" size={22} aria-hidden />
       <p className="testimonial-card-text">{quote}</p>
       <div className="testimonial-card-footer">
         {avatar ? (

@@ -60,6 +60,7 @@ function delay(ms: number): Promise<void> {
 function getInternalRoutePath(link: HTMLAnchorElement): string | null {
   const rawHref = link.getAttribute('href');
   if (!rawHref || rawHref.startsWith('mailto:') || rawHref.startsWith('tel:')) return null;
+  if (link.dataset.mmNativeNav === 'true') return null;
   if (link.target && link.target !== '_self') return null;
   if (link.hasAttribute('download')) return null;
 
