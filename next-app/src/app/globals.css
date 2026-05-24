@@ -8419,11 +8419,15 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-process-bento__tile--hero {
   min-height: var(--mm-process-bento-tile-row-min);
-  background: #07111f;
+  background:
+    radial-gradient(100% 85% at 22% 18%, rgba(16, 164, 255, 0.18), transparent 56%),
+    linear-gradient(128deg, #07111f 0%, var(--mm-process-blue-ink) 58%, #02101c 100%);
 }
 
 .mm-process-bento__tile-shell--hero .mm-process-bento__tile--hero {
-  background: #07111f;
+  background:
+    radial-gradient(100% 85% at 22% 18%, rgba(16, 164, 255, 0.18), transparent 56%),
+    linear-gradient(128deg, #07111f 0%, var(--mm-process-blue-ink) 58%, #02101c 100%);
   border-color: rgba(16, 164, 255, 0.22);
 }
 
@@ -8432,7 +8436,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   inset: 0;
   z-index: 0;
   border-radius: inherit;
-  background: #07111f;
+  background:
+    radial-gradient(105% 92% at 20% 16%, rgba(16, 164, 255, 0.2), transparent 58%),
+    linear-gradient(128deg, #07111f 0%, var(--mm-process-blue-ink) 58%, #02101c 100%);
 }
 
 /* Dark hero plate: white ripple rings, subdued on ink background. */
