@@ -10,7 +10,6 @@ import {
   ArrowUpRight,
   BarChart3,
   MousePointer2,
-  Sparkles,
   Zap,
 } from 'lucide-react';
 import { CONTENT } from '@/lib/content';
@@ -1092,7 +1091,6 @@ function TestimonialCardArticle({
       exit={{ opacity: 0 }}
       transition={{ duration: 1.35, ease: 'easeInOut' }}
     >
-      <Sparkles className="testimonial-card-quote-icon" size={22} aria-hidden />
       <p className="testimonial-card-text">{quote}</p>
       <div className="testimonial-card-footer">
         {avatar ? (

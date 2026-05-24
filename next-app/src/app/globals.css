@@ -2038,24 +2038,11 @@ body.galaxy-active .hero::after {
   color: var(--testimonial-card-inactive-text);
 }
 
-.testimonial-card--inactive .testimonial-card-quote-icon {
-  color: rgba(16, 164, 255, 0.45);
-}
-
 button.testimonial-card {
   appearance: none;
   font: inherit;
   width: 100%;
   display: block;
-}
-
-.testimonial-card-quote-icon {
-  display: block;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 2.35rem;
-  line-height: 0.85;
-  color: var(--color-accent-light);
-  margin-bottom: 0.35rem;
 }
 
 .testimonial-card-body {
@@ -6537,10 +6524,6 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
     0 22px 58px rgba(0, 61, 110, 0.14),
     inset 0 1px 0 rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(14px);
-}
-
-.mm-testimonials-wave .testimonial-card-quote-icon {
-  color: #0065a3;
 }
 
 .mm-testimonials-wave .testimonial-stars {
