@@ -88,8 +88,8 @@ const FRAGMENT_SHADER = /* glsl */ `
     glow *= smoothstep(1.25, 0.15, length(uv));   // gentle radial falloff
     glow = clamp(glow, 0.0, 1.0);
 
-    // White base, blue waves on top. Multiply-style blend keeps mids airy.
-    vec3 base = vec3(1.0);
+    // Landing-page surface base, blue waves on top. Multiply-style blend keeps mids airy.
+    vec3 base = vec3(0.937, 0.937, 0.937);
     vec3 color = base - glow * (base - u_color);
 
     // Faint vignette so the section reads as composed, not flat.
@@ -100,7 +100,8 @@ const FRAGMENT_SHADER = /* glsl */ `
   }
 `;
 
-const WORK_SHADER_FALLBACK = 'linear-gradient(180deg, #ffffff 0%, #f4f6f8 100%)';
+const WORK_SHADER_FALLBACK =
+  'radial-gradient(ellipse 82% 58% at 50% 12%, rgba(16, 164, 255, 0.1), transparent 62%), linear-gradient(180deg, var(--mm-section-surface, #efefef) 0%, #f4f7fa 48%, var(--mm-section-surface, #efefef) 100%)';
 
 function hexToRgb(hex: string): [number, number, number] {
   const normalized = hex.replace('#', '').trim();
@@ -248,6 +249,7 @@ export function WorkLightswindShader({
         gl.uniform2f(uMouse, mouse.x, mouse.y);
         gl.uniform1f(uTime, reduceMotion ? 0 : elapsed);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
+        canvas.dataset.mmShaderReady = 'true';
 
         if (reduceMotion) {
           // Single frame, then idle until visibility/resize wakes us up.
@@ -287,6 +289,7 @@ export function WorkLightswindShader({
       event.preventDefault();
       running = false;
       cancelAnimationFrame(raf);
+      delete canvas.dataset.mmShaderReady;
       canvas.style.background = WORK_SHADER_FALLBACK;
     };
 

@@ -591,8 +591,7 @@ export function Services() {
       <div className="mm-services__shell">
         <div className="mm-services__masthead">
           <h2 id="services-heading" className="mm-services__title">
-            <span className="mm-services__title-line">Serious Craft.</span>
-            <span className="mm-services__title-line">Playful Energy.</span>
+            <span className="mm-services__title-line">Services</span>
           </h2>
           <p className="mm-services__lede">{servicesSubtitle}</p>
         </div>
@@ -714,9 +713,11 @@ export function Work({ stacked = true }: WorkProps = {}) {
             className="mm-work-card__tags"
             aria-label={`Project tags: ${project.tags.slice(0, 3).join(', ')}`}
           >
-            <span className="mm-work-card__tag">
-              {project.tags.slice(0, 3).join(' – ')}
-            </span>
+            {project.tags.slice(0, 3).map((tag) => (
+              <span className="mm-work-card__tag" key={tag}>
+                {tag}
+              </span>
+            ))}
           </div>
         ) : null}
       </div>

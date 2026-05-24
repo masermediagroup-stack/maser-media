@@ -168,6 +168,15 @@
   /* Typography */
   --font-display: 'Aspekta', system-ui, sans-serif;
   --font-body: 'Aspekta', system-ui, sans-serif;
+  --mm-type-display: clamp(2.2rem, 5.3vw, 5rem);
+  --mm-type-section-title: clamp(2.2rem, 5.3vw, 5rem);
+  --mm-type-section-title-mobile: clamp(2.05rem, 9vw, 3.05rem);
+  --mm-type-card-title: clamp(1.25rem, 2vw, 1.65rem);
+  --mm-type-body: clamp(1rem, 1.35vw, 1.18rem);
+  --mm-type-body-small: clamp(0.92rem, 1.1vw, 1.04rem);
+  --mm-leading-display: 1.06;
+  --mm-leading-title: 1.08;
+  --mm-leading-body: 1.58;
 
   /* Spacing */
   --section-padding: clamp(4rem, 10vw, 8rem);
@@ -3921,8 +3930,10 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-section.mm-section--work.mm-work {
-  /* White base under Lightswind WebGL shader (blue waves draw on top). */
-  background: linear-gradient(180deg, #ffffff 0%, #f4f6f8 100%);
+  --mm-work-fallback-bg:
+    radial-gradient(ellipse 82% 58% at 50% 12%, rgba(16, 164, 255, 0.1), transparent 62%),
+    linear-gradient(180deg, var(--mm-section-surface) 0%, #f4f7fa 48%, var(--mm-section-surface) 100%);
+  background: var(--mm-work-fallback-bg);
 }
 
 .mm-work__blue-wash {
@@ -3937,6 +3948,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  background: var(--mm-work-fallback-bg);
 }
 
 .mm-work__ripple-layer .mm-work__shader-canvas,
@@ -3944,6 +3956,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   display: block;
   width: 100% !important;
   height: 100% !important;
+  background: var(--mm-work-fallback-bg);
 }
 
 .mm-section.mm-section--services.mm-services {
@@ -3990,9 +4003,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 /* Work: one page h1 lives in hero; this matches hero h1 scale with heavier weight */
 .mm-work .mm-section-heading h2.mm-work__title {
-  font-size: clamp(2.2rem, 5.3vw, 5rem);
+  font-size: var(--mm-type-section-title);
   font-weight: 700;
-  line-height: 1.06;
+  line-height: var(--mm-leading-title);
 }
 
 .mm-section-heading h2,
@@ -4000,9 +4013,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   margin: 0;
   color: var(--mm-ink);
   font-family: var(--font-display);
-  font-size: clamp(2.35rem, 5.7vw, 6.9rem);
+  font-size: var(--mm-type-section-title);
   font-weight: 650;
-  line-height: 1.08;
+  line-height: var(--mm-leading-title);
   letter-spacing: 0;
 }
 
@@ -4011,8 +4024,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   margin-top: 1.15rem;
   color: var(--mm-muted);
   max-width: 760px;
-  font-size: clamp(1rem, 1.5vw, 1.2rem);
-  line-height: 1.65;
+  font-size: var(--mm-type-body);
+  line-height: var(--mm-leading-body);
 }
 
 .liquid-nav {
@@ -4480,9 +4493,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 .mm-type-display {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.2rem, 5.3vw, 5rem);
+  font-size: var(--mm-type-display);
   font-weight: 500;
-  line-height: 1.06;
+  line-height: var(--mm-leading-display);
   letter-spacing: 0;
   text-wrap: pretty;
 }
@@ -4699,9 +4712,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   padding-inline: 0;
   box-sizing: border-box;
   font-family: var(--font-display);
-  font-size: clamp(2.2rem, 5.3vw, 5rem);
+  font-size: var(--mm-type-section-title);
   font-weight: 500;
-  line-height: 1.06;
+  line-height: var(--mm-leading-title);
   letter-spacing: 0;
   text-align: center;
   text-wrap: balance;
@@ -5046,18 +5059,18 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   margin: 0 0 1.25rem;
   color: var(--mm-services-ink);
   font-family: var(--font-display);
-  font-size: clamp(4rem, 10vw, 7rem);
+  font-size: var(--mm-type-section-title);
   font-weight: 720;
   letter-spacing: 0;
-  line-height: 0.95;
+  line-height: var(--mm-leading-title);
 }
 
 .mm-services__lede {
   max-width: 42rem;
   margin: 0;
   color: var(--mm-services-muted);
-  font-size: clamp(1rem, 0.96rem + 0.35vw, 1.16rem);
-  line-height: 1.55;
+  font-size: var(--mm-type-body);
+  line-height: var(--mm-leading-body);
   text-wrap: pretty;
 }
 
@@ -5130,19 +5143,19 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 .mm-services__accordion-title {
   color: var(--mm-services-ink);
   font-family: var(--font-display);
-  font-size: clamp(2.2rem, 5vw, 2.7rem);
+  font-size: clamp(1.85rem, 4vw, 2.45rem);
   font-weight: 720;
   letter-spacing: 0;
-  line-height: 1.05;
+  line-height: var(--mm-leading-title);
   transition: color 220ms ease;
 }
 
 .mm-services__accordion-summary {
   max-width: 42rem;
   color: var(--mm-services-muted);
-  font-size: clamp(0.98rem, 0.9rem + 0.25vw, 1.05rem);
+  font-size: var(--mm-type-body-small);
   font-weight: 430;
-  line-height: 1.55;
+  line-height: var(--mm-leading-body);
   text-align: left;
   text-wrap: pretty;
   transition: color 220ms ease;
@@ -5200,7 +5213,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   color: var(--mm-services-ink);
   font-size: 0.95rem;
   font-weight: 680;
-  line-height: 1.35;
+  line-height: 1.3;
   transition: color 420ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -5209,8 +5222,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   z-index: 1;
   margin: 0;
   color: var(--mm-services-muted);
-  font-size: 0.92rem;
-  line-height: 1.58;
+  font-size: var(--mm-type-body-small);
+  line-height: var(--mm-leading-body);
   text-wrap: pretty;
   transition: color 420ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -6131,7 +6144,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   letter-spacing: 0.04em;
   /* >1 so descenders (y,g,p,q) are not clipped; 0.92 was cropping AuroraText “you” */
   line-height: 1.08;
-  font-size: clamp(3rem, 6.8vw + 0.5rem, 7.25rem);
+  font-size: var(--mm-type-section-title);
   padding-block-end: 0.06em;
   overflow: visible;
   /* Color lives on `.title-anim` so AuroraText children are not forced to `currentColor: white`,
@@ -6274,7 +6287,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-testimonials-wave .testimonial-card-text {
   color: rgba(248, 250, 252, 0.96);
-  font-size: clamp(1.02rem, 1.1rem + 0.55vw, 1.2rem);
+  font-size: var(--mm-type-body);
   line-height: 1.68;
   text-wrap: pretty;
 }
@@ -6335,7 +6348,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
   .mm-testimonials-wave__title {
     align-items: center;
-    font-size: clamp(3rem, 10vw + 0.5rem, 4.75rem);
+    font-size: var(--mm-type-section-title-mobile);
     font-weight: 500;
     letter-spacing: 0;
     text-align: center;
@@ -6393,7 +6406,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   }
 
   .mm-testimonials-wave__title {
-    font-size: clamp(3.1rem, 13vw, 4.5rem);
+    font-size: var(--mm-type-section-title-mobile);
     line-height: 1.12;
     letter-spacing: 0;
   }
@@ -6420,7 +6433,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   }
 
   .mm-testimonials-wave .testimonial-card-text {
-    font-size: clamp(0.97rem, 3.1vw, 1.05rem);
+    font-size: var(--mm-type-body-small);
     line-height: 1.62;
   }
 }
@@ -7716,8 +7729,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-section.mm-section--work.mm-work {
-  /* White base — the Lightswind shader handles the blue wave field. */
-  background: linear-gradient(180deg, #ffffff 0%, #f4f6f8 100%);
+  background: var(--mm-work-fallback-bg);
   color: var(--mm-ink);
 }
 
@@ -8818,8 +8830,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-section.mm-section--work.mm-work {
-  /* White base — Lightswind WebGL shader handles the blue wave field. */
-  background: linear-gradient(180deg, #ffffff 0%, #f4f6f8 100%);
+  background: var(--mm-work-fallback-bg);
   background-size: auto;
 }
 
@@ -9159,16 +9170,16 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 .mm-faq__shell h2 {
   margin: 0;
   color: #07111f;
-  font-size: clamp(2.3rem, 6vw, 5rem);
-  line-height: 0.94;
+  font-size: var(--mm-type-section-title);
+  line-height: var(--mm-leading-title);
 }
 
 .mm-trust__copy p:not(.mm-kicker) {
   margin: 1.2rem 0 0;
   max-width: 35rem;
   color: #536171;
-  font-size: clamp(1rem, 1.4vw, 1.18rem);
-  line-height: 1.62;
+  font-size: var(--mm-type-body);
+  line-height: var(--mm-leading-body);
 }
 
 .mm-trust__grid {
@@ -9200,8 +9211,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 .mm-faq__item h3 {
   margin: 0.7rem 0 0;
   color: #07111f;
-  font-size: clamp(1.2rem, 2vw, 1.65rem);
-  line-height: 1.08;
+  font-size: var(--mm-type-card-title);
+  line-height: var(--mm-leading-title);
 }
 
 .mm-trust__card p,
@@ -9356,6 +9367,194 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 :where(h1, h2, h3, h4, h5, h6),
 :where(h1, h2, h3, h4, h5, h6) :where(span, strong, em) {
   font-weight: 500 !important;
+}
+
+/* Typography consistency pass: keep recurring section and card text on shared scales. */
+.mm-hero__title,
+.mm-type-display {
+  font-size: var(--mm-type-display) !important;
+  line-height: var(--mm-leading-display) !important;
+}
+
+.mm-section-heading h2,
+.mm-work .mm-section-heading h2.mm-work__title,
+.mm-clients__headline,
+.mm-services__title,
+.mm-testimonials-wave__title,
+.mm-trust__copy h2,
+.mm-faq__shell h2,
+.mm-cta__title {
+  font-size: var(--mm-type-section-title) !important;
+  line-height: var(--mm-leading-title) !important;
+  letter-spacing: 0 !important;
+}
+
+.mm-section-heading p,
+.mm-inner-hero p,
+.mm-services__lede,
+.mm-work .mm-section-heading p,
+.mm-trust__copy p:not(.mm-kicker),
+.mm-cta__lead {
+  font-size: var(--mm-type-body) !important;
+  line-height: var(--mm-leading-body) !important;
+}
+
+.mm-services__accordion-summary,
+.mm-services__service-card p,
+.mm-testimonials-wave .testimonial-card-text,
+.mm-trust__card p,
+.mm-faq__item p {
+  font-size: var(--mm-type-body-small) !important;
+  line-height: var(--mm-leading-body) !important;
+}
+
+.mm-services__accordion-title {
+  font-size: clamp(1.85rem, 4vw, 2.45rem) !important;
+  line-height: var(--mm-leading-title) !important;
+}
+
+.mm-work-card__body h3,
+.stack-card h3,
+.mm-contact-card h2,
+.mm-trust__card h3,
+.mm-faq__item h3 {
+  font-size: var(--mm-type-card-title) !important;
+  line-height: var(--mm-leading-title) !important;
+  letter-spacing: 0 !important;
+}
+
+@media (max-width: 760px) {
+  .mm-section-heading h2,
+  .mm-work .mm-section-heading h2.mm-work__title,
+  .mm-clients__headline,
+  .mm-services__title,
+  .mm-testimonials-wave__title,
+  .mm-trust__copy h2,
+  .mm-faq__shell h2,
+  .mm-cta__title {
+    font-size: var(--mm-type-section-title-mobile) !important;
+  }
+
+  .mm-services__title-line {
+    white-space: normal !important;
+  }
+
+  .mm-services__accordion-title {
+    font-size: clamp(1.55rem, 7vw, 2rem) !important;
+  }
+}
+
+/* Work project placeholders ------------------------------------------------ */
+
+.mm-project-placeholder {
+  min-height: 100vh;
+  background: var(--mm-section-surface);
+  color: #07111f;
+}
+
+.mm-project-placeholder__hero {
+  min-height: 100svh;
+  display: grid;
+  align-items: end;
+  padding: clamp(7rem, 12vw, 10rem) var(--mm-section-pad-x) clamp(3rem, 7vw, 5rem);
+  background:
+    radial-gradient(ellipse 78% 52% at 50% 0%, rgba(16, 164, 255, 0.1), transparent 62%),
+    linear-gradient(180deg, #f7f8f9 0%, var(--mm-section-surface) 100%);
+}
+
+.mm-project-placeholder__copy,
+.mm-project-placeholder__viewport,
+.mm-project-placeholder__footer {
+  width: min(1180px, 100%);
+  margin-inline: auto;
+}
+
+.mm-project-placeholder__copy {
+  display: grid;
+  gap: clamp(0.9rem, 2vw, 1.25rem);
+}
+
+.mm-project-placeholder__eyebrow {
+  margin: 0;
+  color: rgba(7, 17, 31, 0.58);
+  font-size: clamp(0.78rem, 1vw, 0.9rem);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.mm-project-placeholder h1,
+.mm-project-placeholder__panel h2 {
+  max-width: 11ch;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--mm-type-section-title);
+  font-weight: 500;
+  line-height: var(--mm-leading-title);
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.mm-project-placeholder__summary {
+  max-width: 42rem;
+  margin: 0;
+  color: #536171;
+  font-size: var(--mm-type-body);
+  line-height: var(--mm-leading-body);
+  text-wrap: pretty;
+}
+
+.mm-project-placeholder__viewport {
+  min-height: 100svh;
+  display: grid;
+  align-items: center;
+  padding: clamp(4rem, 9vw, 7rem) var(--mm-section-pad-x);
+}
+
+.mm-project-placeholder__panel {
+  min-height: min(70svh, 42rem);
+  display: grid;
+  align-content: end;
+  gap: 0.85rem;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  border: 1px solid rgba(7, 17, 31, 0.08);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(16, 164, 255, 0.08), rgba(255, 255, 255, 0)),
+    #fbfdff;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+}
+
+.mm-project-placeholder__panel h2 {
+  max-width: 14ch;
+  font-size: clamp(1.85rem, 4.2vw, 3.4rem);
+}
+
+.mm-project-placeholder__footer {
+  padding: 0 var(--mm-section-pad-x) clamp(3rem, 7vw, 5rem);
+}
+
+.mm-project-placeholder__footer a {
+  color: #07111f;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 0.22em;
+}
+
+@media (max-width: 760px) {
+  .mm-project-placeholder__hero {
+    min-height: 88svh;
+    padding-top: 6.5rem;
+  }
+
+  .mm-project-placeholder h1 {
+    font-size: var(--mm-type-section-title-mobile);
+  }
+
+  .mm-project-placeholder__viewport {
+    min-height: 82svh;
+  }
 }
 
 /* AboutFounders ------------------------------------------------------------- */
