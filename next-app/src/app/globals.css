@@ -9246,7 +9246,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   }
 
   .liquid-nav-drawer--fullscreen .liquid-nav-drawer-fs-logo {
-    justify-content: flex-start !important;
+    justify-content: center !important;
   }
 
   .liquid-nav-drawer--fullscreen .liquid-nav-drawer-fs-logo-img {
@@ -9257,12 +9257,16 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   .liquid-nav-drawer--fullscreen .liquid-nav-drawer-fs-links {
     width: 100% !important;
     gap: clamp(0.55rem, 2.4vw, 0.9rem) !important;
+    align-items: stretch !important;
+    text-align: center !important;
   }
 
   .liquid-nav-drawer-link.liquid-nav-drawer-link--fullscreen {
     width: 100% !important;
+    justify-content: center !important;
     font-size: clamp(2rem, 9vw, 3.05rem) !important;
     line-height: 1.08 !important;
+    text-align: center !important;
     overflow-wrap: anywhere;
   }
 
