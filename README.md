@@ -8,6 +8,7 @@ For agents and future client-site work, read:
 - `.codex/skills/agency-nextjs-website/SKILL.md`
 - `.codex/skills/high-motion-web-performance/SKILL.md`
 - `docs/AGENCY_WEBSITE_PLAYBOOK.md`
+- `docs/DESIGN_SYSTEM.md`
 
 ## Commands
 
