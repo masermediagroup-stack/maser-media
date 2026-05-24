@@ -8953,10 +8953,12 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
   .mm-process-bento__grid {
     grid-template-columns: 1fr;
-    --mm-process-bento-mobile-gap: 1rem;
-    --mm-process-bento-mobile-tile-pad: 1.35rem;
-    --mm-process-bento-mobile-tile-height: clamp(13.25rem, 50vw, 15.25rem);
-    --mm-process-bento-mobile-icon-block: calc(clamp(3.25rem, 5vw, 3.85rem) + 1.1rem);
+    --mm-process-bento-mobile-gap: clamp(0.8rem, 3.8vw, 1rem);
+    --mm-process-bento-mobile-tile-pad: clamp(1rem, 4.8vw, 1.2rem);
+    --mm-process-bento-mobile-tile-height: clamp(12.75rem, 60vw, 14.5rem);
+    --mm-process-bento-mobile-icon-block: calc(clamp(3rem, 5vw, 3.5rem) + 0.8rem);
+    width: min(100%, calc(100vw - 2rem));
+    padding-inline: 0;
     grid-template-rows: repeat(4, var(--mm-process-bento-mobile-tile-height));
     align-items: stretch;
     grid-template-areas:
@@ -9013,13 +9015,13 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
     min-height: 0;
     height: 100%;
     padding: var(--mm-process-bento-mobile-tile-pad);
-    gap: 1.1rem;
+    gap: clamp(0.65rem, 3vw, 0.9rem);
   }
 
   .mm-process-bento__tile-body {
     flex: 1 1 auto;
     min-height: 0;
-    gap: 1.1rem;
+    gap: clamp(0.65rem, 3vw, 0.9rem);
   }
 
   .mm-process-bento__tile--quote .mm-process-bento__tile-body {
@@ -9041,6 +9043,31 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
   .mm-process-bento__quote {
     max-width: none;
+    font-size: clamp(1.3rem, 7vw, 1.65rem);
+    line-height: 1.12;
+  }
+
+  .mm-process-bento__copy {
+    gap: clamp(0.48rem, 2.6vw, 0.65rem);
+  }
+
+  .mm-process-bento__copy h3 {
+    max-width: min(17rem, 100%);
+    font-size: clamp(1.35rem, 6.4vw, 1.6rem);
+    line-height: 1.06;
+    letter-spacing: 0;
+  }
+
+  .mm-process-bento__copy p {
+    max-width: min(17.75rem, 100%);
+    font-size: clamp(0.92rem, 4.55vw, 1.04rem);
+    line-height: 1.34;
+    letter-spacing: 0;
+  }
+
+  .mm-process-bento__tile-shell--hero .mm-process-bento__copy p,
+  .mm-process-bento__tile-shell--shader-dark .mm-process-bento__copy p {
+    max-width: min(17rem, 100%);
   }
 
   /* Mobile-only: hide icons in hero (Direct) and accent (Launch) tiles. */
