@@ -8840,7 +8840,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   }
 
   .mm-work-projects {
-    --mm-work-card-height: clamp(22rem, 92vw, 28rem);
+    --mm-work-card-height: clamp(17.5rem, 76vw, 22rem);
   }
 
   .mm-work-projects .mm-work-card {
@@ -8853,6 +8853,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   .mm-work-card-pin {
     min-height: var(--mm-work-card-height);
     height: var(--mm-work-card-height);
+    margin-bottom: clamp(1.1rem, 4.5vw, 1.6rem);
   }
 
   .mm-work-projects .mm-work-card__body {
