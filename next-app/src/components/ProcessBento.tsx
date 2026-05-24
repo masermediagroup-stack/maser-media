@@ -1,6 +1,8 @@
 'use client';
 
 import Image from 'next/image';
+import { useEffect, useRef } from 'react';
+import type { CSSProperties, ReactNode, RefObject } from 'react';
 import { CONTENT } from '@/lib/content';
 import { ProcessIconByKey } from '@/components/ProcessIcons';
 import { ProcessBentoGridBackground } from '@/components/process-bento/ProcessBentoGridBackground';
@@ -35,27 +37,94 @@ function isDarkShaderTile(id: string) {
   return id === 'system';
 }
 
+function useProcessBentoReveal(gridRef: RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const grid = gridRef.current;
+
+    if (!grid) {
+      return;
+    }
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion || typeof IntersectionObserver === 'undefined') {
+      grid.classList.add('mm-process-bento__grid--motion-ready');
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) {
+          return;
+        }
+
+        grid.classList.add('mm-process-bento__grid--motion-ready');
+        observer.disconnect();
+      },
+      {
+        rootMargin: '0px 0px -18% 0px',
+        threshold: 0.24,
+      },
+    );
+
+    observer.observe(grid);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [gridRef]);
+}
+
+function ProcessTextReveal({
+  children,
+  className = '',
+  nowrap = false,
+  delay = 0,
+}: {
+  children: ReactNode;
+  className?: string;
+  nowrap?: boolean;
+  delay?: number;
+}) {
+  return (
+    <span
+      className={`mm-process-bento__text-reveal-line ${className}`.trim()}
+      style={{ '--mm-process-text-delay': `${delay}ms` } as CSSProperties}
+    >
+      <span
+        className={`mm-process-bento__text-reveal-inner${nowrap ? ' mm-process-bento__text-reveal-inner--nowrap' : ''}`}
+      >
+        {children}
+      </span>
+    </span>
+  );
+}
+
 function renderProcessPullQuote(quote: string) {
   const lockedLine = 'Launch-ready work.';
   const lockedLineIndex = quote.indexOf(lockedLine);
 
   if (lockedLineIndex === -1) {
-    return quote;
+    return <ProcessTextReveal delay={220}>{quote}</ProcessTextReveal>;
   }
 
   return (
     <>
-      <span className="mm-process-bento__quote-line">
+      <ProcessTextReveal className="mm-process-bento__quote-line" delay={220}>
         {quote.slice(0, lockedLineIndex).trimEnd()}{' '}
-      </span>
-      <span className="mm-process-bento__quote-line mm-process-bento__quote-line--nowrap">
+      </ProcessTextReveal>
+      <ProcessTextReveal className="mm-process-bento__quote-line" nowrap delay={340}>
         {lockedLine}
-      </span>
+      </ProcessTextReveal>
     </>
   );
 }
 
 export function ProcessBento() {
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  useProcessBentoReveal(gridRef);
+
   return (
     <section
       id="process"
@@ -72,6 +141,7 @@ export function ProcessBento() {
       </header>
 
       <div
+        ref={gridRef}
         className="mm-process-bento__grid"
         data-mm-reveal-group="fade"
         data-mm-reveal-stagger="0.09"
@@ -79,7 +149,7 @@ export function ProcessBento() {
         role="list"
         aria-label="Why Maser Media"
       >
-        {items.map((item) => (
+        {items.map((item, index) => (
           <ProcessBentoTile
             key={item.id}
             variant={item.variant}
@@ -92,26 +162,42 @@ export function ProcessBento() {
           >
             {item.variant === 'hero' ? (
               <>
-                <div className="mm-process-bento__icon-wrap" data-process-icon-wrap={item.icon}>
+                <div
+                  className="mm-process-bento__icon-wrap"
+                  data-process-icon-wrap={item.icon}
+                  style={{ '--mm-process-icon-delay': `${80 + index * 120}ms` } as CSSProperties}
+                >
                   <ProcessIconByKey icon={item.icon} className="mm-process-bento__icon" />
                 </div>
                 <div className="mm-process-bento__copy mm-process-bento__copy--hero">
-                  <h3>{item.title}</h3>
-                  <p>{item.text}</p>
+                  <h3>
+                    <ProcessTextReveal delay={120 + index * 80}>{item.title}</ProcessTextReveal>
+                  </h3>
+                  <p>
+                    <ProcessTextReveal delay={220 + index * 80}>{item.text}</ProcessTextReveal>
+                  </p>
                 </div>
               </>
             ) : (
               <>
                 {!isDarkShaderTile(item.id) ? (
-                  <div className="mm-process-bento__icon-wrap" data-process-icon-wrap={item.icon}>
+                  <div
+                    className="mm-process-bento__icon-wrap"
+                    data-process-icon-wrap={item.icon}
+                    style={{ '--mm-process-icon-delay': `${80 + index * 120}ms` } as CSSProperties}
+                  >
                     <ProcessIconByKey icon={item.icon} className="mm-process-bento__icon" />
                   </div>
                 ) : null}
                 <div
                   className={`mm-process-bento__copy${isDarkShaderTile(item.id) ? ' mm-process-bento__copy--on-dark-shader' : ''}`}
                 >
-                  <h3>{item.title}</h3>
-                  <p>{item.text}</p>
+                  <h3>
+                    <ProcessTextReveal delay={120 + index * 80}>{item.title}</ProcessTextReveal>
+                  </h3>
+                  <p>
+                    <ProcessTextReveal delay={220 + index * 80}>{item.text}</ProcessTextReveal>
+                  </p>
                 </div>
               </>
             )}
@@ -126,7 +212,11 @@ export function ProcessBento() {
           data-mm-reveal="fade"
           aria-label="Studio summary"
         >
-          <div className="mm-process-bento__quote-icon" data-process-icon-wrap="mark">
+          <div
+            className="mm-process-bento__quote-icon"
+            data-process-icon-wrap="mark"
+            style={{ '--mm-process-icon-delay': '440ms' } as CSSProperties}
+          >
             <Image
               src={QUOTE_MONOGRAM_SRC}
               alt={CONTENT.site.logoAlt}

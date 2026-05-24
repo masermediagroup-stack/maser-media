@@ -8630,6 +8630,21 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   color: var(--mm-process-blue-deep);
 }
 
+.mm-process-bento__grid .mm-process-bento__icon-wrap,
+.mm-process-bento__grid .mm-process-bento__quote-icon {
+  opacity: 0;
+  transform: translate3d(0, 0.75rem, 0) scale(0.94);
+  transition:
+    opacity 540ms cubic-bezier(0.16, 1, 0.3, 1) var(--mm-process-icon-delay, 80ms),
+    transform 540ms cubic-bezier(0.16, 1, 0.3, 1) var(--mm-process-icon-delay, 80ms);
+}
+
+.mm-process-bento__grid--motion-ready .mm-process-bento__icon-wrap,
+.mm-process-bento__grid--motion-ready .mm-process-bento__quote-icon {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
 .mm-process-bento__icon {
   width: clamp(2.75rem, 4.5vw, 3.5rem);
   height: clamp(2.75rem, 4.5vw, 3.5rem);
@@ -8669,6 +8684,30 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   line-height: 1.58;
 }
 
+.mm-process-bento__text-reveal-line {
+  display: block;
+  overflow: hidden;
+  font-kerning: none;
+}
+
+.mm-process-bento__text-reveal-inner {
+  display: block;
+  opacity: 0;
+  transform: translate3d(0, 105%, 0);
+  transition:
+    opacity 560ms cubic-bezier(0.16, 1, 0.3, 1) var(--mm-process-text-delay, 120ms),
+    transform 680ms cubic-bezier(0.16, 1, 0.3, 1) var(--mm-process-text-delay, 120ms);
+}
+
+.mm-process-bento__text-reveal-inner--nowrap {
+  white-space: nowrap;
+}
+
+.mm-process-bento__grid--motion-ready .mm-process-bento__text-reveal-inner {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
 .mm-process-bento__quote {
   position: relative;
   z-index: 1;
@@ -8686,10 +8725,6 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   display: block;
 }
 
-.mm-process-bento__quote-line--nowrap {
-  white-space: nowrap;
-}
-
 .mm-process-bento__quote-icon {
   position: relative;
   z-index: 1;
@@ -8702,6 +8737,16 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   border: 0;
   background: transparent;
   box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-process-bento__grid .mm-process-bento__icon-wrap,
+  .mm-process-bento__grid .mm-process-bento__quote-icon,
+  .mm-process-bento__text-reveal-inner {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 .mm-process-bento__icon--quote {
