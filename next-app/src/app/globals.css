@@ -6461,6 +6461,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   align-items: center;
   gap: clamp(2.25rem, 5vw, 3.75rem);
   width: 100%;
+  margin-inline: auto;
 }
 
 .mm-testimonials-wave__head {
@@ -6500,16 +6501,21 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(1rem, 2.2vw, 1.4rem);
   width: 100%;
+  max-width: min(100%, 68rem);
+  margin-inline: auto;
   height: auto;
   max-height: none;
   overflow: visible;
   padding: 0;
   mask-image: none;
+  justify-content: center;
 }
 
 .mm-testimonials-wave__slot {
   display: grid;
   min-width: 0;
+  width: 100%;
+  justify-self: center;
 }
 
 .mm-testimonials-wave .testimonial-card {
@@ -6557,7 +6563,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   .mm-testimonials-wave__static,
   .mm-testimonials-wave__static--live {
     grid-template-columns: 1fr;
+    width: min(100%, 38rem);
     max-width: 38rem;
+    margin-inline: auto;
   }
 
   .mm-testimonials-wave .testimonial-card {
