@@ -7478,7 +7478,19 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 @media (max-width: 540px) {
   .mm-clients__grid {
-    grid-template-columns: 1fr;
+    width: min(100%, calc(100vw - 2rem));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.72rem 0.5rem;
+  }
+
+  .mm-clients .mm-client-name {
+    font-size: clamp(0.72rem, 4vw, 0.84rem);
+    line-height: 1.22;
+    letter-spacing: 0;
+  }
+
+  .mm-clients__more {
+    font-size: 0.72rem;
   }
 }
 
