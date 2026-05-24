@@ -57,6 +57,7 @@ This repo currently has a compact structure:
 - `next-app/src/components/index.tsx` contains many homepage and inner-page sections.
 - `next-app/src/lib/content.ts` owns most site copy and structured content.
 - `next-app/src/app/globals.css` contains the visual system and route styling.
+- `docs/DESIGN_SYSTEM.md` captures the current Maser Media tokens, surfaces, component rules, and research-backed design-system direction.
 
 This is acceptable for the current site, but future work should gradually extract large sections into `src/components/sections/*` when editing them substantially.
 
@@ -202,4 +203,3 @@ Every quarter:
 - MDN lazy loading: https://developer.mozilla.org/en-US/docs/Web/Performance/Lazy_loading
 - GSAP ScrollTrigger: https://gsap.com/docs/v3/Plugins/ScrollTrigger/
 - Creative motion case study: https://tympanus.net/codrops/2025/09/19/lo2s-x-snp-dashdigital-designing-a-website-full-of-movement-and-energy/
-
