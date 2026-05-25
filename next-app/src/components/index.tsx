@@ -873,19 +873,20 @@ export function Cta() {
             </div>
             <motion.div
               className="mm-cta__logo-stage"
-              aria-hidden
               initial={reduceMotion ? false : { opacity: 0, y: 12 }}
               whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.45 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Image
-                src="/assets/Blue-HD.svg"
-                alt=""
-                width={520}
-                height={280}
-                className="mm-cta__logo"
-              />
+              <Link href="/#hero" className="mm-cta__logo-link" aria-label="Back to the Maser Media hero">
+                <Image
+                  src="/assets/Blue-HD.svg"
+                  alt="Maser Media"
+                  width={520}
+                  height={280}
+                  className="mm-cta__logo"
+                />
+              </Link>
             </motion.div>
           </div>
         </div>

@@ -15,26 +15,35 @@ precision mediump float;
 uniform vec2 iResolution;
 uniform float iTime;
 uniform vec2 iMouse;
+uniform vec2 iVelocity;
+uniform float iPointerActive;
 uniform vec3 u_color;
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord){
-    vec2 uv = fragCoord / iResolution;
     vec2 centeredUV = (2.0 * fragCoord - iResolution.xy) / min(iResolution.x, iResolution.y);
 
     float time = iTime * 0.5;
 
-    // Normalize mouse input (0.0 - 1.0)
-    vec2 mouse = iMouse / iResolution;
-    vec2 rippleCenter = 2.0 * mouse - 1.0; // remap to -1.0 ~ 1.0
+    vec2 pointer = (2.0 * iMouse - iResolution.xy) / min(iResolution.x, iResolution.y);
+    vec2 toPointer = centeredUV - pointer;
+    float pointerDist = length(toPointer);
+    float pointerField = exp(-pointerDist * pointerDist * 5.4) * iPointerActive;
+    vec2 velocity = iVelocity / max(iResolution.xy, vec2(1.0));
+    vec2 drag = velocity * vec2(1.0, -1.0);
+    vec2 tangent = vec2(-toPointer.y, toPointer.x);
 
     vec2 distortion = centeredUV;
+    distortion -= drag * pointerField * 1.85;
+    distortion += tangent * pointerField * 0.16 * sin(time * 1.7 + pointerDist * 11.0);
+
     for (float i = 1.0; i < 8.0; i++) {
-        distortion.x += 0.5 / i * cos(i * 2.0 * distortion.y + time + rippleCenter.x * 3.1415);
-        distortion.y += 0.5 / i * cos(i * 2.0 * distortion.x + time + rippleCenter.y * 3.1415);
+        distortion.x += 0.42 / i * cos(i * 2.0 * distortion.y + time + pointer.x * 1.15);
+        distortion.y += 0.42 / i * cos(i * 2.0 * distortion.x + time + pointer.y * 1.15);
     }
 
     float wave = abs(sin(distortion.x + distortion.y + time));
     float glow = smoothstep(0.9, 0.2, wave);
+    glow += pointerField * 0.18 * smoothstep(0.65, 0.0, pointerDist);
 
     fragColor = vec4(u_color * glow, 1.0);
 }
@@ -84,8 +93,6 @@ function SmokeyBackground({
   className = "",
 }: SmokeyBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouseRef = useRef({ x: 0, y: 0 });
-  const hoveringRef = useRef(false);
   const colorRef = useRef(color);
 
   colorRef.current = color;
@@ -144,13 +151,35 @@ function SmokeyBackground({
     const iResolutionLocation = gl.getUniformLocation(program, "iResolution");
     const iTimeLocation = gl.getUniformLocation(program, "iTime");
     const iMouseLocation = gl.getUniformLocation(program, "iMouse");
+    const iVelocityLocation = gl.getUniformLocation(program, "iVelocity");
+    const iPointerActiveLocation = gl.getUniformLocation(program, "iPointerActive");
     const uColorLocation = gl.getUniformLocation(program, "u_color");
 
     const startTime = Date.now();
+    const pointer = { x: 0, y: 0, vx: 0, vy: 0, active: 0 };
+    const target = { x: 0, y: 0, time: 0, seeded: false };
+    const setters = {
+      x: (value: number) => {
+        pointer.x = value;
+      },
+      y: (value: number) => {
+        pointer.y = value;
+      },
+      vx: (value: number) => {
+        pointer.vx = value;
+      },
+      vy: (value: number) => {
+        pointer.vy = value;
+      },
+      active: (value: number) => {
+        pointer.active = value;
+      },
+    };
     let rafId = 0;
     let cancelled = false;
     let running = false;
     let inView = true;
+    let killGsapTweens: (() => void) | null = null;
     const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
     const reducedMotionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
     const pixelRatio = coarsePointer ? 0.85 : Math.min(window.devicePixelRatio || 1, 1.25);
@@ -183,11 +212,9 @@ function SmokeyBackground({
       gl.uniform3f(uColorLocation, r, g, b);
       gl.uniform2f(iResolutionLocation, bufferWidth, bufferHeight);
       gl.uniform1f(iTimeLocation, reducedMotionMedia.matches ? 0 : currentTime);
-      gl.uniform2f(
-        iMouseLocation,
-        hoveringRef.current ? mouseRef.current.x * pixelRatio : 0,
-        hoveringRef.current ? (height - mouseRef.current.y) * pixelRatio : 0,
-      );
+      gl.uniform2f(iMouseLocation, pointer.x * pixelRatio, (height - pointer.y) * pixelRatio);
+      gl.uniform2f(iVelocityLocation, pointer.vx * pixelRatio, pointer.vy * pixelRatio);
+      gl.uniform1f(iPointerActiveLocation, pointer.active);
 
       gl.drawArrays(gl.TRIANGLES, 0, 6);
       if (reducedMotionMedia.matches) {
@@ -209,21 +236,33 @@ function SmokeyBackground({
       running = false;
     };
 
-    const handleMouseMove = (event: MouseEvent) => {
+    const handlePointerMove = (event: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
-      mouseRef.current = {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top,
-      };
+      const nextX = event.clientX - rect.left;
+      const nextY = event.clientY - rect.top;
+      const now = performance.now();
+      const delta = target.seeded ? Math.max(16, now - target.time) : 16;
+      const vx = target.seeded ? ((nextX - target.x) / delta) * 16.67 : 0;
+      const vy = target.seeded ? ((nextY - target.y) / delta) * 16.67 : 0;
+
+      target.x = nextX;
+      target.y = nextY;
+      target.time = now;
+      target.seeded = true;
+
+      setters.x(nextX);
+      setters.y(nextY);
+      setters.vx(Math.max(-90, Math.min(90, vx)));
+      setters.vy(Math.max(-90, Math.min(90, vy)));
+      setters.active(1);
+      start();
     };
 
-    const handleMouseEnter = () => {
-      hoveringRef.current = true;
-    };
-
-    const handleMouseLeave = () => {
-      hoveringRef.current = false;
-      mouseRef.current = { x: 0, y: 0 };
+    const handlePointerLeave = () => {
+      target.seeded = false;
+      setters.vx(0);
+      setters.vy(0);
+      setters.active(0);
     };
 
     const observer = new IntersectionObserver(
@@ -241,10 +280,21 @@ function SmokeyBackground({
       else start();
     };
 
+    const interactionTarget = canvas.closest<HTMLElement>(".mm-hero") ?? canvas;
+
     if (!coarsePointer) {
-      canvas.addEventListener("mousemove", handleMouseMove);
-      canvas.addEventListener("mouseenter", handleMouseEnter);
-      canvas.addEventListener("mouseleave", handleMouseLeave);
+      import("gsap").then(({ gsap }) => {
+        if (cancelled) return;
+        setters.x = gsap.quickTo(pointer, "x", { duration: 0.72, ease: "power3.out" });
+        setters.y = gsap.quickTo(pointer, "y", { duration: 0.72, ease: "power3.out" });
+        setters.vx = gsap.quickTo(pointer, "vx", { duration: 0.55, ease: "power3.out" });
+        setters.vy = gsap.quickTo(pointer, "vy", { duration: 0.55, ease: "power3.out" });
+        setters.active = gsap.quickTo(pointer, "active", { duration: 0.34, ease: "power2.out" });
+        killGsapTweens = () => gsap.killTweensOf(pointer);
+      });
+
+      interactionTarget.addEventListener("pointermove", handlePointerMove, { passive: true });
+      interactionTarget.addEventListener("pointerleave", handlePointerLeave);
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
@@ -254,10 +304,10 @@ function SmokeyBackground({
       cancelled = true;
       stop();
       observer.disconnect();
-      canvas.removeEventListener("mousemove", handleMouseMove);
-      canvas.removeEventListener("mouseenter", handleMouseEnter);
-      canvas.removeEventListener("mouseleave", handleMouseLeave);
+      interactionTarget.removeEventListener("pointermove", handlePointerMove);
+      interactionTarget.removeEventListener("pointerleave", handlePointerLeave);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      killGsapTweens?.();
       gl.deleteProgram(program);
       gl.deleteShader(vertexShader);
       gl.deleteShader(fragmentShader);
