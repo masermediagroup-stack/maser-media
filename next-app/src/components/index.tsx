@@ -489,7 +489,7 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
   }, [canMountCurtain, entrance, onCurtainDone]);
 
   return (
-    <header className={`mm-hero${curtainDone ? ' mm-hero--curtain-done' : ''}`}>
+    <header id="hero" className={`mm-hero${curtainDone ? ' mm-hero--curtain-done' : ''}`}>
       <div className="mm-hero__bg-scale" aria-hidden>
         <div className="mm-hero__smokey">
           <div className="mm-hero__smokey-placeholder" aria-hidden />

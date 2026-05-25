@@ -6,6 +6,7 @@ export interface BookingInput {
   service: string;
   brief: string;
   budget: string;
+  heardAbout: string;
   firstName: string;
   email: string;
   phone: string;
@@ -56,6 +57,7 @@ export async function createBookingEvent(input: BookingInput): Promise<BookingRe
   const description = [
     `Service:  ${input.service}`,
     `Budget:   ${input.budget}`,
+    `Heard:    ${input.heardAbout}`,
     `Name:     ${input.firstName}`,
     `Email:    ${input.email}`,
     `Phone:    ${input.phone || "(not provided)"}`,

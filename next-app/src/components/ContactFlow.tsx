@@ -15,11 +15,20 @@ import {
 
 type ServiceId = "brand" | "web" | "copy" | "strategy" | "unsure";
 type BudgetId = "under-1000" | "1000-5000" | "5000-15000" | "15000-plus" | "unsure";
+type HeardAboutId =
+  | "google"
+  | "instagram"
+  | "facebook"
+  | "referral"
+  | "existing-client"
+  | "ai-search"
+  | "other";
 
 type ContactData = {
   service: ServiceId;
   brief: string;
   budget: BudgetId;
+  heardAbout: HeardAboutId;
   firstName: string;
   email: string;
   phone: string;
@@ -35,6 +44,12 @@ type ServiceOption = {
 
 type BudgetOption = {
   id: BudgetId;
+  label: string;
+  wide?: boolean;
+};
+
+type HeardAboutOption = {
+  id: HeardAboutId;
   label: string;
   wide?: boolean;
 };
@@ -55,6 +70,16 @@ const BUDGET_OPTIONS: BudgetOption[] = [
   { id: "unsure", label: "Not sure yet", wide: true },
 ];
 
+const HEARD_ABOUT_OPTIONS: HeardAboutOption[] = [
+  { id: "google", label: "Google" },
+  { id: "instagram", label: "Instagram" },
+  { id: "facebook", label: "Facebook" },
+  { id: "referral", label: "Friend / referral" },
+  { id: "existing-client", label: "Existing client" },
+  { id: "ai-search", label: "AI search" },
+  { id: "other", label: "Somewhere else", wide: true },
+];
+
 const STEP_COPY = [
   {
     title: "What are you looking to build?",
@@ -69,8 +94,12 @@ const STEP_COPY = [
     helper: "",
   },
   {
+    title: "How did you hear about us?",
+    helper: "This helps us understand where the right people are finding Maser Media.",
+  },
+  {
     title: "Choose a consulting call.",
-    helper: "Pick a date and time that works for your intro call.",
+    helper: "Pick any future date and a Central Time slot between 10:00am and 7:00pm.",
   },
   {
     title: "Almost there - let's get in touch.",
@@ -78,20 +107,40 @@ const STEP_COPY = [
   },
 ];
 
-const TIME_SLOTS = ["8:00am", "8:20am", "8:40am", "9:00am", "9:20am", "9:40am", "10:00am", "10:20am"];
-const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+const FIRST_BOOKING_HOUR = 10;
+const LAST_BOOKING_HOUR = 19;
+const BOOKING_SLOT_MINUTES = 20;
 
-function getBookingDates() {
+function formatTimeSlot(totalMinutes: number) {
+  const hour24 = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  const suffix = hour24 >= 12 ? "pm" : "am";
+  const hour12 = hour24 % 12 || 12;
+  return `${hour12}:${String(minutes).padStart(2, "0")}${suffix}`;
+}
+
+function createTimeSlots() {
+  const slots: string[] = [];
+  for (
+    let totalMinutes = FIRST_BOOKING_HOUR * 60;
+    totalMinutes <= LAST_BOOKING_HOUR * 60;
+    totalMinutes += BOOKING_SLOT_MINUTES
+  ) {
+    slots.push(formatTimeSlot(totalMinutes));
+  }
+  return slots;
+}
+
+const TIME_SLOTS = createTimeSlots();
+
+function getSuggestedBookingDates() {
   const dates: Date[] = [];
   const cursor = new Date();
   cursor.setHours(12, 0, 0, 0);
   cursor.setDate(cursor.getDate() + 1);
 
-  while (dates.length < 10) {
-    const day = cursor.getDay();
-    if (day !== 0 && day !== 6) {
-      dates.push(new Date(cursor));
-    }
+  while (dates.length < 7) {
+    dates.push(new Date(cursor));
     cursor.setDate(cursor.getDate() + 1);
   }
 
@@ -99,7 +148,18 @@ function getBookingDates() {
 }
 
 function toDateId(date: Date) {
-  return date.toISOString().slice(0, 10);
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0"),
+  ].join("-");
+}
+
+function getMinBookingDateId() {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() + 1);
+  return toDateId(date);
 }
 
 function formatBookingDate(dateId: string) {
@@ -113,11 +173,12 @@ function formatBookingDate(dateId: string) {
 }
 
 function createInitialContactData(): ContactData {
-  const firstDate = getBookingDates()[0];
+  const firstDate = getSuggestedBookingDates()[0];
   return {
     service: "web",
     brief: "",
     budget: "5000-15000",
+    heardAbout: "google",
     firstName: "",
     email: "",
     phone: "",
@@ -134,14 +195,15 @@ export function ContactFlow() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [data, setData] = useState<ContactData>(() => createInitialContactData());
 
-  const totalSteps = 5;
+  const totalSteps = 6;
   const copy = STEP_COPY[step];
   const progress = `${((step + 1) / totalSteps) * 100}%`;
   const canContinue = useMemo(() => {
     if (step === 0) return Boolean(data.service);
     if (step === 1) return data.brief.trim().length > 0;
     if (step === 2) return Boolean(data.budget);
-    if (step === 3) return Boolean(data.callDate && data.callTime);
+    if (step === 3) return Boolean(data.heardAbout);
+    if (step === 4) return Boolean(data.callDate && data.callTime);
     return data.firstName.trim().length > 0 && data.email.trim().length > 0;
   }, [data, step]);
 
@@ -242,6 +304,7 @@ export function ContactFlow() {
         <input type="hidden" name="call_date" value={data.callDate} />
         <input type="hidden" name="call_time" value={data.callTime} />
         <input type="hidden" name="call_timezone" value="America/Chicago" />
+        <input type="hidden" name="heard_about" value={data.heardAbout} />
 
         <div
           className="contact-flow-progress"
@@ -266,8 +329,9 @@ export function ContactFlow() {
             {step === 0 ? <ServiceStep data={data} setData={setData} /> : null}
             {step === 1 ? <BriefStep data={data} setData={setData} /> : null}
             {step === 2 ? <BudgetStep data={data} setData={setData} /> : null}
-            {step === 3 ? <ScheduleStep data={data} setData={setData} /> : null}
-            {step === 4 ? <ContactStep data={data} setData={setData} /> : null}
+            {step === 3 ? <HeardAboutStep data={data} setData={setData} /> : null}
+            {step === 4 ? <ScheduleStep data={data} setData={setData} /> : null}
+            {step === 5 ? <ContactStep data={data} setData={setData} /> : null}
           </motion.div>
         </AnimatePresence>
 
@@ -404,6 +468,44 @@ function BudgetStep({
   );
 }
 
+function HeardAboutStep({
+  data,
+  setData,
+}: {
+  data: ContactData;
+  setData: React.Dispatch<React.SetStateAction<ContactData>>;
+}) {
+  return (
+    <fieldset className="contact-flow-fieldset">
+      <legend className="contact-flow-field-title">Where did you first hear about Maser Media?</legend>
+      <div className="contact-flow-grid contact-flow-grid--heard-about">
+        {HEARD_ABOUT_OPTIONS.map((option) => {
+          const selected = data.heardAbout === option.id;
+
+          return (
+            <button
+              type="button"
+              key={option.id}
+              className={`contact-flow-option contact-flow-option--heard-about${selected ? " is-selected" : ""}${
+                option.wide ? " is-wide" : ""
+              }`}
+              aria-pressed={selected}
+              onClick={() => setData((current) => ({ ...current, heardAbout: option.id }))}
+            >
+              <span className="contact-flow-option-label">{option.label}</span>
+              {selected ? (
+                <span className="contact-flow-option-check" aria-hidden>
+                  <Check size={16} strokeWidth={3} />
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
 function ScheduleStep({
   data,
   setData,
@@ -411,7 +513,8 @@ function ScheduleStep({
   data: ContactData;
   setData: React.Dispatch<React.SetStateAction<ContactData>>;
 }) {
-  const bookingDates = useMemo(() => getBookingDates(), []);
+  const bookingDates = useMemo(() => getSuggestedBookingDates(), []);
+  const minBookingDate = useMemo(() => getMinBookingDateId(), []);
   const selectedDateLabel = formatBookingDate(data.callDate);
 
   return (
@@ -433,21 +536,34 @@ function ScheduleStep({
           <div>
             <Globe2 size={16} aria-hidden />
             <dt>Timezone</dt>
-            <dd>America/Chicago</dd>
+            <dd>Central Time</dd>
           </div>
         </dl>
       </aside>
 
       <div className="contact-flow-calendar-panel">
         <div className="contact-flow-calendar-head">
-          <span>Pick a date</span>
+          <span>Pick any future date</span>
           <strong>{selectedDateLabel}</strong>
         </div>
-        <div className="contact-flow-weekdays" aria-hidden>
-          {WEEKDAY_LABELS.map((day) => (
-            <span key={day}>{day}</span>
-          ))}
-        </div>
+        <label className="contact-flow-date-input-label" htmlFor="contact-call-date">
+          <span>Calendar date</span>
+          <input
+            id="contact-call-date"
+            className="contact-flow-input contact-flow-date-input"
+            type="date"
+            min={minBookingDate}
+            value={data.callDate}
+            onChange={(event) => {
+              const nextDate = event.target.value;
+              setData((current) => ({
+                ...current,
+                callDate: nextDate && nextDate >= minBookingDate ? nextDate : minBookingDate,
+              }));
+            }}
+          />
+        </label>
+        <p className="contact-flow-field-note">Quick picks</p>
         <div className="contact-flow-date-grid" role="group" aria-label="Available dates">
           {bookingDates.map((date) => {
             const id = toDateId(date);
@@ -477,7 +593,7 @@ function ScheduleStep({
       <div className="contact-flow-time-panel">
         <div className="contact-flow-calendar-head">
           <span>Pick a time</span>
-          <strong>{data.callTime || "20m slots"}</strong>
+          <strong>{data.callTime || "20m slots"} CST</strong>
         </div>
         <div className="contact-flow-time-list" role="group" aria-label="Available times">
           {TIME_SLOTS.map((time) => {
@@ -539,7 +655,7 @@ function ContactStep({
       />
       <p className="contact-flow-field-note contact-flow-field-note--inline">
         <Clock3 size={16} aria-hidden />
-        Selected call: {formatBookingDate(data.callDate)} at {data.callTime} CT. We&apos;ll send the Google Calendar invite after review.
+        Selected call: {formatBookingDate(data.callDate)} at {data.callTime} CST. We&apos;ll send the Google Calendar invite after review.
       </p>
     </div>
   );
