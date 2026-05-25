@@ -414,22 +414,34 @@ export function useGsapLandingMotion(
             }
 
             if (clientsSection && clientPanelFadeItems && clientPanelFadeItems.length) {
-              gsap.fromTo(
-                clientPanelFadeItems,
-                { autoAlpha: 0, y: isNarrow ? 12 : 16 },
-                {
-                  autoAlpha: 1,
-                  y: 0,
-                  duration: 0.9,
-                  ease: 'power2.out',
-                  scrollTrigger: {
-                    trigger: clientsSection,
-                    start: 'top 82%',
-                    toggleActions: 'play none none none',
-                    ...scrollTriggerDefaults,
-                  },
+              SplitText.create(clientPanelFadeItems, {
+                type: 'lines, words',
+                mask: 'lines',
+                linesClass: 'mm-client-line++',
+                wordsClass: 'mm-client-word++',
+                autoSplit: true,
+                onSplit(self) {
+                  gsap.set(clientPanelFadeItems, { autoAlpha: 1 });
+
+                  return gsap.from(self.words, {
+                    autoAlpha: 0,
+                    yPercent: 115,
+                    rotateX: -72,
+                    transformOrigin: '50% 100%',
+                    transformPerspective: 720,
+                    duration: isNarrow ? 0.58 : 0.68,
+                    ease: 'power4.out',
+                    stagger: { each: isNarrow ? 0.035 : 0.045, from: 'start' },
+                    clearProps: 'transformPerspective,transformOrigin',
+                    scrollTrigger: {
+                      trigger: clientsSection,
+                      start: 'top 82%',
+                      toggleActions: 'play none none none',
+                      ...scrollTriggerDefaults,
+                    },
+                  });
                 },
-              );
+              });
             }
 
             const workSection = root.querySelector<HTMLElement>('.mm-work');
