@@ -3353,10 +3353,9 @@ button.premium-btn {
   white-space: nowrap;
 }
 
-.contact-flow-weekdays,
 .contact-flow-date-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(3.25rem, 1fr));
   gap: 0.5rem;
 }
 
@@ -3450,7 +3449,8 @@ button.premium-btn {
 }
 
 .contact-flow-grid--services,
-.contact-flow-grid--budget {
+.contact-flow-grid--budget,
+.contact-flow-grid--heard-about {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -3536,6 +3536,11 @@ button.premium-btn {
   padding-inline: 1.25rem;
 }
 
+.contact-flow-option--heard-about {
+  min-height: 3.6rem;
+  padding-inline: 1.1rem;
+}
+
 .contact-flow-field-title {
   display: block;
   margin-bottom: 1rem;
@@ -3592,6 +3597,21 @@ button.premium-btn {
   color: #737373;
   font-size: 0.95rem;
   line-height: 1.5;
+}
+
+.contact-flow-date-input-label {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+  color: #111;
+  font-size: 0.9rem;
+  font-weight: 720;
+}
+
+.contact-flow-date-input {
+  min-height: 3.25rem;
+  border-radius: 14px;
+  color-scheme: light;
 }
 
 .contact-flow-field-note--inline {
@@ -3723,6 +3743,7 @@ button.premium-btn {
 
   .contact-flow-grid--services,
   .contact-flow-grid--budget,
+  .contact-flow-grid--heard-about,
   .contact-flow-actions {
     grid-template-columns: 1fr;
   }
@@ -7081,6 +7102,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   flex: 0 0 auto;
   margin: 0;
   max-height: 42px;
+  perspective: 760px;
+  transform-style: preserve-3d;
 }
 
 .liquid-nav-logo-img {
@@ -7090,6 +7113,35 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   max-height: 42px;
   object-fit: contain;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.28));
+  transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg);
+  transform-origin: 50% 50%;
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 220ms ease;
+  will-change: transform;
+}
+
+.liquid-nav-logo:hover .liquid-nav-logo-img,
+.liquid-nav-logo:focus-visible .liquid-nav-logo-img {
+  transform: translate3d(0, -2px, 18px) rotateX(7deg) rotateY(-8deg);
+  filter: drop-shadow(0 7px 12px rgba(0, 0, 0, 0.24));
+}
+
+.liquid-nav-logo:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.58);
+  outline-offset: 0.35rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liquid-nav-logo-img {
+    transition: none;
+    will-change: auto;
+  }
+
+  .liquid-nav-logo:hover .liquid-nav-logo-img,
+  .liquid-nav-logo:focus-visible .liquid-nav-logo-img {
+    transform: translateY(-1px);
+  }
 }
 
 .liquid-nav.liquid-nav--expanded {

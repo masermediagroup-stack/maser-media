@@ -233,7 +233,7 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
                 perspective: reduceMotion ? undefined : 1000,
               }}
             >
-              <Link href="/" className="liquid-nav-logo" aria-label="Maser Media home">
+              <Link href="/#hero" className="liquid-nav-logo" aria-label="Maser Media hero">
                 <motion.span
                   className="liquid-nav-flip-inner"
                   initial={flipInitial}
@@ -372,9 +372,9 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
               {fullscreenMenuOpen ? (
                 <div className="liquid-nav-drawer-fs-inner">
                   <Link
-                    href="/"
+                    href="/#hero"
                     className="liquid-nav-drawer-fs-logo"
-                    aria-label="Maser Media home"
+                    aria-label="Maser Media hero"
                     onClick={() => setOpen(false)}
                   >
                     <Image

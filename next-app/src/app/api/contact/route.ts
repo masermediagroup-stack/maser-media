@@ -9,6 +9,7 @@ interface ContactPayload {
   service: string;
   brief: string;
   budget: string;
+  heardAbout: string;
   firstName: string;
   email: string;
   phone: string;
@@ -25,9 +26,19 @@ const BUDGET_IDS = new Set([
   "15000-plus",
   "unsure",
 ]);
+const HEARD_ABOUT_IDS = new Set([
+  "google",
+  "instagram",
+  "facebook",
+  "referral",
+  "existing-client",
+  "ai-search",
+  "other",
+]);
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_PATTERN = /^\d{1,2}:\d{2}(am|pm)$/i;
+const TIME_SLOT_IDS = new Set(createTimeSlots());
 
 export async function POST(request: Request) {
   let payload: ContactPayload;
@@ -51,6 +62,7 @@ export async function POST(request: Request) {
       service: payload.service,
       brief: payload.brief,
       budget: payload.budget,
+      heardAbout: payload.heardAbout,
       firstName: payload.firstName,
       email: payload.email,
       phone: payload.phone ?? "",
@@ -90,6 +102,9 @@ function validate(payload: ContactPayload | null | undefined): string | null {
   if (typeof payload.budget !== "string" || !BUDGET_IDS.has(payload.budget)) {
     return "Invalid budget selection.";
   }
+  if (typeof payload.heardAbout !== "string" || !HEARD_ABOUT_IDS.has(payload.heardAbout)) {
+    return "Invalid referral source.";
+  }
   if (typeof payload.firstName !== "string" || payload.firstName.trim().length === 0) {
     return "Please enter your first name.";
   }
@@ -99,7 +114,14 @@ function validate(payload: ContactPayload | null | undefined): string | null {
   if (typeof payload.callDate !== "string" || !DATE_PATTERN.test(payload.callDate)) {
     return "Please choose a date for the call.";
   }
-  if (typeof payload.callTime !== "string" || !TIME_PATTERN.test(payload.callTime)) {
+  if (!isFutureDate(payload.callDate)) {
+    return "Please choose a future date for the call.";
+  }
+  if (
+    typeof payload.callTime !== "string" ||
+    !TIME_PATTERN.test(payload.callTime) ||
+    !TIME_SLOT_IDS.has(payload.callTime.toLowerCase())
+  ) {
     return "Please choose a time for the call.";
   }
   if (payload.phone && typeof payload.phone !== "string") {
@@ -107,4 +129,23 @@ function validate(payload: ContactPayload | null | undefined): string | null {
   }
 
   return null;
+}
+
+function createTimeSlots() {
+  const slots: string[] = [];
+  for (let totalMinutes = 10 * 60; totalMinutes <= 19 * 60; totalMinutes += 20) {
+    const hour24 = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    const suffix = hour24 >= 12 ? "pm" : "am";
+    const hour12 = hour24 % 12 || 12;
+    slots.push(`${hour12}:${String(minutes).padStart(2, "0")}${suffix}`);
+  }
+  return slots;
+}
+
+function isFutureDate(dateId: string) {
+  const selected = new Date(`${dateId}T12:00:00`);
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+  return Number.isFinite(selected.getTime()) && selected > today;
 }
