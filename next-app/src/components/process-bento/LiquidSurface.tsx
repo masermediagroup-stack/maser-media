@@ -27,6 +27,10 @@ export interface LiquidSurfaceProps {
   interactionRoot?: HTMLElement | null;
   /** Scales cursor distortion (UV offset, ripples, touch force). Default 1. */
   touchStrength?: number;
+  logoTextureSrc?: string;
+  logoOpacity?: number;
+  logoScale?: number;
+  logoOffset?: { x: number; y: number };
 }
 
 type TouchPoint = {
@@ -162,14 +166,22 @@ type SceneManager = {
   scene: THREE.Scene;
 };
 
+function createTransparentTexture() {
+  const texture = new THREE.DataTexture(new Uint8Array([255, 255, 255, 0]), 1, 1, THREE.RGBAFormat);
+  texture.needsUpdate = true;
+  return texture;
+}
+
 class GradientBackground {
   sceneManager: SceneManager;
   mesh: THREE.Mesh | null;
   uniforms: Record<string, THREE.IUniform>;
+  fallbackLogoTexture: THREE.DataTexture;
 
   constructor(sceneManager: SceneManager, props: LiquidSurfaceProps) {
     this.sceneManager = sceneManager;
     this.mesh = null;
+    this.fallbackLogoTexture = createTransparentTexture();
     this.uniforms = {
       uTime: { value: 0 },
       uResolution: { value: new THREE.Vector2(100, 100) },
@@ -190,6 +202,12 @@ class GradientBackground {
       uColor1Weight: { value: props.color1Weight ?? 1.0 },
       uColor2Weight: { value: props.color2Weight ?? 1.0 },
       uTouchStrength: { value: props.touchStrength ?? 1.0 },
+      uLogoTexture: { value: this.fallbackLogoTexture },
+      uLogoEnabled: { value: 0 },
+      uLogoOpacity: { value: props.logoOpacity ?? 0 },
+      uLogoScale: { value: props.logoScale ?? 1 },
+      uLogoAspect: { value: 1 },
+      uLogoOffset: { value: new THREE.Vector2(props.logoOffset?.x ?? 0, props.logoOffset?.y ?? 0) },
     };
   }
 
@@ -216,6 +234,9 @@ class GradientBackground {
         uniform float uGradientSize; uniform float uGradientCount;
         uniform float uColor1Weight; uniform float uColor2Weight;
         uniform float uTouchStrength;
+        uniform sampler2D uLogoTexture;
+        uniform float uLogoEnabled; uniform float uLogoOpacity; uniform float uLogoScale;
+        uniform float uLogoAspect; uniform vec2 uLogoOffset;
 
         varying vec2 vUv;
 
@@ -223,6 +244,32 @@ class GradientBackground {
           vec2 grainUv = uv * uResolution * 0.5;
           float grainValue = fract(sin(dot(grainUv + time, vec2(12.9898, 78.233))) * 43758.5453);
           return grainValue * 2.0 - 1.0;
+        }
+
+        float logoAlpha(vec2 uv) {
+          if (uLogoEnabled < 0.5 || uLogoOpacity <= 0.0) return 0.0;
+
+          vec2 logoUv = uv - 0.5 - uLogoOffset;
+          float canvasAspect = max(uResolution.x / max(uResolution.y, 1.0), 0.001);
+          float textureAspect = max(uLogoAspect, 0.001);
+          if (canvasAspect > textureAspect) {
+            logoUv.x *= canvasAspect / textureAspect;
+          } else {
+            logoUv.y *= textureAspect / canvasAspect;
+          }
+          logoUv = logoUv / max(uLogoScale, 0.001) + 0.5;
+
+          vec2 inside = step(vec2(0.0), logoUv) * step(logoUv, vec2(1.0));
+          float bounds = inside.x * inside.y;
+          if (bounds < 0.5) return 0.0;
+
+          vec2 texel = vec2(1.0 / 518.0, 1.0 / 1024.0);
+          float alpha = texture2D(uLogoTexture, logoUv).a * 0.46;
+          alpha += texture2D(uLogoTexture, logoUv + vec2(texel.x * 2.5, 0.0)).a * 0.135;
+          alpha += texture2D(uLogoTexture, logoUv - vec2(texel.x * 2.5, 0.0)).a * 0.135;
+          alpha += texture2D(uLogoTexture, logoUv + vec2(0.0, texel.y * 2.5)).a * 0.135;
+          alpha += texture2D(uLogoTexture, logoUv - vec2(0.0, texel.y * 2.5)).a * 0.135;
+          return clamp(alpha * uLogoOpacity, 0.0, 1.0);
         }
 
         vec3 getGradientColor(vec2 uv, float time) {
@@ -327,6 +374,10 @@ class GradientBackground {
           uv += vec2(ripple + wave);
 
           vec3 color = getGradientColor(uv, uTime);
+          float logo = logoAlpha(uv);
+          vec3 logoBlue = vec3(0.063, 0.643, 1.0);
+          color = mix(color, mix(uDarkNavy, logoBlue, 0.78), logo * 0.42);
+          color += logoBlue * logo * 0.08;
           color += grain(uv, uTime) * uGrainIntensity;
 
           float timeShift = uTime * 0.5;
@@ -377,6 +428,8 @@ class WebGLApp {
   clock: THREE.Clock;
   touchTexture: TouchTexture;
   gradientBackground: GradientBackground;
+  logoTexture: THREE.Texture | null;
+  disposed = false;
   colorSchemes: Record<number, { color1: THREE.Vector3; color2: THREE.Vector3; color3?: THREE.Vector3; color4?: THREE.Vector3; color5?: THREE.Vector3; color6?: THREE.Vector3 }>;
   currentScheme: number;
   mouse: { x: number; y: number };
@@ -408,6 +461,7 @@ class WebGLApp {
     );
     this.camera.position.z = 50;
     this.scene = new THREE.Scene();
+    this.logoTexture = null;
 
     const bgHex = props.darkNavyColor
       ? parseInt(props.darkNavyColor.replace('#', ''), 16)
@@ -418,6 +472,7 @@ class WebGLApp {
     this.touchTexture = new TouchTexture(props.touchStrength ?? 1);
     this.gradientBackground = new GradientBackground(this, props);
     this.gradientBackground.uniforms.uTouchTexture.value = this.touchTexture.texture;
+    this.loadLogoTexture(props);
 
     this.colorSchemes = {
       1: {
@@ -537,6 +592,47 @@ class WebGLApp {
     });
   }
 
+  loadLogoTexture(props: LiquidSurfaceProps) {
+    const uniforms = this.gradientBackground.uniforms;
+    uniforms.uLogoOpacity.value = props.logoOpacity ?? 0;
+    uniforms.uLogoScale.value = props.logoScale ?? 1;
+    uniforms.uLogoOffset.value.set(props.logoOffset?.x ?? 0, props.logoOffset?.y ?? 0);
+
+    if (!props.logoTextureSrc) {
+      uniforms.uLogoEnabled.value = 0;
+      return;
+    }
+
+    const loader = new THREE.TextureLoader();
+    loader.load(
+      props.logoTextureSrc,
+      (texture) => {
+        if (this.disposed) {
+          texture.dispose();
+          return;
+        }
+
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+        texture.needsUpdate = true;
+        this.logoTexture?.dispose();
+        this.logoTexture = texture;
+        uniforms.uLogoTexture.value = texture;
+        uniforms.uLogoAspect.value = texture.image?.width && texture.image?.height
+          ? texture.image.width / texture.image.height
+          : 1;
+        uniforms.uLogoEnabled.value = 1;
+      },
+      undefined,
+      () => {
+        uniforms.uLogoEnabled.value = 0;
+      },
+    );
+  }
+
   init() {
     this.gradientBackground.init();
     this.setColorScheme(this.currentScheme);
@@ -577,6 +673,7 @@ class WebGLApp {
   }
 
   dispose() {
+    this.disposed = true;
     cancelAnimationFrame(this.animationId);
     this.animationId = 0;
     this.gradientBackground.mesh?.geometry.dispose();
@@ -585,6 +682,8 @@ class WebGLApp {
       material.dispose();
     }
     this.touchTexture.texture.dispose();
+    this.logoTexture?.dispose();
+    this.gradientBackground.fallbackLogoTexture.dispose();
     this.renderer.dispose();
   }
 }
@@ -608,6 +707,10 @@ export default function LiquidSurface({
   paused = false,
   interactionRoot = null,
   touchStrength,
+  logoTextureSrc,
+  logoOpacity,
+  logoScale,
+  logoOffset,
 }: LiquidSurfaceProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
@@ -635,6 +738,10 @@ export default function LiquidSurface({
       scheme,
       colors,
       touchStrength,
+      logoTextureSrc,
+      logoOpacity,
+      logoScale,
+      logoOffset,
     });
     appRef.current = app;
 
@@ -709,6 +816,9 @@ export default function LiquidSurface({
     if (color1Weight !== undefined) uniforms.uColor1Weight.value = color1Weight;
     if (color2Weight !== undefined) uniforms.uColor2Weight.value = color2Weight;
     if (touchStrength !== undefined) uniforms.uTouchStrength.value = touchStrength;
+    if (logoOpacity !== undefined) uniforms.uLogoOpacity.value = logoOpacity;
+    if (logoScale !== undefined) uniforms.uLogoScale.value = logoScale;
+    if (logoOffset) uniforms.uLogoOffset.value.set(logoOffset.x, logoOffset.y);
 
     if (darkNavyColor) {
       const darkRgb = hexToRgb(darkNavyColor);
@@ -727,6 +837,9 @@ export default function LiquidSurface({
     color2Weight,
     darkNavyColor,
     touchStrength,
+    logoOpacity,
+    logoScale,
+    logoOffset,
   ]);
 
   const handleMouseEnter = () => {

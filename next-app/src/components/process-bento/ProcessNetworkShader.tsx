@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
 import { useReducedMotionGate } from '@/hooks/useReducedMotionGate';
 
 const MOBILE_LITE_MQ = '(max-width: 760px)';
@@ -18,10 +19,11 @@ precision highp float;
 
 uniform vec2 iResolution;
 uniform float iTime;
-uniform vec2 uClickPos;
-uniform float uClickAge;
+uniform vec2 uPointerPos;
+uniform vec2 uPointerVelocity;
+uniform float uPointerActive;
+uniform float uMagnetStrength;
 uniform float uTheme;
-uniform float uEnableBurst;
 
 float s(float a, float b, float c) {
   return smoothstep(a, b, c);
@@ -50,9 +52,21 @@ vec3 getpoint(vec2 id) {
 float line(vec2 uv, vec2 p, vec2 p2) {
   vec2 n = uv - p;
   vec2 w = p2 - p;
-  float r = clamp(dot(n, w) / dot(w, w), 0.0, 1.0);
+  float r = clamp(dot(n, w) / max(dot(w, w), 0.0001), 0.0, 1.0);
   r = length(n - w * r);
   return clamp(s(0.04, 0.01, r) * (s(0.6, 1.0, 1.0 / max(distance(p, p2), 0.001))), 0.0, 1.0);
+}
+
+vec2 magnetPoint(vec2 id, vec2 p, vec2 pointerUv) {
+  vec2 globalPoint = id + p;
+  vec2 toPointer = pointerUv - globalPoint;
+  float dist = length(toPointer);
+  float field = smoothstep(1.55, 0.0, dist) * uPointerActive;
+  vec2 velocity = uPointerVelocity / max(iResolution.xy, vec2(1.0));
+  vec2 stretch = vec2(velocity.x, -velocity.y) * 1.8;
+  vec2 target = pointerUv - stretch;
+  float pull = field * uMagnetStrength * 0.52;
+  return mix(globalPoint, target, pull) - id;
 }
 
 vec2 neighborPoint(vec2 id, float w, float n) {
@@ -64,19 +78,21 @@ void main() {
   vec2 fragCoord = gl_FragCoord.xy;
   vec2 uv = (fragCoord * 2.0 - iResolution.xy) / iResolution.y;
   uv *= 5.0;
+  vec2 pointerUv = (uPointerPos * 2.0 - iResolution.xy) / iResolution.y;
+  pointerUv *= 5.0;
 
   vec2 id = floor(uv);
   vec2 c = fract(uv);
 
-  vec2 p0 = neighborPoint(id, -1.0, -1.0);
-  vec2 p1 = neighborPoint(id,  0.0, -1.0);
-  vec2 p2 = neighborPoint(id,  1.0, -1.0);
-  vec2 p3 = neighborPoint(id, -1.0,  0.0);
-  vec2 p4 = neighborPoint(id,  0.0,  0.0);
-  vec2 p5 = neighborPoint(id,  1.0,  0.0);
-  vec2 p6 = neighborPoint(id, -1.0,  1.0);
-  vec2 p7 = neighborPoint(id,  0.0,  1.0);
-  vec2 p8 = neighborPoint(id,  1.0,  1.0);
+  vec2 p0 = magnetPoint(id, neighborPoint(id, -1.0, -1.0), pointerUv);
+  vec2 p1 = magnetPoint(id, neighborPoint(id,  0.0, -1.0), pointerUv);
+  vec2 p2 = magnetPoint(id, neighborPoint(id,  1.0, -1.0), pointerUv);
+  vec2 p3 = magnetPoint(id, neighborPoint(id, -1.0,  0.0), pointerUv);
+  vec2 p4 = magnetPoint(id, neighborPoint(id,  0.0,  0.0), pointerUv);
+  vec2 p5 = magnetPoint(id, neighborPoint(id,  1.0,  0.0), pointerUv);
+  vec2 p6 = magnetPoint(id, neighborPoint(id, -1.0,  1.0), pointerUv);
+  vec2 p7 = magnetPoint(id, neighborPoint(id,  0.0,  1.0), pointerUv);
+  vec2 p8 = magnetPoint(id, neighborPoint(id,  1.0,  1.0), pointerUv);
 
   float col = 0.0;
   col += pow(getpoint(id + vec2(-1.0, -1.0)).z / max(dot((p0.xy - c) * 10.0, (p0.xy - c) * 10.0), 0.0001), 2.2);
@@ -124,14 +140,8 @@ void main() {
 
   vec3 rgb = mix(baseColor, lineColor, clamp(col, 0.0, 1.0));
 
-  if (uEnableBurst > 0.5 && uClickAge < 0.65) {
-    vec2 clickUv = (uClickPos * 2.0 - iResolution.xy) / iResolution.y;
-    float dist = length(uv - clickUv * 5.0);
-    float burst = exp(-dist * 2.8) * (1.0 - uClickAge / 0.65);
-    float sparkle = rand(floor(fragCoord * 0.5 + iTime * 40.0));
-    vec3 burstColor = mix(vec3(1.0), maserBlue, step(0.55, sparkle));
-    rgb = mix(rgb, burstColor, burst * 0.85);
-  }
+  float cursorHalo = exp(-length(uv - pointerUv) * 2.4) * uPointerActive * uMagnetStrength;
+  rgb = mix(rgb, maserBlue, cursorHalo * 0.12);
 
   gl_FragColor = vec4(rgb, 1.0);
 }
@@ -160,25 +170,8 @@ export function ProcessNetworkShader({
 }: ProcessNetworkShaderProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const clickRef = useRef({ x: 0, y: 0 });
-  const clickAtRef = useRef<number | null>(null);
   const reducedMotion = useReducedMotionGate();
   const [usePosterOnly, setUsePosterOnly] = useState(false);
-
-  const handlePointerDown = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      if (!interactive || reducedMotion || usePosterOnly) return;
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const rect = canvas.getBoundingClientRect();
-      clickRef.current = {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top,
-      };
-      clickAtRef.current = performance.now();
-    },
-    [interactive, reducedMotion, usePosterOnly],
-  );
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -250,13 +243,21 @@ export function ProcessNetworkShader({
 
     const iResolutionLoc = gl.getUniformLocation(program, 'iResolution');
     const iTimeLoc = gl.getUniformLocation(program, 'iTime');
-    const uClickPosLoc = gl.getUniformLocation(program, 'uClickPos');
-    const uClickAgeLoc = gl.getUniformLocation(program, 'uClickAge');
+    const uPointerPosLoc = gl.getUniformLocation(program, 'uPointerPos');
+    const uPointerVelocityLoc = gl.getUniformLocation(program, 'uPointerVelocity');
+    const uPointerActiveLoc = gl.getUniformLocation(program, 'uPointerActive');
+    const uMagnetStrengthLoc = gl.getUniformLocation(program, 'uMagnetStrength');
     const uThemeLoc = gl.getUniformLocation(program, 'uTheme');
-    const uEnableBurstLoc = gl.getUniformLocation(program, 'uEnableBurst');
 
     const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
     const start = performance.now();
+    const pointer = { x: 0, y: 0, vx: 0, vy: 0, active: 0 };
+    const target = { x: 0, y: 0, time: 0, seeded: false };
+    const setPointerX = gsap.quickTo(pointer, 'x', { duration: 0.42, ease: 'power3.out' });
+    const setPointerY = gsap.quickTo(pointer, 'y', { duration: 0.42, ease: 'power3.out' });
+    const setPointerVx = gsap.quickTo(pointer, 'vx', { duration: 0.52, ease: 'power3.out' });
+    const setPointerVy = gsap.quickTo(pointer, 'vy', { duration: 0.52, ease: 'power3.out' });
+    const setPointerActive = gsap.quickTo(pointer, 'active', { duration: 0.46, ease: 'power2.out' });
     let rafId = 0;
     let cancelled = false;
     let inView = true;
@@ -293,16 +294,15 @@ export function ProcessNetworkShader({
       }
 
       const t = motionReduced ? 0 : (now - start) / 1000;
-      const clickAge =
-        clickAtRef.current === null ? 999.0 : (now - clickAtRef.current) / 1000;
 
       gl.useProgram(program);
       gl.uniform2f(iResolutionLoc, bw, bh);
       gl.uniform1f(iTimeLoc, t);
-      gl.uniform2f(uClickPosLoc, clickRef.current.x * pixelRatio, clickRef.current.y * pixelRatio);
-      gl.uniform1f(uClickAgeLoc, clickAge);
+      gl.uniform2f(uPointerPosLoc, pointer.x * pixelRatio, (h - pointer.y) * pixelRatio);
+      gl.uniform2f(uPointerVelocityLoc, pointer.vx * pixelRatio, pointer.vy * pixelRatio);
+      gl.uniform1f(uPointerActiveLoc, interactive && !motionReduced ? pointer.active : 0);
+      gl.uniform1f(uMagnetStrengthLoc, theme === 'dark' ? 1.0 : 0.62);
       gl.uniform1f(uThemeLoc, theme === 'light' ? 0 : 1);
-      gl.uniform1f(uEnableBurstLoc, interactive && !motionReduced ? 1 : 0);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
 
       if (motionReduced) {
@@ -321,6 +321,46 @@ export function ProcessNetworkShader({
     const stopLoop = () => {
       cancelAnimationFrame(rafId);
       running = false;
+    };
+
+    const interactionTarget = container.closest<HTMLElement>('.mm-process-bento__tile') ?? container;
+    const canUsePointer = interactive && !reducedMotion && !prefersReducedMotion();
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (!canUsePointer || mobileLite) return;
+      const rect = canvas.getBoundingClientRect();
+      const nextX = event.clientX - rect.left;
+      const nextY = event.clientY - rect.top;
+      const now = performance.now();
+      const delta = target.seeded ? Math.max(16, now - target.time) : 16;
+      const vx = target.seeded ? ((nextX - target.x) / delta) * 16.67 : 0;
+      const vy = target.seeded ? ((nextY - target.y) / delta) * 16.67 : 0;
+
+      target.x = nextX;
+      target.y = nextY;
+      target.time = now;
+      target.seeded = true;
+
+      setPointerX(nextX);
+      setPointerY(nextY);
+      setPointerVx(Math.max(-72, Math.min(72, vx)));
+      setPointerVy(Math.max(-72, Math.min(72, vy)));
+      setPointerActive(1);
+      startLoop();
+    };
+
+    const handlePointerEnter = (event: PointerEvent) => {
+      if (!canUsePointer || mobileLite) return;
+      target.seeded = false;
+      handlePointerMove(event);
+    };
+
+    const handlePointerLeave = () => {
+      target.seeded = false;
+      setPointerVx(0);
+      setPointerVy(0);
+      setPointerActive(0);
+      startLoop();
     };
 
     const observer = new IntersectionObserver(
@@ -354,6 +394,12 @@ export function ProcessNetworkShader({
     };
     mobileMq.addEventListener('change', onMobileChange);
 
+    if (canUsePointer) {
+      interactionTarget.addEventListener('pointerenter', handlePointerEnter, { passive: true });
+      interactionTarget.addEventListener('pointermove', handlePointerMove, { passive: true });
+      interactionTarget.addEventListener('pointerleave', handlePointerLeave);
+    }
+
     render(performance.now());
     startLoop();
 
@@ -363,6 +409,10 @@ export function ProcessNetworkShader({
       observer.disconnect();
       resizeObserver.disconnect();
       mobileMq.removeEventListener('change', onMobileChange);
+      interactionTarget.removeEventListener('pointerenter', handlePointerEnter);
+      interactionTarget.removeEventListener('pointermove', handlePointerMove);
+      interactionTarget.removeEventListener('pointerleave', handlePointerLeave);
+      gsap.killTweensOf(pointer);
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
       gl.deleteShader(vs);
@@ -380,7 +430,6 @@ export function ProcessNetworkShader({
       ref={containerRef}
       className={`mm-process-bento__media${usePosterOnly ? ' mm-process-bento__media--poster-only' : ''} ${className}`.trim()}
       aria-hidden
-      onPointerDown={handlePointerDown}
     >
       <div className={posterClass} />
       <canvas ref={canvasRef} className="mm-process-bento__shader-canvas" />

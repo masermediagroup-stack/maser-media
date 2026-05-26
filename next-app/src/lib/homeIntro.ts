@@ -1,6 +1,6 @@
 export const HOME_INTRO_STORAGE_KEY = 'mm-home-intro-played';
 /** Matches `.mm-hero__load-curtain` animation duration + small buffer for `animationend`. */
-export const HOME_INTRO_CURTAIN_MS = 1120;
+export const HOME_INTRO_CURTAIN_MS = 1420;
 
 export function hasHomeIntroPlayed() {
   if (typeof window === 'undefined') {
