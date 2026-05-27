@@ -342,7 +342,7 @@ export const CONTENT: Content = {
         logoHeight: 597,
         cardLayout: "logo-panel",
         link: "https://millermorehandiwork.com",
-        tags: ["Local services", "Lead capture", "Web build"],
+        tags: ["UI/UX", "SEO", "Web build"],
         cardVariant: "miller-more",
       },
       {
@@ -359,8 +359,7 @@ export const CONTENT: Content = {
         cardVariant: "main-street",
       },
       {
-        title: "Helm In-House SAAS",
-        titleLines: ["Helm", "In-House SAAS"],
+        title: "Helm",
         description:
           "A tool we are building ourselves to support how creative studios run client work.",
         image: null,
@@ -369,7 +368,7 @@ export const CONTENT: Content = {
         logoHeight: 796,
         cardLayout: "logo-panel",
         link: "/work/helm-in-house-saas",
-        tags: ["Internal build", "SaaS", "In progress"],
+        tags: ["Web App Infrastructure", "SaaS", "Project management"],
         cardVariant: "helm",
       },
     ],

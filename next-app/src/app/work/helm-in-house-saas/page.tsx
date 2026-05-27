@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { Nav } from '@/components';
+import { InnerRouteShell } from '@/components';
 import { ProjectPlaceholderPage } from '../project-placeholder';
 
 export const metadata: Metadata = {
@@ -10,13 +10,12 @@ export const metadata: Metadata = {
 
 export default function HelmInHouseSaasPage() {
   return (
-    <>
-      <Nav />
+    <InnerRouteShell>
       <ProjectPlaceholderPage
         eyebrow="Internal SaaS build"
         title="Helm In-House SAAS"
         summary="An internal tool we are building to support how creative studios plan, organize, and move client work from idea to launch."
       />
-    </>
+    </InnerRouteShell>
   );
 }

@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { InnerPageMain } from '@/components';
 
 type ProjectPlaceholderPageProps = {
   eyebrow: string;
@@ -8,7 +11,8 @@ type ProjectPlaceholderPageProps = {
 
 export function ProjectPlaceholderPage({ eyebrow, title, summary }: ProjectPlaceholderPageProps) {
   return (
-    <main className="mm-project-placeholder" id="main-content">
+    <InnerPageMain>
+      <div className="mm-project-placeholder">
       <section className="mm-project-placeholder__hero" aria-labelledby="project-title">
         <div className="mm-project-placeholder__copy">
           <p className="mm-project-placeholder__eyebrow">{eyebrow}</p>
@@ -27,6 +31,7 @@ export function ProjectPlaceholderPage({ eyebrow, title, summary }: ProjectPlace
       <footer className="mm-project-placeholder__footer">
         <Link href="/work#main-content">Back to work</Link>
       </footer>
-    </main>
+      </div>
+    </InnerPageMain>
   );
 }

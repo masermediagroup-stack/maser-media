@@ -269,6 +269,8 @@ body.mm-page-transition-hide-content .mm-smooth-wrapper,
 body.mm-page-transition-hide-content .mm-smooth-content,
 body.mm-page-transition-hide-content main.mm-inner-main,
 body.mm-page-transition-hide-content .mm-global-shader,
+body.mm-page-transition-hide-content .galaxy-background,
+body.mm-page-transition-hide-content #galaxy-background,
 body.mm-page-transition-hide-content .cursor-aura-layer {
   visibility: hidden;
 }
@@ -326,7 +328,7 @@ section[id],
 body.galaxy-active {
   display: flex;
   flex-direction: column;
-  background: transparent;
+  background-color: #030303;
   -webkit-font-smoothing: antialiased;
   min-height: 100dvh;
   overflow-x: hidden;
@@ -334,12 +336,12 @@ body.galaxy-active {
   isolation: isolate;
 }
 
-/* Seamless galaxy from hero through rest of page */
+/* Seamless backdrop from hero through rest of page */
 body.galaxy-active .hero-bg {
   background: transparent;
 }
 
-/* Shader fade only: no opaque page fill so the fixed galaxy can read through into Clients */
+/* Shader fade only: no opaque page fill so the fixed backdrop can read through into Clients */
 body.galaxy-active .hero-bg::after {
   background: linear-gradient(
     to top,
@@ -3807,10 +3809,10 @@ html.mm-inner-route .mm-inner-main:has(.mm-inner-main__stack > .mm-inner-hero--e
  *
  * Recurrence root cause: agents alternated (A) min-height:100dvh + flex:1 on main/stack, which
  * creates empty scroll below the footer, with (B) block layout without clearing GSAP pin-spacers /
- * ScrollSmoother inline heights on html/body — phantom document height + fixed galaxy = bleed.
+ * ScrollSmoother inline heights on html/body — phantom document height + fixed backdrop = bleed.
  *
  * Single model: document height = in-flow content only (no min-height:100dvh on main/stack).
- * Galaxy stays fixed behind; html/body use solid #03060d; footer opaque cap hides edge bleed.
+ * Site backdrop stays fixed behind; html/body use solid #03060d; footer opaque cap hides edge bleed.
  * Homepage keeps body.galaxy-active flex + #smooth-wrapper (see rules above). Class is set in
  * InnerPageMain — do not rely on :has(.mm-inner-main) alone.
  */
@@ -4356,11 +4358,23 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   box-shadow: none;
 }
 
+/* Fixed layout backdrop (see .galaxy-background) — very subtle top lift only */
 .hero-god-rays--static {
   background:
-    radial-gradient(ellipse 72% 54% at 20% 24%, rgba(30, 84, 168, 0.28), transparent 62%),
-    radial-gradient(ellipse 64% 58% at 78% 64%, rgba(16, 164, 255, 0.18), transparent 66%),
-    linear-gradient(180deg, #020408 0%, #06101c 48%, #03060d 100%);
+    radial-gradient(ellipse 90% 55% at 50% 0%, rgba(255, 255, 255, 0.045), transparent 58%);
+}
+
+.galaxy-background {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 100% 72% at 50% -8%, rgba(255, 255, 255, 0.05), transparent 52%),
+    radial-gradient(ellipse 80% 60% at 88% 92%, rgba(255, 255, 255, 0.025), transparent 55%),
+    linear-gradient(180deg, #000000 0%, #050506 48%, #030303 100%);
 }
 
 @media (max-width: 767px), (pointer: coarse) {
@@ -5578,13 +5592,15 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-cta__logo-link:hover .mm-cta__logo,
 .mm-cta__logo-link:focus-visible .mm-cta__logo {
-  filter: drop-shadow(0 8px 16px rgba(16, 164, 255, 0.16));
+  filter:
+    drop-shadow(0 8px 18px rgba(255, 255, 255, 0.32))
+    drop-shadow(0 0 26px rgba(255, 255, 255, 0.2));
   transform: translate3d(0, -2px, 10px) rotateX(3deg) rotateY(-4deg);
 }
 
 .mm-cta__logo-link:focus-visible {
   border-radius: 12px;
-  outline: 2px solid rgba(16, 164, 255, 0.5);
+  outline: 2px solid rgba(255, 255, 255, 0.55);
   outline-offset: 0.4rem;
 }
 
@@ -5801,6 +5817,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 .mm-inner-hero__shader .mm-aurora-shader__canvas {
   position: absolute;
   inset: 0;
+  z-index: 1;
   width: 100%;
   height: 100%;
 }
@@ -5928,22 +5945,13 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-inner-hero--work .mm-inner-hero__content {
-  align-items: flex-start;
-  width: min(1180px, calc(100% - 2rem));
+  width: min(1180px, 100%);
   margin-inline: auto;
-  text-align: left;
-}
-
-.mm-inner-hero--work .mm-inner-hero__content h1 {
-  margin-inline: 0;
-  text-align: left;
 }
 
 .mm-inner-hero--work .mm-inner-hero__content .mm-inner-hero__lead,
 .mm-inner-hero--work .mm-inner-hero__content p {
   max-width: 40rem;
-  margin-inline: 0;
-  text-align: left;
 }
 
 @media (min-width: 1024px) {
@@ -6617,6 +6625,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   padding: clamp(2.5rem, 5vw, 4.25rem) var(--mm-section-pad-x) 2rem;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "copy nav"
+    "ascii ascii";
   align-items: center;
   gap: 1.5rem 2rem;
   background: var(--mm-cta-bg);
@@ -6638,45 +6649,66 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-footer__nav {
+  position: relative;
+  z-index: 12;
+  grid-area: nav;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 0.8rem 1.3rem;
+  pointer-events: auto;
 }
 
 .mm-footer__nav a,
-.mm-footer__nav a:visited {
-  color: var(--mm-cta-ink);
-  text-decoration: underline transparent;
-  text-underline-offset: 0.18em;
+.mm-footer__nav a:visited,
+.mm-footer__nav-link {
+  color: rgba(10, 18, 30, 0.48);
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 0.38rem 0.85rem;
+  background: transparent;
   transition:
-    opacity 180ms ease,
-    text-decoration-color 180ms ease;
+    color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
-.mm-footer__nav a:hover {
-  opacity: 0.72;
-  text-decoration-color: currentColor;
+.mm-footer__nav-link {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
 }
 
-.mm-footer__nav a:focus-visible {
+.mm-footer__nav a:hover,
+.mm-footer__nav-link:hover {
+  color: rgba(10, 18, 30, 0.82);
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+  text-decoration: none;
+}
+
+.mm-footer__nav a:focus-visible,
+.mm-footer__nav-link:focus-visible {
+  color: rgba(10, 18, 30, 0.82);
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
   outline: 2px solid var(--mm-cta-focus);
-  outline-offset: 3px;
+  outline-offset: 2px;
 }
 
 .mm-footer__copy {
-  grid-column: 1;
-  grid-row: 1;
+  grid-area: copy;
   margin: 0;
   align-self: center;
 }
 
 .mm-footer__ascii {
-  grid-column: 1 / -1;
+  grid-area: ascii;
   width: 100%;
   margin-top: 0.35rem;
   opacity: 0.92;
   background-color: var(--mm-cta-bg, var(--mm-section-surface));
+  pointer-events: none;
 }
 
 .mm-footer-cool-button {
@@ -6858,6 +6890,10 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
   .mm-footer {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "copy"
+      "nav"
+      "ascii";
     justify-items: center;
     text-align: center;
   }
@@ -7746,33 +7782,54 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   text-transform: none;
 }
 
+.mm-work-card__divider {
+  width: 100%;
+  height: 0;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
 .mm-work-card__tags {
-  margin-top: 1rem;
+  margin: 0;
+  padding: 0;
   max-width: 100%;
+  list-style: none;
 }
 
 .mm-work-card__body .mm-work-card__tag {
-  display: inline-flex;
-  align-items: center;
-  margin: 0;
-  padding: 0.22rem 0.54rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.09);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0 0 0.4rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: rgba(255, 255, 255, 0.84);
   font-size: 0.74rem;
   font-weight: 400;
-  line-height: 1.2;
+  line-height: 1.45;
   letter-spacing: 0;
   text-transform: none;
-  white-space: nowrap;
+  white-space: normal;
   max-width: 100%;
-  overflow-x: auto;
-  scrollbar-width: none;
+  list-style: none;
 }
 
-.mm-work-card__body .mm-work-card__tag::-webkit-scrollbar {
-  display: none;
+.mm-work-card__body .mm-work-card__tag::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 0.38em;
+  height: 0.38em;
+  margin-top: 0.58em;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+.mm-work-card__body .mm-work-card__tag::after {
+  content: none;
 }
 
 .mm-section.mm-section--work.mm-work {
@@ -8031,12 +8088,16 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   text-shadow: none;
 }
 
+.mm-work-projects .mm-work-card--logo-panel .mm-work-card__divider {
+  border-top-color: rgba(10, 15, 26, 0.12);
+}
+
 .mm-work-projects .mm-work-card--logo-panel .mm-work-card__body .mm-work-card__tag {
-  width: 100%;
+  width: auto;
   max-width: 100%;
-  border-color: rgba(10, 15, 26, 0.14);
-  background: rgba(10, 15, 26, 0.05);
-  color: rgba(10, 15, 26, 0.82);
+  border: 0;
+  background: transparent;
+  color: rgba(10, 15, 26, 0.78);
 }
 
 .mm-work-projects .mm-work-card__body {
@@ -8059,6 +8120,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-work-projects .mm-work-card__body h3,
 .mm-work-projects .mm-work-card__body p,
+.mm-work-projects .mm-work-card__divider,
 .mm-work-projects .mm-work-card__tags {
   opacity: 0;
   transform: translate3d(0, 0.9rem, 0);
@@ -8069,6 +8131,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-work-projects .mm-work-card--content-visible .mm-work-card__body h3,
 .mm-work-projects .mm-work-card--content-visible .mm-work-card__body p,
+.mm-work-projects .mm-work-card--content-visible .mm-work-card__divider,
 .mm-work-projects .mm-work-card--content-visible .mm-work-card__tags {
   opacity: 1;
   transform: translate3d(0, 0, 0);
@@ -8078,18 +8141,23 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   transition-delay: 20ms;
 }
 
-.mm-work-projects .mm-work-card--content-visible .mm-work-card__body p {
+.mm-work-projects .mm-work-card--content-visible .mm-work-card__divider {
   transition-delay: 120ms;
 }
 
+.mm-work-projects .mm-work-card--content-visible .mm-work-card__body p {
+  transition-delay: 180ms;
+}
+
 .mm-work-projects .mm-work-card--content-visible .mm-work-card__tags {
-  transition-delay: 220ms;
+  transition-delay: 260ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .mm-work-projects .mm-work-card--logo-panel .mm-work-card__logo,
   .mm-work-projects .mm-work-card__body h3,
   .mm-work-projects .mm-work-card__body p,
+  .mm-work-projects .mm-work-card__divider,
   .mm-work-projects .mm-work-card__tags {
     opacity: 1;
     transform: none;
@@ -8106,8 +8174,13 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   text-transform: none;
 }
 
-.mm-work-projects .mm-work-card__body p {
+.mm-work-projects .mm-work-card__divider {
   order: 2;
+  margin-top: clamp(0.85rem, 1.6vw, 1.15rem);
+}
+
+.mm-work-projects .mm-work-card__body p {
+  order: 3;
   max-width: 34rem;
   margin: clamp(0.85rem, 1.6vw, 1.25rem) 0 0;
   color: rgba(255, 255, 255, 0.88);
@@ -8121,19 +8194,39 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-work-projects .mm-work-card__tags {
-  order: 3;
-  margin-top: clamp(1rem, 2vw, 1.4rem);
-  min-height: calc(1.5rem + clamp(1rem, 2vw, 1.4rem));
+  order: 4;
+  display: block;
+  margin-top: clamp(0.85rem, 1.6vw, 1.1rem);
+  padding-left: 0;
+  min-height: 0;
 }
 
 .mm-work-projects .mm-work-card__body .mm-work-card__tag {
-  min-height: 1.5rem;
-  padding: 0.26rem 0.72rem;
-  border-color: rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.92);
-  font-size: 0.78rem;
-  font-weight: 400;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: clamp(1rem, 1.3vw, 1.2rem);
+  font-weight: 520;
+  line-height: 1.45;
+  white-space: normal;
+  width: auto;
+  max-width: 100%;
+  list-style: none;
+}
+
+.mm-work-projects .mm-work-card__body .mm-work-card__tag::before {
+  opacity: 0.72;
+}
+
+.mm-work-projects .mm-work-card__body .mm-work-card__tag:last-child {
+  margin-bottom: 0;
+}
+
+.mm-work-projects .mm-work-card--logo-panel .mm-work-card__body .mm-work-card__tag::before {
+  opacity: 0.45;
 }
 
 .mm-work-view-all {
@@ -8665,11 +8758,14 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 .mm-process-bento__poster--quote-liquid::before {
   content: '';
   position: absolute;
-  inset: -42% -20% -46% -28%;
+  left: 50%;
+  top: 50%;
+  width: min(58%, 11.5rem);
+  height: min(58%, 11.5rem);
   background: #10a4ff;
   opacity: 0.24;
   filter: blur(10px);
-  transform: translate3d(-3%, 1%, 0) scale(1.12);
+  transform: translate(-50%, -50%);
   -webkit-mask: url('/assets/MaserMedia-MM-monogram-white-transparent.png') center / contain no-repeat;
   mask: url('/assets/MaserMedia-MM-monogram-white-transparent.png') center / contain no-repeat;
 }
@@ -8976,6 +9072,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
     -webkit-line-clamp: 4;
   }
 
+  .mm-work-projects .mm-work-card--logo-panel .mm-work-card__divider,
   .mm-work-projects .mm-work-card--logo-panel .mm-work-card__tags {
     display: none;
   }
@@ -8983,11 +9080,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   .mm-work-projects .mm-work-card--logo-panel .mm-work-card__body .mm-work-card__tag {
     max-width: 100%;
     min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 0.66rem;
-    letter-spacing: 0.06em;
+    font-size: clamp(0.82rem, 3.35vw, 0.98rem);
+    line-height: 1.35;
   }
 
   .mm-work-projects .mm-work-card--logo-panel .mm-work-card__logo {
@@ -9009,20 +9103,6 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   .mm-work-projects .mm-work-card--helm .mm-work-card__logo {
     min-height: clamp(5.75rem, 34vw, 8.8rem);
     height: min(58%, 9.5rem);
-  }
-
-  .mm-inner-hero--work .mm-inner-hero__content {
-    width: 100%;
-    align-items: center;
-    margin-inline: auto;
-    text-align: center;
-  }
-
-  .mm-inner-hero--work .mm-inner-hero__content h1,
-  .mm-inner-hero--work .mm-inner-hero__content .mm-inner-hero__lead,
-  .mm-inner-hero--work .mm-inner-hero__content p {
-    margin-inline: auto;
-    text-align: center;
   }
 
   .mm-section.mm-section--process.mm-process-bento {

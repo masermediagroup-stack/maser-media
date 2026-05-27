@@ -13,7 +13,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { CONTENT } from '@/lib/content';
-import { openContactModalFromApp } from '@/lib/contactModalEvents';
+import { isContactModalHref, openContactModalFromApp } from '@/lib/contactModalEvents';
 import SmokeyBackground from '@/components/lightswind/smokey-background';
 import { WorkLightswindShader } from '@/components/WorkLightswindShader';
 import { useGsapLandingMotion, useMmScrollReveals } from '@/hooks/useGsapLandingMotion';
@@ -707,18 +707,18 @@ export function Work({ stacked = true }: WorkProps = {}) {
             project.title
           )}
         </h3>
+        <hr className="mm-work-card__divider" aria-hidden="true" />
         <p>{project.description}</p>
         {project.tags?.length ? (
-          <div
-            className="mm-work-card__tags"
-            aria-label={`Project tags: ${project.tags.slice(0, 3).join(', ')}`}
-          >
-            {project.tags.slice(0, 3).map((tag) => (
-              <span className="mm-work-card__tag" key={tag}>
-                {tag}
-              </span>
-            ))}
-          </div>
+          <>
+            <ul className="mm-work-card__tags" aria-label={`What we delivered: ${project.tags.slice(0, 3).join(', ')}`}>
+              {project.tags.slice(0, 3).map((tag) => (
+                <li className="mm-work-card__tag" key={tag}>
+                  {tag}
+                </li>
+              ))}
+            </ul>
+          </>
         ) : null}
       </div>
     </Link>
@@ -895,19 +895,43 @@ export function Cta() {
   );
 }
 
+function FooterNavItem({ text, href }: { text: string; href: string }) {
+  if (isContactModalHref(href)) {
+    return (
+      <button
+        type="button"
+        className="mm-footer__nav-link"
+        data-mm-reveal="fade"
+        onClick={() => openContactModalFromApp()}
+      >
+        {text}
+      </button>
+    );
+  }
+
+  return (
+    <Link
+      href={href}
+      className="mm-footer__nav-link"
+      data-mm-reveal="fade"
+      data-mm-native-nav="true"
+    >
+      {text}
+    </Link>
+  );
+}
+
 export function Footer() {
   return (
     <footer className="mm-footer relative" data-mm-reveal-group="fade" data-mm-reveal-stagger="0.08">
-      <nav className="mm-footer__nav" aria-label="Footer navigation">
-        {CONTENT.footer.nav.map((item) => (
-          <Link key={item.href} href={item.href} data-mm-reveal="fade">
-            {item.text}
-          </Link>
-        ))}
-      </nav>
       <p className="mm-footer__copy" data-mm-reveal="fade">
         © {CONTENT.footer.copyright}
       </p>
+      <nav className="mm-footer__nav" aria-label="Footer navigation">
+        {CONTENT.footer.nav.map((item) => (
+          <FooterNavItem key={item.href} text={item.text} href={item.href} />
+        ))}
+      </nav>
       <AsciiWaveFooter color="#10A4FF" speed={1} />
       <FooterCoolButton />
     </footer>
@@ -1219,3 +1243,4 @@ export function CrashPlayground() {
 }
 
 export { GalaxyBackground } from './GalaxyBackground';
+export { InnerRouteShell } from './InnerRouteShell';

@@ -18,18 +18,18 @@ interface Founder {
 
 const FOUNDERS: Founder[] = [
   {
-    name: 'Founder A',
+    name: 'Tyler Vea',
     role: 'Design + Direction',
-    headshot: '',
+    headshot: '/assets/about/tyler-vea.jpg',
     bio: [
       "Graphic design first, business builder by habit. Years of pushing brand systems, decks, and launch surfaces for companies that needed their story to land in seconds.",
       "Came out of the Paradox content team - two people, every asset, every week - and built the muscle for shipping creative work that actually moves a brand forward.",
     ],
   },
   {
-    name: 'Founder B',
+    name: 'Grayson Maser',
     role: 'Strategy + Storytelling',
-    headshot: '',
+    headshot: '/assets/about/grayson-maser.jpg',
     bio: [
       "Storytelling and creative direction with a soft spot for the offer underneath the design. Spends as much time on what to say as on how it looks.",
       "Same Paradox roots - running the visual-content guides, the campaign frames, and the day-to-day of a two-person creative team that had to actually deliver.",

@@ -1,14 +1,11 @@
 'use client';
 
-import { MotionConfig } from 'motion/react';
-import { GalaxyBackground, InnerPage, Nav } from '@/components';
+import { InnerPage, InnerRouteShell } from '@/components';
 
 export default function AboutPage() {
   return (
-    <MotionConfig reducedMotion="user">
-      <GalaxyBackground />
-      <Nav />
+    <InnerRouteShell>
       <InnerPage kind="about" />
-    </MotionConfig>
+    </InnerRouteShell>
   );
 }

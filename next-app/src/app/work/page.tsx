@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { MotionConfig } from 'motion/react';
-import { GalaxyBackground, InnerPage, Nav } from '@/components';
+import { InnerPage, InnerRouteShell } from '@/components';
 
 export default function WorkPage() {
   useEffect(() => {
@@ -19,10 +18,8 @@ export default function WorkPage() {
   }, []);
 
   return (
-    <MotionConfig reducedMotion="user">
-      <GalaxyBackground />
-      <Nav />
+    <InnerRouteShell>
       <InnerPage kind="work" />
-    </MotionConfig>
+    </InnerRouteShell>
   );
 }

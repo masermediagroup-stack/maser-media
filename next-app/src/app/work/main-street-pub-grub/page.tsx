@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { Nav } from '@/components';
+import { InnerRouteShell } from '@/components';
 import { ProjectPlaceholderPage } from '../project-placeholder';
 
 export const metadata: Metadata = {
@@ -10,13 +10,12 @@ export const metadata: Metadata = {
 
 export default function MainStreetPubGrubPage() {
   return (
-    <>
-      <Nav />
+    <InnerRouteShell>
       <ProjectPlaceholderPage
         eyebrow="Hospitality brand identity"
         title="Main Street Pub & Grub"
         summary="A neighborhood pub brand system built to feel welcoming, recognizable, and easy to carry across the room, menu, and local launch materials."
       />
-    </>
+    </InnerRouteShell>
   );
 }
