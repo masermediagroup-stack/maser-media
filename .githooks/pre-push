@@ -1,0 +1,4 @@
+#!/bin/sh
+node scripts/start-work-check.mjs --hook || exit 1
+npm run typecheck || exit 1
+npm run lint || exit 1

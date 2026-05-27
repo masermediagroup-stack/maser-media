@@ -118,8 +118,8 @@ export function ProcessQuoteLiquidSurface() {
           grainIntensity={0.06}
           logoTextureSrc="/assets/MaserMedia-MM-monogram-white-transparent.png"
           logoOpacity={0.42}
-          logoScale={2.65}
-          logoOffset={{ x: -0.1, y: 0.01 }}
+          logoScale={2.05}
+          logoOffset={{ x: 0, y: 0 }}
         />
       ) : null}
     </div>
