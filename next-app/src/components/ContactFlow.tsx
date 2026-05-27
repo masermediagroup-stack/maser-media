@@ -3,15 +3,7 @@
 import { useMemo, useState } from "react";
 import type React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CalendarDays,
-  Check,
-  CheckCircle2,
-  Clock3,
-  Globe2,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clock3, Globe2 } from "lucide-react";
 
 type ServiceId = "brand" | "web" | "copy" | "strategy" | "unsure";
 type BudgetId = "under-1000" | "1000-5000" | "5000-15000" | "15000-plus" | "unsure";
@@ -83,11 +75,11 @@ const HEARD_ABOUT_OPTIONS: HeardAboutOption[] = [
 const STEP_COPY = [
   {
     title: "What are you looking to build?",
-    helper: "A few quick questions so we can tailor the conversation to your goals.",
+    helper: "",
   },
   {
-    title: "Tell us about your project.",
-    helper: "Quick intake now, detailed planning on the call.",
+    title: "Tell us about your goals.",
+    helper: "Quick breakdown now, detailed planning soon!",
   },
   {
     title: "What's your rough budget?",
@@ -98,11 +90,11 @@ const STEP_COPY = [
     helper: "This helps us understand where the right people are finding Maser Media.",
   },
   {
-    title: "Choose a consulting call.",
-    helper: "Pick any future date and a Central Time slot between 10:00am and 7:00pm.",
+    title: "Lets Meet.",
+    helper: "Begin your creative partnership with Maser Media.",
   },
   {
-    title: "Almost there - let's get in touch.",
+    title: "We're exctied to hear about your project!",
     helper: "",
   },
 ];
@@ -379,7 +371,6 @@ function ServiceStep({
 }) {
   return (
     <fieldset className="contact-flow-fieldset">
-      <legend className="contact-flow-field-title">What can we help you with?</legend>
       <div className="contact-flow-grid contact-flow-grid--services">
         {SERVICE_OPTIONS.map((option) => {
           const selected = data.service === option.id;
@@ -415,9 +406,6 @@ function BriefStep({
 }) {
   return (
     <div className="contact-flow-fields">
-      <label htmlFor="brief-input" className="contact-flow-field-title">
-        Tell us about your project
-      </label>
       <textarea
         id="brief-input"
         className="contact-flow-input contact-flow-textarea"
@@ -439,7 +427,6 @@ function BudgetStep({
 }) {
   return (
     <fieldset className="contact-flow-fieldset">
-      <legend className="contact-flow-field-title">What is your rough budget?</legend>
       <div className="contact-flow-grid contact-flow-grid--budget">
         {BUDGET_OPTIONS.map((option) => {
           const selected = data.budget === option.id;
@@ -477,7 +464,6 @@ function HeardAboutStep({
 }) {
   return (
     <fieldset className="contact-flow-fieldset">
-      <legend className="contact-flow-field-title">Where did you first hear about Maser Media?</legend>
       <div className="contact-flow-grid contact-flow-grid--heard-about">
         {HEARD_ABOUT_OPTIONS.map((option) => {
           const selected = data.heardAbout === option.id;
@@ -519,35 +505,12 @@ function ScheduleStep({
 
   return (
     <div className="contact-flow-scheduler">
-      <aside className="contact-flow-call-card" aria-label="Consulting call details">
-        <div className="contact-flow-call-icon" aria-hidden>
-          <CalendarDays size={20} />
-        </div>
-        <div className="contact-flow-call-copy">
-          <h2>Intro Call</h2>
-          <p>A focused 20 minute conversation about scope, timeline, and the cleanest next step.</p>
-        </div>
-        <dl>
-          <div>
-            <Clock3 size={16} aria-hidden />
-            <dt>Length</dt>
-            <dd>20m</dd>
-          </div>
-          <div>
-            <Globe2 size={16} aria-hidden />
-            <dt>Timezone</dt>
-            <dd>Central Time</dd>
-          </div>
-        </dl>
-      </aside>
-
       <div className="contact-flow-calendar-panel">
         <div className="contact-flow-calendar-head">
-          <span>Pick any future date</span>
+          <span>Pick a date</span>
           <strong>{selectedDateLabel}</strong>
         </div>
         <label className="contact-flow-date-input-label" htmlFor="contact-call-date">
-          <span>Calendar date</span>
           <input
             id="contact-call-date"
             className="contact-flow-input contact-flow-date-input"
@@ -563,7 +526,6 @@ function ScheduleStep({
             }}
           />
         </label>
-        <p className="contact-flow-field-note">Quick picks</p>
         <div className="contact-flow-date-grid" role="group" aria-label="Available dates">
           {bookingDates.map((date) => {
             const id = toDateId(date);
@@ -591,9 +553,15 @@ function ScheduleStep({
       </div>
 
       <div className="contact-flow-time-panel">
-        <div className="contact-flow-calendar-head">
-          <span>Pick a time</span>
-          <strong>{data.callTime || "20m slots"} CST</strong>
+        <div className="contact-flow-calendar-head contact-flow-time-head">
+          <div className="contact-flow-time-head-start">
+            <span>Pick a time</span>
+            <span className="contact-flow-call-duration" aria-label="Call length: 20 minutes">
+              <Clock3 size={16} aria-hidden />
+              20m
+            </span>
+          </div>
+          <strong>{data.callTime ? `${data.callTime} CST` : "20m slots CST"}</strong>
         </div>
         <div className="contact-flow-time-list" role="group" aria-label="Available times">
           {TIME_SLOTS.map((time) => {
@@ -628,8 +596,8 @@ function ContactStep({
     <div className="contact-flow-fields">
       <TextField
         id="first-name"
-        label="First Name"
-        placeholder="Jane"
+        label="Name"
+        placeholder="Jane Doe"
         autoComplete="given-name"
         value={data.firstName}
         onChange={(value) => setData((current) => ({ ...current, firstName: value }))}
@@ -646,7 +614,6 @@ function ContactStep({
       <TextField
         id="phone-number"
         label="Phone"
-        optionalLabel="(optional)"
         placeholder="+1 (555) 000-0000"
         type="tel"
         autoComplete="tel"

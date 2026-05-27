@@ -3233,96 +3233,10 @@ button.premium-btn {
   background: #fff;
 }
 
-.contact-flow-call-card,
 .contact-flow-calendar-panel,
 .contact-flow-time-panel {
   min-width: 0;
   padding: clamp(1rem, 2.2vw, 1.35rem);
-}
-
-.contact-flow-call-card {
-  display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas: "icon copy meta";
-  align-items: center;
-  gap: 0.95rem;
-  border-bottom: 1px solid #e5e5e5;
-  background: linear-gradient(180deg, #ffffff, #f9fbfd);
-}
-
-.contact-flow-call-icon {
-  grid-area: icon;
-}
-
-.contact-flow-call-copy {
-  grid-area: copy;
-  min-width: 0;
-}
-
-.contact-flow-call-card dl {
-  grid-area: meta;
-}
-
-.contact-flow-call-icon {
-  display: grid;
-  width: 2.4rem;
-  height: 2.4rem;
-  place-items: center;
-  border-radius: 999px;
-  background: rgba(16, 164, 255, 0.1);
-  color: #078fdc;
-  flex-shrink: 0;
-}
-
-.contact-flow-call-copy h2 {
-  margin-top: 0;
-  color: #111;
-  font-size: clamp(1.15rem, 2vw, 1.35rem);
-  font-weight: 780;
-  letter-spacing: 0;
-  line-height: 1.1;
-}
-
-.contact-flow-call-copy p {
-  max-width: 34rem;
-  margin-top: 0.35rem;
-  color: #555;
-  font-size: 0.9rem;
-  line-height: 1.45;
-}
-
-.contact-flow-call-card dl {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: max-content;
-  gap: 0.8rem;
-  margin: 0;
-  padding: 0;
-}
-
-.contact-flow-call-card dl div {
-  display: grid;
-  grid-template-columns: auto auto;
-  align-items: center;
-  gap: 0.45rem;
-  color: #4a4a4a;
-  font-size: 0.9rem;
-}
-
-.contact-flow-call-card dt {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-}
-
-.contact-flow-call-card dd {
-  margin: 0;
-  color: #111;
-  font-weight: 680;
 }
 
 .contact-flow-calendar-panel {
@@ -3350,6 +3264,27 @@ button.premium-btn {
   color: #111;
   font-size: 0.95rem;
   font-weight: 760;
+  white-space: nowrap;
+}
+
+.contact-flow-time-head-start {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.75rem;
+  min-width: 0;
+}
+
+.contact-flow-call-duration {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #4a4a4a;
+  font-size: 0.9rem;
+  font-weight: 680;
+  letter-spacing: 0;
+  line-height: 1;
+  text-transform: none;
   white-space: nowrap;
 }
 
@@ -3750,23 +3685,6 @@ button.premium-btn {
 
   .contact-flow-scheduler {
     grid-template-columns: 1fr;
-  }
-
-  .contact-flow-call-card {
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-areas:
-      "icon copy"
-      "meta meta";
-    align-items: start;
-    border-right: 0;
-    border-bottom: 1px solid #e5e5e5;
-  }
-
-  .contact-flow-call-card dl {
-    grid-auto-flow: row;
-    grid-auto-columns: auto;
-    gap: 0.55rem;
-    margin-top: 0.15rem;
   }
 
   .contact-flow-calendar-panel {
