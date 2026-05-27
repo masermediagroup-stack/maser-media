@@ -78,7 +78,12 @@ export interface TestimonialCarouselItem {
   quote: string;
   name: string;
   role: string;
-  avatar: string | null;
+  /** Client logo shown bottom-right on the card. */
+  logo: string;
+  logoWidth?: number;
+  logoHeight?: number;
+  /** Render logo as neutral ink (no brand color). */
+  logoMonochrome?: boolean;
   rating?: number;
 }
 
@@ -384,21 +389,28 @@ export const CONTENT: Content = {
         quote: "Quote pending - kind words from the Miller More team coming soon.",
         name: "Miller More Handiwork",
         role: "Local home services, client since launch",
-        avatar: "/assets/testimonial-avatar-01.svg",
+        logo: "/assets/miller-more-logo-clean.png",
+        logoWidth: 1077,
+        logoHeight: 597,
         rating: 5,
       },
       {
         quote: "Quote pending - hand-off from the Main Street Pub & Grub crew on the way.",
         name: "Main Street Pub & Grub",
         role: "Hospitality, brand and web partner",
-        avatar: "/assets/testimonial-avatar-02.svg",
+        logo: "/assets/main-street-logo-clean.png",
+        logoWidth: 1326,
+        logoHeight: 625,
         rating: 5,
       },
       {
         quote: "Quote pending - sharing notes from Arpit shortly.",
         name: "Arpit",
-        role: "Founder, partner brand",
-        avatar: "/assets/testimonial-avatar-03.svg",
+        role: "Founder, Paradox Customs",
+        logo: "/assets/paradox-customs-logo.png",
+        logoWidth: 1200,
+        logoHeight: 400,
+        logoMonochrome: true,
         rating: 5,
       },
     ],

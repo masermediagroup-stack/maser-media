@@ -1100,13 +1100,19 @@ function TestimonialCardArticle({
   quote,
   name,
   role,
-  avatar,
+  logo,
+  logoWidth = 240,
+  logoHeight = 120,
+  logoMonochrome = false,
   className = '',
 }: {
   quote: string;
   name: string;
   role: string;
-  avatar?: string | null;
+  logo: string;
+  logoWidth?: number;
+  logoHeight?: number;
+  logoMonochrome?: boolean;
   className?: string;
 }) {
   return (
@@ -1119,23 +1125,19 @@ function TestimonialCardArticle({
     >
       <p className="testimonial-card-text">{quote}</p>
       <div className="testimonial-card-footer">
-        {avatar ? (
-          <Image
-            src={avatar}
-            alt=""
-            width={44}
-            height={44}
-            className="testimonial-card-avatar"
-            aria-hidden
-          />
-        ) : (
-          <div className="testimonial-card-avatar testimonial-card-avatar--placeholder" aria-hidden />
-        )}
         <div className="testimonial-card-who">
           <strong className="testimonial-card-name">{name}</strong>
           <span className="testimonial-card-role">{role}</span>
         </div>
       </div>
+      <Image
+        src={logo}
+        alt=""
+        width={logoWidth}
+        height={logoHeight}
+        className={`testimonial-card-logo${logoMonochrome ? ' testimonial-card-logo--mono' : ''}`}
+        aria-hidden
+      />
     </motion.article>
   );
 }
@@ -1210,7 +1212,10 @@ export function Testimonials() {
                       quote={item.quote}
                       name={item.name}
                       role={item.role}
-                      avatar={item.avatar}
+                      logo={item.logo}
+                      logoWidth={item.logoWidth}
+                      logoHeight={item.logoHeight}
+                      logoMonochrome={item.logoMonochrome}
                     />
                   </AnimatePresence>
                 </li>

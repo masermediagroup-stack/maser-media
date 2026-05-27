@@ -6284,6 +6284,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-testimonials-wave .testimonial-card {
+  position: relative;
   min-height: 0;
   height: clamp(21rem, 31vw, 29rem);
   margin: 0;
@@ -6296,6 +6297,32 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.mm-testimonials-wave .testimonial-card-logo {
+  position: absolute;
+  right: clamp(0.85rem, 2vw, 1.35rem);
+  bottom: clamp(0.85rem, 2vw, 1.35rem);
+  z-index: 1;
+  width: auto;
+  height: clamp(1.65rem, 3.2vw, 2.35rem);
+  max-width: min(46%, 11rem);
+  object-fit: contain;
+  object-position: right bottom;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.mm-testimonials-wave .testimonial-card-logo--mono {
+  filter: grayscale(1) brightness(0.2);
+}
+
+.mm-testimonials-wave .testimonial-card-footer {
+  position: relative;
+  z-index: 2;
+  max-width: min(100%, 14rem);
+  padding-right: clamp(4.5rem, 28%, 7rem);
 }
 
 .mm-testimonials-wave .testimonial-card-text {
@@ -6574,11 +6601,6 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-testimonials-wave .testimonial-card-role {
   color: rgba(13, 17, 23, 0.58);
-}
-
-.mm-testimonials-wave .testimonial-card-avatar {
-  border-color: rgba(0, 101, 163, 0.14);
-  background: linear-gradient(135deg, rgba(0, 101, 163, 0.12), rgba(8, 152, 222, 0.2));
 }
 
 @media (max-width: 900px) {
