@@ -3760,9 +3760,7 @@ body {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition:
-    opacity 0.35s ease,
-    visibility 0.35s ease;
+  transition: none;
 }
 
 html.mm-intro-pending .mm-preload-fallback {
@@ -4109,7 +4107,6 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-hero__load-curtain {
   --mm-hero-curtain-duration: 1.12s;
-  --mm-hero-dot-duration: 0.98s;
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -4125,7 +4122,6 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 @media (min-width: 768px) {
   .mm-hero__load-curtain {
     --mm-hero-curtain-duration: 1.36s;
-    --mm-hero-dot-duration: 1.12s;
   }
 }
 
@@ -4136,7 +4132,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-hero__dot-stage {
-  --mm-hero-dot-duration: 0.98s;
+  --mm-hero-curtain-duration: 1.12s;
   position: fixed;
   inset: 0;
   z-index: 1002;
@@ -4148,7 +4144,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 @media (min-width: 768px) {
   .mm-hero__dot-stage {
-    --mm-hero-dot-duration: 1.12s;
+    --mm-hero-curtain-duration: 1.36s;
   }
 }
 
@@ -4195,7 +4191,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   box-shadow:
     0 0 0 1px rgba(247, 251, 255, 0.55),
     0 0 1.15rem rgba(255, 255, 255, 0.42);
-  animation: mm-hero-reveal-dot var(--mm-hero-dot-duration, 0.98s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: mm-hero-reveal-dot var(--mm-hero-curtain-duration, 1.12s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes mm-hero-reveal-dot {
@@ -4226,7 +4222,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
     transform: translate3d(0, 0.2rem, 0) scale(1.04, 0.96);
   }
 
-  42% {
+  40% {
     opacity: 1;
     background-color: #fff;
     box-shadow:
@@ -4236,40 +4232,22 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   }
 
   52% {
-    background-color: #74caff;
-    box-shadow:
-      0 0 0 1px rgba(247, 251, 255, 0.46),
-      0 0 1.8rem rgba(16, 164, 255, 0.54),
-      0 0 3.4rem rgba(16, 164, 255, 0.2);
-    transform: translate3d(0, -0.32rem, 0) scale(0.99, 1.02);
-  }
-
-  60% {
-    opacity: 1;
+    opacity: 0.45;
     background-color: var(--mm-blue, #10a4ff);
     box-shadow:
-      0 0 0 1px rgba(247, 251, 255, 0.38),
-      0 0 2.15rem rgba(16, 164, 255, 0.64),
-      0 0 4.1rem rgba(16, 164, 255, 0.28);
-    transform: translate3d(0, 0, 0) scale(1);
+      0 0 0 1px rgba(247, 251, 255, 0.24),
+      0 0 1.6rem rgba(16, 164, 255, 0.42);
+    transform: translate3d(0, 0, 0) scale(0.98);
   }
 
-  66% {
+  62%,
+  100% {
     opacity: 0;
     background-color: var(--mm-blue, #10a4ff);
     box-shadow:
       0 0 0 1px rgba(247, 251, 255, 0),
       0 0 1.2rem rgba(16, 164, 255, 0.08);
     transform: translate3d(0, 0, 0) scale(0.94);
-  }
-
-  100% {
-    opacity: 0;
-    background-color: var(--mm-blue, #10a4ff);
-    box-shadow:
-      0 0 0 1px rgba(247, 251, 255, 0),
-      0 0 1.4rem rgba(16, 164, 255, 0.22);
-    transform: translate3d(0, 0, 0) scale(0.96);
   }
 }
 
@@ -4282,12 +4260,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 @keyframes mm-hero-curtain-hole {
   0%,
-  48% {
+  40% {
     width: 0;
-  }
-
-  66% {
-    width: 52vmax;
   }
 
   100% {
@@ -5528,7 +5502,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-cta__shell {
   display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(18rem, 0.85fr);
+  grid-template-columns: minmax(0, 0.9fr) minmax(20rem, 1fr);
   align-items: center;
   justify-content: center;
   gap: clamp(2.5rem, 8vw, 8rem);
@@ -5572,30 +5546,89 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: min(100%, clamp(16rem, 32vw, 32rem));
+  width: min(100%, clamp(18rem, 40vw, 40rem));
   perspective: 820px;
   transform-style: preserve-3d;
   text-decoration: none;
 }
 
+.mm-cta__logo-shell {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  aspect-ratio: 3776.87 / 1915.83;
+  padding: 6% 4%;
+  box-sizing: border-box;
+  --cta-logo-tilt-x: 0rad;
+  --cta-logo-tilt-y: 0rad;
+  --cta-logo-tilt-z: 0px;
+}
+
+.mm-cta__logo-shell--static-tilt .mm-cta__logo--static {
+  transform: rotateX(var(--cta-logo-tilt-x)) rotateY(var(--cta-logo-tilt-y))
+    translate3d(0, 0, var(--cta-logo-tilt-z));
+  transition: filter 220ms ease;
+}
+
+.mm-cta__logo-shell--webgl-ready .mm-cta__logo--static {
+  opacity: 0;
+  visibility: hidden;
+}
+
 .mm-cta__logo {
   display: block;
   width: 100%;
-  height: auto;
-  transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg);
-  transform-origin: 50% 50%;
-  transition:
-    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
-    filter 220ms ease;
-  will-change: transform;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
-.mm-cta__logo-link:hover .mm-cta__logo,
-.mm-cta__logo-link:focus-visible .mm-cta__logo {
+.mm-cta__logo--static {
+  transform: translate3d(0, 0, 0);
+  transform-origin: center;
+  transition:
+    opacity 180ms ease,
+    visibility 180ms ease,
+    filter 220ms ease;
+}
+
+.mm-cta__logo--tilt {
+  position: absolute;
+  inset: 6% 4%;
+  overflow: visible;
+  opacity: 0;
+  transition:
+    opacity 180ms ease,
+    filter 220ms ease;
+}
+
+.mm-cta__logo-shell--webgl-ready .mm-cta__logo--tilt {
+  opacity: 1;
+}
+
+.mm-cta__logo--tilt canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.mm-cta__logo-shell.mm-cta__logo--active .mm-cta__logo--tilt,
+.mm-cta__logo-shell.mm-cta__logo--active .mm-cta__logo--static,
+.mm-cta__logo-link:focus-visible .mm-cta__logo--tilt,
+.mm-cta__logo-link:focus-visible .mm-cta__logo--static {
+  filter:
+    drop-shadow(0 10px 22px rgba(255, 255, 255, 0.34))
+    drop-shadow(0 0 28px rgba(122, 196, 255, 0.22));
+}
+
+.mm-cta__logo-link:focus-visible .mm-cta__logo--static {
+  transform: translate3d(0, -2px, 0);
   filter:
     drop-shadow(0 8px 18px rgba(255, 255, 255, 0.32))
     drop-shadow(0 0 26px rgba(255, 255, 255, 0.2));
-  transform: translate3d(0, -2px, 10px) rotateX(3deg) rotateY(-4deg);
 }
 
 .mm-cta__logo-link:focus-visible {
@@ -5605,13 +5638,11 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mm-cta__logo {
+  .mm-cta__logo--static {
     transition: none;
-    will-change: auto;
   }
 
-  .mm-cta__logo-link:hover .mm-cta__logo,
-  .mm-cta__logo-link:focus-visible .mm-cta__logo {
+  .mm-cta__logo-link:focus-visible .mm-cta__logo--static {
     transform: translateY(-1px);
   }
 }
@@ -5766,7 +5797,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   }
 
   .mm-cta__logo-link {
-    width: min(78vw, 20rem);
+    width: min(88vw, 26rem);
   }
 
   .mm-cta .mm-cta__actions {
@@ -6476,6 +6507,15 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
     font-size: var(--mm-type-body-small);
     line-height: 1.62;
   }
+
+  .mm-testimonials-wave .testimonial-card-footer {
+    max-width: calc(100% - clamp(6.25rem, 38%, 9rem));
+  }
+
+  .mm-testimonials-wave .testimonial-card-logo {
+    height: clamp(2.65rem, 11vw, 3.35rem);
+    max-width: min(42%, 9.75rem);
+  }
 }
 
 /* Testimonials — three-card randomized fade band */
@@ -6618,6 +6658,42 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
   .mm-testimonials-wave .testimonial-card {
     min-height: clamp(16rem, 46vw, 19rem);
+  }
+
+  .mm-testimonials-wave .testimonial-card-footer {
+    max-width: calc(100% - clamp(5.75rem, 34%, 8.5rem));
+    padding-right: 0;
+  }
+
+  .mm-testimonials-wave .testimonial-card-who {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    column-gap: clamp(0.45rem, 2vw, 0.75rem);
+    row-gap: 0.15rem;
+  }
+
+  .mm-testimonials-wave .testimonial-card-name {
+    white-space: nowrap;
+  }
+
+  .mm-testimonials-wave .testimonial-card-role {
+    min-width: 0;
+    line-height: 1.35;
+  }
+
+  .mm-testimonials-wave .testimonial-card-role::before {
+    content: '·';
+    margin-right: 0.45rem;
+    color: rgba(13, 17, 23, 0.32);
+    font-weight: 400;
+  }
+
+  .mm-testimonials-wave .testimonial-card-logo {
+    height: clamp(2.35rem, 6.5vw, 3.1rem);
+    max-width: min(44%, 10.5rem);
+    right: clamp(1rem, 3vw, 1.35rem);
+    bottom: clamp(1rem, 3vw, 1.35rem);
   }
 }
 
