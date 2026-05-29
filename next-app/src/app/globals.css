@@ -5540,12 +5540,13 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   justify-content: flex-end;
   align-items: center;
   min-width: 0;
+  overflow: visible;
 }
 
 .mm-cta__logo-link {
   display: block;
   width: min(100%, clamp(18rem, 40vw, 40rem));
-  perspective: 820px;
+  perspective: 920px;
   transform-style: preserve-3d;
   text-decoration: none;
   overflow: visible;
@@ -5558,21 +5559,20 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   transform-style: preserve-3d;
   aspect-ratio: 3776.87 / 1915.83;
   overflow: visible;
-  --cta-logo-tilt-x: 0rad;
-  --cta-logo-tilt-y: 0rad;
-  --cta-logo-tilt-z: 0px;
 }
 
 .mm-cta__logo-viewport {
   position: absolute;
-  inset: 10%;
+  inset: 5%;
   overflow: visible;
-}
-
-.mm-cta__logo-shell--static-tilt .mm-cta__logo--static {
-  transform: rotateX(var(--cta-logo-tilt-x)) rotateY(var(--cta-logo-tilt-y))
-    translate3d(0, 0, var(--cta-logo-tilt-z));
-  transition: filter 220ms ease;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--cta-logo-tilt-x, 0deg)) rotateY(var(--cta-logo-tilt-y, 0deg))
+    translate3d(0, 0, var(--cta-logo-tilt-z, 0px));
+  transform-origin: center center;
+  will-change: transform;
+  --cta-logo-tilt-x: 0deg;
+  --cta-logo-tilt-y: 0deg;
+  --cta-logo-tilt-z: 0px;
 }
 
 .mm-cta__logo {
@@ -5581,50 +5581,13 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   object-position: center;
 }
 
-.mm-cta__logo--static {
-  position: absolute !important;
-  inset: 0;
-  width: 100% !important;
-  height: 100% !important;
-  transform: translate3d(0, 0, 0);
-  transform-origin: center;
-  transition:
-    opacity 180ms ease,
-    visibility 180ms ease,
-    filter 220ms ease;
-}
-
-.mm-cta__logo--tilt {
-  position: absolute;
-  inset: 0;
-  overflow: visible;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 180ms ease;
-}
-
-.mm-cta__logo-shell--webgl-ready .mm-cta__logo--tilt {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.mm-cta__logo--tilt canvas {
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
-}
-
-.mm-cta__logo-shell.mm-cta__logo--active .mm-cta__logo--tilt,
-.mm-cta__logo-shell.mm-cta__logo--active .mm-cta__logo--static,
-.mm-cta__logo-link:focus-visible .mm-cta__logo--tilt,
-.mm-cta__logo-link:focus-visible .mm-cta__logo--static {
+.mm-cta__logo-shell.mm-cta__logo--active .mm-cta__logo-viewport {
   filter:
     drop-shadow(0 10px 22px rgba(255, 255, 255, 0.34))
     drop-shadow(0 0 28px rgba(122, 196, 255, 0.22));
 }
 
-.mm-cta__logo-link:focus-visible .mm-cta__logo--static {
-  transform: translate3d(0, -2px, 0);
+.mm-cta__logo-link:focus-visible .mm-cta__logo-viewport {
   filter:
     drop-shadow(0 8px 18px rgba(255, 255, 255, 0.32))
     drop-shadow(0 0 26px rgba(255, 255, 255, 0.2));
@@ -5637,12 +5600,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mm-cta__logo--static {
+  .mm-cta__logo-viewport {
     transition: none;
-  }
-
-  .mm-cta__logo-link:focus-visible .mm-cta__logo--static {
-    transform: translateY(-1px);
+    will-change: auto;
   }
 }
 
