@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from 'motion/react';
 import type { AriaRole, ReactNode } from 'react';
+import { useIsClient } from '@/hooks/useIsClient';
 
 type ScrollRevealVariant = 'fade' | 'blur';
 
@@ -51,10 +52,11 @@ export function ScrollReveal({
   id,
 }: ScrollRevealProps) {
   const reduceMotion = useReducedMotion();
+  const canAnimate = useIsClient();
   const Tag = motionTags[as];
   const StaticTag = as;
 
-  if (reduceMotion) {
+  if (!canAnimate || reduceMotion) {
     return (
       <StaticTag className={className} role={role} id={id}>
         {children}

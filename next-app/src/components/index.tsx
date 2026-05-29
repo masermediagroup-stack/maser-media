@@ -17,6 +17,7 @@ import { isContactModalHref, openContactModalFromApp } from '@/lib/contactModalE
 import SmokeyBackground from '@/components/lightswind/smokey-background';
 import { WorkLightswindShader } from '@/components/WorkLightswindShader';
 import { useGsapLandingMotion, useMmScrollReveals } from '@/hooks/useGsapLandingMotion';
+import { useIsClient } from '@/hooks/useIsClient';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { HOME_INTRO_CURTAIN_MS } from '@/lib/homeIntro';
 import { sanitizeScrollArtifacts } from '@/lib/scrollSanitize';
@@ -846,6 +847,8 @@ export function FaqSection() {
 
 export function Cta() {
   const reduceMotion = useReducedMotion();
+  const isClient = useIsClient();
+  const animateLogo = isClient && !reduceMotion;
 
   return (
     <section className="mm-cta mm-section--cta" id="contact" aria-labelledby="contact-heading">
@@ -874,8 +877,8 @@ export function Cta() {
             </div>
             <motion.div
               className="mm-cta__logo-stage"
-              initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-              whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              initial={animateLogo ? { opacity: 0, y: 12 } : false}
+              whileInView={animateLogo ? { opacity: 1, y: 0 } : undefined}
               viewport={{ once: true, amount: 0.45 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
@@ -896,7 +899,6 @@ function FooterNavItem({ text, href }: { text: string; href: string }) {
       <button
         type="button"
         className="mm-footer__nav-link"
-        data-mm-reveal="fade"
         onClick={() => openContactModalFromApp()}
       >
         {text}
@@ -905,12 +907,7 @@ function FooterNavItem({ text, href }: { text: string; href: string }) {
   }
 
   return (
-    <Link
-      href={href}
-      className="mm-footer__nav-link"
-      data-mm-reveal="fade"
-      data-mm-native-nav="true"
-    >
+    <Link href={href} className="mm-footer__nav-link" data-mm-native-nav="true">
       {text}
     </Link>
   );
@@ -918,8 +915,8 @@ function FooterNavItem({ text, href }: { text: string; href: string }) {
 
 export function Footer() {
   return (
-    <footer className="mm-footer relative" data-mm-reveal-group="fade" data-mm-reveal-stagger="0.08">
-      <p className="mm-footer__copy" data-mm-reveal="fade">
+    <footer className="mm-footer relative">
+      <p className="mm-footer__copy">
         © {CONTENT.footer.copyright}
       </p>
       <nav className="mm-footer__nav" aria-label="Footer navigation">
