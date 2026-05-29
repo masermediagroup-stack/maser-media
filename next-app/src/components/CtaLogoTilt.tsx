@@ -12,8 +12,9 @@ const LOGO_VIEWBOX_HEIGHT = 1915.83;
 const LOGO_ASPECT = LOGO_VIEWBOX_WIDTH / LOGO_VIEWBOX_HEIGHT;
 const LOGO_WIDTH = 640;
 const LOGO_HEIGHT = Math.round(LOGO_WIDTH / LOGO_ASPECT);
-const LOGO_FRAME_INSET = 0.06;
-const LOGO_MESH_SCALE = 0.94;
+const LOGO_FRAME_INSET = 0.1;
+const LOGO_VIEW_MARGIN = 0.78;
+const FRUSTUM_HEIGHT = 1;
 const MAX_TILT_X = 0.26;
 const MAX_TILT_Y = 0.3;
 const MAX_LIFT = 0.12;
@@ -111,6 +112,46 @@ async function createLogoTexture() {
   return texture;
 }
 
+function waitForMountLayout(mount: HTMLElement) {
+  return new Promise<void>((resolve) => {
+    const check = () => {
+      if (mount.clientWidth > 1 && mount.clientHeight > 1) {
+        resolve();
+        return;
+      }
+      requestAnimationFrame(check);
+    };
+    check();
+  });
+}
+
+function updateLogoViewport(
+  camera: THREE.OrthographicCamera,
+  renderer: THREE.WebGLRenderer,
+  mount: HTMLElement,
+  mesh: THREE.Mesh,
+  planeAspect: number,
+) {
+  const width = Math.max(mount.clientWidth, 1);
+  const height = Math.max(mount.clientHeight, 1);
+  const viewAspect = width / height;
+  const frustumWidth = FRUSTUM_HEIGHT * viewAspect;
+
+  camera.left = -frustumWidth / 2;
+  camera.right = frustumWidth / 2;
+  camera.top = FRUSTUM_HEIGHT / 2;
+  camera.bottom = -FRUSTUM_HEIGHT / 2;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(width, height, false);
+
+  const scale = Math.min(
+    (frustumWidth * LOGO_VIEW_MARGIN) / planeAspect,
+    FRUSTUM_HEIGHT * LOGO_VIEW_MARGIN,
+  );
+  mesh.scale.set(scale, scale, 1);
+}
+
 export function CtaLogoTilt({ className }: { className?: string }) {
   const shellRef = useRef<HTMLDivElement>(null);
   const mountRef = useRef<HTMLDivElement>(null);
@@ -142,7 +183,7 @@ export function CtaLogoTilt({ className }: { className?: string }) {
     let texture: THREE.CanvasTexture | null = null;
     let mesh: THREE.Mesh | null = null;
     let scene: THREE.Scene | null = null;
-    let camera: THREE.PerspectiveCamera | null = null;
+    let camera: THREE.OrthographicCamera | null = null;
 
     const setPointerTilt = (clientX: number, clientY: number) => {
       const rect = shell.getBoundingClientRect();
@@ -207,12 +248,8 @@ export function CtaLogoTilt({ className }: { className?: string }) {
     };
 
     const onWindowResize = () => {
-      if (!renderer || !camera || !mount) return;
-      const width = Math.max(mount.clientWidth, 1);
-      const height = Math.max(mount.clientHeight, 1);
-      renderer.setSize(width, height, false);
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
+      if (!renderer || !camera || !mount || !mesh) return;
+      updateLogoViewport(camera, renderer, mount, mesh, LOGO_ASPECT);
       renderFrame();
     };
 
@@ -235,10 +272,8 @@ export function CtaLogoTilt({ className }: { className?: string }) {
         if (disposed) return;
 
         scene = new THREE.Scene();
-        const viewWidth = Math.max(mount.clientWidth, 1);
-        const viewHeight = Math.max(mount.clientHeight, 1);
-        camera = new THREE.PerspectiveCamera(24, viewWidth / viewHeight, 0.1, 20);
-        camera.position.set(0, 0, 2.2);
+        camera = new THREE.OrthographicCamera(-1, 1, 0.5, -0.5, 0.1, 10);
+        camera.position.set(0, 0, 1);
 
         renderer = new THREE.WebGLRenderer({
           alpha: true,
@@ -259,21 +294,22 @@ export function CtaLogoTilt({ className }: { className?: string }) {
           transparent: true,
           depthWrite: false,
           toneMapped: false,
-          alphaTest: 0.02,
           side: THREE.DoubleSide,
         });
 
         mesh = new THREE.Mesh(geometry, material);
-        mesh.scale.set(LOGO_MESH_SCALE, LOGO_MESH_SCALE, 1);
         scene.add(mesh);
 
-        onWindowResize();
-        renderFrame();
-        startRenderLoop();
+        await waitForMountLayout(mount);
+        if (disposed) return;
 
-        if (!disposed) {
-          setWebglReady(true);
-        }
+        updateLogoViewport(camera, renderer, mount, mesh, LOGO_ASPECT);
+        renderFrame();
+
+        if (disposed || !mount.contains(renderer.domElement)) return;
+
+        startRenderLoop();
+        setWebglReady(true);
       } catch {
         if (!disposed) {
           setUseStaticTilt(true);
@@ -416,16 +452,18 @@ export function CtaLogoTilt({ className }: { className?: string }) {
         className,
       )}
     >
-      <Image
-        src={LOGO_SRC}
-        alt="Maser Media"
-        width={LOGO_WIDTH}
-        height={LOGO_HEIGHT}
-        className="mm-cta__logo mm-cta__logo--static"
-      />
-      {!useStaticTilt ? (
-        <div ref={mountRef} className="mm-cta__logo mm-cta__logo--tilt" aria-hidden />
-      ) : null}
+      <div className="mm-cta__logo-viewport">
+        <Image
+          src={LOGO_SRC}
+          alt="Maser Media"
+          fill
+          sizes="(min-width: 820px) 40vw, 88vw"
+          className="mm-cta__logo mm-cta__logo--static"
+        />
+        {!useStaticTilt ? (
+          <div ref={mountRef} className="mm-cta__logo mm-cta__logo--tilt" aria-hidden />
+        ) : null}
+      </div>
     </div>
   );
 }
