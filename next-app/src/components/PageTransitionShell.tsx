@@ -197,7 +197,8 @@ export function PageTransitionShell({ children }: { children: ReactNode }) {
 
   const refreshHomeScroll = useCallback(async () => {
     try {
-      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      const { loadScrollSmootherPlugins } = await import('@/lib/scrollSmoother');
+      const { ScrollTrigger } = await loadScrollSmootherPlugins();
       ScrollTrigger.refresh();
     } catch {
       // ScrollTrigger not registered on this route.

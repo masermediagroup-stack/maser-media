@@ -2,6 +2,7 @@
 
 import { useLayoutEffect } from 'react';
 import type { RefObject } from 'react';
+import { whenScrollSmootherReady } from '@/lib/scrollSmoother';
 
 function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined') return false;
@@ -43,6 +44,9 @@ export function useMmScrollReveals(rootRef: RefObject<HTMLElement | null>, enabl
 
     const run = async () => {
       const [{ gsap }, { ScrollTrigger }] = await loadLandingMotionModules();
+      if (cancelled || !rootRef.current) return;
+
+      await whenScrollSmootherReady();
       if (cancelled || !rootRef.current) return;
 
       gsap.registerPlugin(ScrollTrigger);
@@ -191,6 +195,9 @@ export function useGsapLandingMotion(
 
     const run = async () => {
       const [{ gsap }, { ScrollTrigger }, { SplitText }] = await loadLandingMotionModules();
+      if (cancelled || !rootRef.current) return;
+
+      await whenScrollSmootherReady();
       if (cancelled || !rootRef.current) return;
 
       gsap.registerPlugin(ScrollTrigger, SplitText);

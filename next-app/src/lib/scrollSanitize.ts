@@ -8,12 +8,11 @@ export async function sanitizeScrollArtifacts() {
 
   const isInnerRoute = Boolean(document.querySelector('main.mm-inner-main'));
 
-  const [{ ScrollTrigger }, { ScrollSmoother }] = await Promise.all([
-    import('gsap/ScrollTrigger'),
-    import('gsap/ScrollSmoother'),
-  ]);
+  const scrollSmoother = await import('@/lib/scrollSmoother');
+  const { ScrollTrigger, ScrollSmoother } = await scrollSmoother.loadScrollSmootherPlugins();
 
   ScrollSmoother.get()?.kill();
+  scrollSmoother.setScrollSmootherActive(false);
   ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
 
   const removePinSpacers = () => {

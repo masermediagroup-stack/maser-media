@@ -20,6 +20,7 @@ import { useGsapLandingMotion, useMmScrollReveals } from '@/hooks/useGsapLanding
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { HOME_INTRO_CURTAIN_MS } from '@/lib/homeIntro';
 import { sanitizeScrollArtifacts } from '@/lib/scrollSanitize';
+import { whenScrollSmootherReady } from '@/lib/scrollSmoother';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { LiquidNav } from './LiquidNav';
 import { AboutFounders } from './AboutFounders';
@@ -27,6 +28,7 @@ import { AsciiWaveFooter } from './AsciiWaveFooter';
 import { FooterCoolButton } from './FooterCoolButton';
 import { AuroraShader, MASER_AURORA_COLOR_STOPS } from './AuroraShader';
 import { ProcessBento } from './ProcessBento';
+import { CtaLogoTilt } from './CtaLogoTilt';
 
 type EntranceProps = { entrance?: boolean };
 type NavProps = EntranceProps & { introReady?: boolean };
@@ -86,6 +88,11 @@ function useStackedWorkPosters(
         import('gsap/ScrollTrigger'),
       ]);
 
+      if (cancelled || !sectionRef.current) {
+        return;
+      }
+
+      await whenScrollSmootherReady();
       if (cancelled || !sectionRef.current) {
         return;
       }
@@ -879,13 +886,7 @@ export function Cta() {
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
               <Link href="/#hero" className="mm-cta__logo-link" aria-label="Back to the Maser Media hero">
-                <Image
-                  src="/assets/Blue-HD.svg"
-                  alt="Maser Media"
-                  width={520}
-                  height={280}
-                  className="mm-cta__logo"
-                />
+                <CtaLogoTilt />
               </Link>
             </motion.div>
           </div>

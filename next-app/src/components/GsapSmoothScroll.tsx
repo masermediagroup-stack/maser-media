@@ -3,6 +3,11 @@
 import { useLayoutEffect, useRef } from 'react';
 import type React from 'react';
 import { useReducedMotion } from 'motion/react';
+import {
+  isScrollSmootherEligible,
+  loadScrollSmootherPlugins,
+  setScrollSmootherActive,
+} from '@/lib/scrollSmoother';
 
 export function GsapSmoothScroll({ children }: { children: React.ReactNode }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -10,11 +15,7 @@ export function GsapSmoothScroll({ children }: { children: React.ReactNode }) {
   const reduceMotion = useReducedMotion();
 
   useLayoutEffect(() => {
-    if (reduceMotion || !wrapperRef.current || !contentRef.current) {
-      return;
-    }
-
-    if (window.matchMedia('(max-width: 767px), (pointer: coarse)').matches) {
+    if (reduceMotion || !isScrollSmootherEligible() || !wrapperRef.current || !contentRef.current) {
       return;
     }
 
@@ -22,18 +23,14 @@ export function GsapSmoothScroll({ children }: { children: React.ReactNode }) {
     let cleanup = () => {};
 
     const run = async () => {
-      const [{ gsap }, { ScrollTrigger }, { ScrollSmoother }] = await Promise.all([
-        import('gsap'),
-        import('gsap/ScrollTrigger'),
-        import('gsap/ScrollSmoother'),
-      ]);
+      const { ScrollTrigger, ScrollSmoother } = await loadScrollSmootherPlugins();
 
       if (cancelled || !wrapperRef.current || !contentRef.current) {
         return;
       }
 
-      gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
       ScrollSmoother.get()?.kill();
+      setScrollSmootherActive(false);
 
       const smoother = ScrollSmoother.create({
         wrapper: wrapperRef.current,
@@ -45,10 +42,12 @@ export function GsapSmoothScroll({ children }: { children: React.ReactNode }) {
         effects: false,
       });
 
+      setScrollSmootherActive(true);
       ScrollTrigger.refresh();
 
       cleanup = () => {
         smoother.kill();
+        setScrollSmootherActive(false);
         wrapperRef.current?.removeAttribute('style');
         contentRef.current?.removeAttribute('style');
         document.querySelectorAll('.pin-spacer').forEach((node) => {

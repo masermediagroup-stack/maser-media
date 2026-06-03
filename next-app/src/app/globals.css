@@ -352,6 +352,11 @@ body.galaxy-active .hero-bg::after {
   );
 }
 
+/* Avoid fighting GSAP ScrollSmoother on the homepage (layout still sets smooth for inner routes). */
+html.mm-scroll-smoother-active {
+  scroll-behavior: auto !important;
+}
+
 .mm-smooth-wrapper,
 .mm-smooth-content {
   width: 100%;
@@ -5566,53 +5571,58 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   justify-content: flex-end;
   align-items: center;
   min-width: 0;
+  overflow: visible;
 }
 
 .mm-cta__logo-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: min(100%, clamp(16rem, 32vw, 32rem));
-  perspective: 820px;
+  display: block;
+  width: min(100%, clamp(18rem, 40vw, 40rem));
+  perspective: 920px;
   transform-style: preserve-3d;
   text-decoration: none;
+  overflow: visible;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mm-cta__logo-shell {
+  display: block;
+  width: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  overflow: visible;
+  padding: 8% 4%;
+  box-sizing: border-box;
+}
+
+.mm-cta__logo-viewport {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--cta-logo-tilt-x, 0deg)) rotateY(var(--cta-logo-tilt-y, 0deg))
+    translate3d(0, 0, var(--cta-logo-tilt-z, 0px));
+  transform-origin: center center;
+  --cta-logo-tilt-x: 0deg;
+  --cta-logo-tilt-y: 0deg;
+  --cta-logo-tilt-z: 0px;
 }
 
 .mm-cta__logo {
   display: block;
-  width: 100%;
+  width: min(100%, 36rem);
   height: auto;
-  transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg);
-  transform-origin: 50% 50%;
-  transition:
-    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
-    filter 220ms ease;
-  will-change: transform;
-}
-
-.mm-cta__logo-link:hover .mm-cta__logo,
-.mm-cta__logo-link:focus-visible .mm-cta__logo {
-  filter:
-    drop-shadow(0 8px 18px rgba(255, 255, 255, 0.32))
-    drop-shadow(0 0 26px rgba(255, 255, 255, 0.2));
-  transform: translate3d(0, -2px, 10px) rotateX(3deg) rotateY(-4deg);
+  max-width: 100%;
+  margin-inline: auto;
 }
 
 .mm-cta__logo-link:focus-visible {
-  border-radius: 12px;
-  outline: 2px solid rgba(255, 255, 255, 0.55);
-  outline-offset: 0.4rem;
+  outline: 2px solid var(--mm-cta-focus);
+  outline-offset: 0.35rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mm-cta__logo {
-    transition: none;
-    will-change: auto;
-  }
-
-  .mm-cta__logo-link:hover .mm-cta__logo,
-  .mm-cta__logo-link:focus-visible .mm-cta__logo {
-    transform: translateY(-1px);
+  .mm-cta__logo-viewport {
+    transform: none;
   }
 }
 
@@ -5766,7 +5776,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   }
 
   .mm-cta__logo-link {
-    width: min(78vw, 20rem);
+    width: min(88vw, 26rem);
   }
 
   .mm-cta .mm-cta__actions {
