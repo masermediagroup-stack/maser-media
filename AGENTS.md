@@ -48,3 +48,11 @@ The existing site is intentionally visual and motion-heavy. Improve it by making
 - Keep Codex-specific operating rules in `.codex/skills/agency-nextjs-website/SKILL.md`.
 - Keep this file short and strict so future agents see the guardrails immediately.
 
+## Cursor Cloud specific instructions
+
+- **Runtime:** Node.js **≥ 22** (see `next-app/package.json` engines and `.nvmrc`). Install app deps with `npm install --prefix next-app` from the repo root (root `package.json` only proxies scripts).
+- **Dev server:** `npm run dev` → http://localhost:3000. For long-running sessions, use a dedicated tmux session (e.g. `next-dev-server`) rather than a one-shot background shell.
+- **Quality gates:** `npm run typecheck`, `npm run lint`, `npm run build` (all from repo root). ESLint may report warnings without failing.
+- **Optional integrations:** Full contact/booking E2E needs Google Calendar OAuth env vars in `next-app/.env.local` (see `docs/CONTACT_FORM_SETUP.md` and `.env.local.example`). UI and routing work without them; `/api/contact` returns an error when credentials are missing.
+- **Not used locally:** No Docker Compose, database, or separate API service—only the Next.js app process.
+
