@@ -17,6 +17,8 @@ uniform float iTime;
 uniform vec2 iMouse;
 uniform vec2 iVelocity;
 uniform float iPointerActive;
+uniform float uInvertRadius;
+uniform float uInvertHalo;
 uniform vec3 u_color;
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord){
@@ -43,9 +45,18 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord){
 
     float wave = abs(sin(distortion.x + distortion.y + time));
     float glow = smoothstep(0.9, 0.2, wave);
-    glow += pointerField * 0.18 * smoothstep(0.65, 0.0, pointerDist);
 
-    fragColor = vec4(u_color * glow, 1.0);
+    float bubbleMix = smoothstep(uInvertRadius, uInvertRadius * 0.24, pointerDist) * iPointerActive;
+    float bubbleHalo = smoothstep(uInvertRadius * 1.18, uInvertRadius * 0.84, pointerDist)
+                     * smoothstep(uInvertRadius * 0.5, uInvertRadius * 0.76, pointerDist)
+                     * iPointerActive
+                     * uInvertHalo;
+
+    float finalGlow = mix(glow, 1.0 - glow, bubbleMix * 0.92);
+    finalGlow += bubbleHalo * 0.24;
+    finalGlow += bubbleMix * 0.05;
+
+    fragColor = vec4(u_color * finalGlow, 1.0);
 }
 
 void main() {
@@ -153,10 +164,19 @@ function SmokeyBackground({
     const iMouseLocation = gl.getUniformLocation(program, "iMouse");
     const iVelocityLocation = gl.getUniformLocation(program, "iVelocity");
     const iPointerActiveLocation = gl.getUniformLocation(program, "iPointerActive");
+    const uInvertRadiusLocation = gl.getUniformLocation(program, "uInvertRadius");
+    const uInvertHaloLocation = gl.getUniformLocation(program, "uInvertHalo");
     const uColorLocation = gl.getUniformLocation(program, "u_color");
 
     const startTime = Date.now();
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    const reducedMotionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const pixelRatio = coarsePointer ? 0.85 : Math.min(window.devicePixelRatio || 1, 1.25);
     const pointer = { x: 0, y: 0, vx: 0, vy: 0, active: 0 };
+    const invertSettings = {
+      radius: coarsePointer ? 0.1 : 0.13,
+      halo: coarsePointer ? 0.55 : 0.72,
+    };
     const target = { x: 0, y: 0, time: 0, seeded: false };
     const setters = {
       x: (value: number) => {
@@ -180,9 +200,6 @@ function SmokeyBackground({
     let running = false;
     let inView = true;
     let killGsapTweens: (() => void) | null = null;
-    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
-    const reducedMotionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const pixelRatio = coarsePointer ? 0.85 : Math.min(window.devicePixelRatio || 1, 1.25);
 
     const render = () => {
       if (cancelled) return;
@@ -215,6 +232,8 @@ function SmokeyBackground({
       gl.uniform2f(iMouseLocation, pointer.x * pixelRatio, (height - pointer.y) * pixelRatio);
       gl.uniform2f(iVelocityLocation, pointer.vx * pixelRatio, pointer.vy * pixelRatio);
       gl.uniform1f(iPointerActiveLocation, pointer.active);
+      gl.uniform1f(uInvertRadiusLocation, invertSettings.radius);
+      gl.uniform1f(uInvertHaloLocation, invertSettings.halo);
 
       gl.drawArrays(gl.TRIANGLES, 0, 6);
       if (reducedMotionMedia.matches) {
@@ -281,20 +300,64 @@ function SmokeyBackground({
     };
 
     const interactionTarget = canvas.closest<HTMLElement>(".mm-hero") ?? canvas;
+    let touchActive = false;
+
+    const handleTouchPointerDown = (event: PointerEvent) => {
+      if (event.pointerType !== "touch") return;
+      touchActive = true;
+      handlePointerMove(event);
+      setters.active(1);
+      start();
+    };
+
+    const handleTouchPointerMove = (event: PointerEvent) => {
+      if (!touchActive || event.pointerType !== "touch") return;
+      handlePointerMove(event);
+    };
+
+    const handleTouchPointerEnd = (event: PointerEvent) => {
+      if (event.pointerType !== "touch") return;
+      touchActive = false;
+      target.seeded = false;
+      setters.vx(0);
+      setters.vy(0);
+      setters.active(0);
+      start();
+    };
+
+    const bootGsapSetters = (gsap: typeof import("gsap").gsap) => {
+      if (cancelled) return;
+
+      if (coarsePointer) {
+        setters.x = gsap.quickTo(pointer, "x", { duration: 0.18, ease: "power2.out" });
+        setters.y = gsap.quickTo(pointer, "y", { duration: 0.18, ease: "power2.out" });
+        setters.vx = gsap.quickTo(pointer, "vx", { duration: 0.22, ease: "power2.out" });
+        setters.vy = gsap.quickTo(pointer, "vy", { duration: 0.22, ease: "power2.out" });
+        setters.active = gsap.quickTo(pointer, "active", { duration: 0.24, ease: "power2.out" });
+        return;
+      }
+
+      setters.x = gsap.quickTo(pointer, "x", { duration: 0.72, ease: "power3.out" });
+      setters.y = gsap.quickTo(pointer, "y", { duration: 0.72, ease: "power3.out" });
+      setters.vx = gsap.quickTo(pointer, "vx", { duration: 0.55, ease: "power3.out" });
+      setters.vy = gsap.quickTo(pointer, "vy", { duration: 0.55, ease: "power3.out" });
+      setters.active = gsap.quickTo(pointer, "active", { duration: 0.34, ease: "power2.out" });
+    };
+
+    import("gsap").then(({ gsap }) => {
+      if (cancelled) return;
+      bootGsapSetters(gsap);
+      killGsapTweens = () => gsap.killTweensOf(pointer);
+    });
 
     if (!coarsePointer) {
-      import("gsap").then(({ gsap }) => {
-        if (cancelled) return;
-        setters.x = gsap.quickTo(pointer, "x", { duration: 0.72, ease: "power3.out" });
-        setters.y = gsap.quickTo(pointer, "y", { duration: 0.72, ease: "power3.out" });
-        setters.vx = gsap.quickTo(pointer, "vx", { duration: 0.55, ease: "power3.out" });
-        setters.vy = gsap.quickTo(pointer, "vy", { duration: 0.55, ease: "power3.out" });
-        setters.active = gsap.quickTo(pointer, "active", { duration: 0.34, ease: "power2.out" });
-        killGsapTweens = () => gsap.killTweensOf(pointer);
-      });
-
       interactionTarget.addEventListener("pointermove", handlePointerMove, { passive: true });
       interactionTarget.addEventListener("pointerleave", handlePointerLeave);
+    } else {
+      interactionTarget.addEventListener("pointerdown", handleTouchPointerDown, { passive: true });
+      interactionTarget.addEventListener("pointermove", handleTouchPointerMove, { passive: true });
+      interactionTarget.addEventListener("pointerup", handleTouchPointerEnd);
+      interactionTarget.addEventListener("pointercancel", handleTouchPointerEnd);
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
@@ -304,8 +367,15 @@ function SmokeyBackground({
       cancelled = true;
       stop();
       observer.disconnect();
-      interactionTarget.removeEventListener("pointermove", handlePointerMove);
-      interactionTarget.removeEventListener("pointerleave", handlePointerLeave);
+      if (!coarsePointer) {
+        interactionTarget.removeEventListener("pointermove", handlePointerMove);
+        interactionTarget.removeEventListener("pointerleave", handlePointerLeave);
+      } else {
+        interactionTarget.removeEventListener("pointerdown", handleTouchPointerDown);
+        interactionTarget.removeEventListener("pointermove", handleTouchPointerMove);
+        interactionTarget.removeEventListener("pointerup", handleTouchPointerEnd);
+        interactionTarget.removeEventListener("pointercancel", handleTouchPointerEnd);
+      }
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       killGsapTweens?.();
       gl.deleteProgram(program);
