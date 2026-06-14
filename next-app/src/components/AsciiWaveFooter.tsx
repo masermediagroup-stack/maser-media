@@ -24,7 +24,7 @@ export function AsciiWaveFooter({
 
   return (
     <div
-      className={`mm-footer__ascii h-[clamp(4.5rem,8vw,6rem)] w-full shrink-0 ${className ?? ""}`}
+      className={`mm-footer__ascii h-[clamp(5.75rem,18vw,8.5rem)] w-full shrink-0 ${className ?? ""}`}
       aria-hidden
     >
       {reducedMotion ? (

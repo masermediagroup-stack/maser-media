@@ -43,41 +43,46 @@ const AsciiWave: React.FC<AsciiWaveProps> = ({
     resize();
 
     const chars = " .:+x*#".split("");
-    const fontSize = 12;
-    const columnWidth = 10;
 
-    const drawFrame = () => {
+    const getMetrics = () => {
       const width = container.clientWidth;
       const height = container.clientHeight;
+      const fontSize = Math.max(12, Math.min(22, Math.round(height / 6)));
+      const columnWidth = Math.max(8, Math.round(fontSize * 0.78));
+      const columns = Math.max(1, Math.ceil(width / columnWidth));
+      const rows = Math.max(1, Math.ceil(height / fontSize));
+
+      return { width, height, fontSize, columnWidth, columns, rows };
+    };
+
+    const drawFrame = () => {
+      const { width, height, fontSize, columnWidth, columns, rows } = getMetrics();
 
       ctx.clearRect(0, 0, width, height);
 
       ctx.font = `${fontSize}px monospace`;
       ctx.fillStyle = color;
 
-      const columns = Math.ceil(width / columnWidth);
-      const rows = Math.ceil(height / fontSize);
-
       for (let x = 0; x < columns; x++) {
         const shapeBase = Math.sin(x * 0.1) * 0.6 + Math.cos(x * 0.25) * 0.4;
         const breath = Math.sin(time * 0.002 * speed) * 0.1;
         const flicker = Math.sin(time * 0.008 * speed + x * 100) * 0.05;
         const noise = shapeBase + breath + flicker;
-        const columnHeightNormal = Math.max(0.15, ((noise + 1) / 2) * 0.6 + 0.15);
+        const columnHeightNormal = Math.max(0.35, ((noise + 1) / 2) * 0.82 + 0.22);
         const activeRows = Math.floor(columnHeightNormal * rows);
 
         for (let y = rows - 1; y > rows - activeRows; y--) {
           const flowShift = time * 0.005 * speed;
           const charNoise = Math.sin(y * 0.2 - flowShift + x * 10);
           const distFromTop = y - (rows - activeRows);
-          const fade = Math.min(1, distFromTop / 6);
+          const fade = Math.min(1, distFromTop / Math.max(4, fontSize * 0.45));
           const normalizedNoise = (charNoise + 1) / 2;
           const charIndex = Math.floor(normalizedNoise * chars.length);
           const char = chars[Math.min(charIndex, chars.length - 1)];
           const posX = x * columnWidth;
           const posY = y * fontSize;
 
-          if (Math.random() > 0.95) continue;
+          if (Math.random() > 0.9) continue;
 
           ctx.globalAlpha = fade;
           ctx.fillText(char, posX, posY);

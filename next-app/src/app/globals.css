@@ -6761,11 +6761,20 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-footer__ascii {
   grid-area: ascii;
-  width: 100%;
+  box-sizing: border-box;
+  justify-self: stretch;
+  width: 100vw;
+  max-width: 100vw;
   margin-top: 0.35rem;
+  margin-inline: calc(50% - 50vw);
   opacity: 0.92;
   background-color: var(--mm-cta-bg, var(--mm-section-surface));
   pointer-events: none;
+}
+
+.mm-footer__ascii > * {
+  width: 100%;
+  height: 100%;
 }
 
 .mm-footer-cool-button {
@@ -6999,16 +7008,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   }
 
   .mm-footer__ascii {
-    box-sizing: border-box;
-    justify-self: stretch;
-    width: 100vw;
-    max-width: 100vw;
-    margin-inline: calc(50% - 50vw);
-    text-align: center;
-  }
-
-  .mm-footer__ascii > * {
-    width: 100%;
+    min-height: clamp(6.5rem, 24vw, 9.5rem);
+    height: clamp(6.5rem, 24vw, 9.5rem) !important;
   }
 
   .mm-footer-cool-button {
