@@ -924,7 +924,7 @@ export function Footer() {
           <FooterNavItem key={item.href} text={item.text} href={item.href} />
         ))}
       </nav>
-      <AsciiWaveFooter color="#10A4FF" speed={1} />
+      <AsciiWaveFooter speed={1} />
       <FooterCoolButton />
     </footer>
   );

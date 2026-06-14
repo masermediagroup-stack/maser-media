@@ -4,19 +4,20 @@ import AsciiWave from "@/components/lightswind/ascii-wave";
 import { useReducedMotionGate } from "@/hooks/useReducedMotionGate";
 
 export type AsciiWaveFooterProps = {
-  color?: string;
+  colors?: string[];
   speed?: number;
   className?: string;
 };
 
-const DEFAULT_BLUE = "#10A4FF";
+/** Maser palette: bright blue → mid blue → dark blue → black */
+const MASER_FOOTER_PALETTE = ["#10A4FF", "#0097F5", "#0065A3", "#111111"] as const;
 
 /**
  * Full-width ASCII wave strip for the site footer. Honors `prefers-reduced-motion`
  * (empty strip — no animation).
  */
 export function AsciiWaveFooter({
-  color = DEFAULT_BLUE,
+  colors = [...MASER_FOOTER_PALETTE],
   speed = 1,
   className,
 }: AsciiWaveFooterProps) {
@@ -30,7 +31,7 @@ export function AsciiWaveFooter({
       {reducedMotion ? (
         <div className="h-full w-full" />
       ) : (
-        <AsciiWave className="h-full" color={color} speed={speed} animated />
+        <AsciiWave className="h-full" colors={colors} speed={speed} animated />
       )}
     </div>
   );
