@@ -6806,10 +6806,38 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
   .mm-hero {
     min-height: 100svh;
+    min-height: 100dvh;
     grid-template-rows: minmax(0, 1fr);
     align-items: center;
     padding-top: clamp(5.75rem, 16svh, 7.25rem);
     padding-bottom: max(clamp(2.75rem, 9svh, 4.5rem), env(safe-area-inset-bottom));
+  }
+
+  /* Bias smokey overscan downward so the first mobile fold stays blue through the bottom edge. */
+  .mm-hero__bg-scale {
+    top: -8%;
+    right: -12%;
+    bottom: -22%;
+    left: -12%;
+  }
+
+  .mm-hero__smokey-placeholder {
+    background:
+      radial-gradient(ellipse 110% 88% at 50% 108%, rgba(16, 164, 255, 0.2), transparent 72%),
+      radial-gradient(ellipse 90% 70% at 50% 100%, rgba(16, 164, 255, 0.14), transparent 62%),
+      #020204;
+  }
+
+  /* Keep the hero-to-clients fade, but don't crush the initial fold into a black band on phones. */
+  .mm-hero::after {
+    height: clamp(9rem, 20svh, 14rem);
+    background: linear-gradient(
+      180deg,
+      rgba(3, 6, 13, 0) 0%,
+      rgba(3, 6, 13, 0.05) 36%,
+      rgba(3, 6, 13, 0.24) 72%,
+      rgba(3, 6, 13, 0.58) 100%
+    );
   }
 
   .mm-hero__content {
@@ -6817,6 +6845,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
     justify-items: center;
     align-self: center;
     min-height: calc(100svh - clamp(5.75rem, 16svh, 7.25rem) - max(clamp(2.75rem, 9svh, 4.5rem), env(safe-area-inset-bottom)));
+    min-height: calc(100dvh - clamp(5.75rem, 16svh, 7.25rem) - max(clamp(2.75rem, 9svh, 4.5rem), env(safe-area-inset-bottom)));
     text-align: center;
   }
 
