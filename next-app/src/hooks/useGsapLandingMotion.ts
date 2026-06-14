@@ -208,7 +208,7 @@ export function useGsapLandingMotion(
             onHeroIntroStart?.();
             onHeroIntroDone?.();
           }
-          if (hero) gsap.set(hero, { '--hero-exit-p': 1 });
+          if (hero) gsap.set(hero, { '--hero-exit-p': 0, '--hero-content-p': 0 });
           gsap.utils.toArray<HTMLElement>('.mm-section, .marquee-system', root).forEach((el) => {
             gsap.fromTo(
               el,
@@ -348,42 +348,86 @@ export function useGsapLandingMotion(
               }
             }
 
-            if (hero) {
-              gsap.fromTo(
-                hero,
-                { '--hero-exit-p': 0 },
-                {
-                  '--hero-exit-p': 1,
-                  ease: 'power2.inOut',
+            const heroScene = root.querySelector<HTMLElement>('.mm-hero-scene');
+            const heroContent = hero?.querySelector<HTMLElement>('.mm-hero__content');
+            const bgScale = hero?.querySelector<HTMLElement>('.mm-hero__bg-scale');
+            const heroScrollTrigger = heroScene ?? hero;
+
+            if (hero && heroScrollTrigger) {
+              gsap.set(hero, { '--hero-exit-p': 0, '--hero-content-p': 0 });
+
+              if (isNarrow) {
+                const mobileExit = gsap.timeline({
                   scrollTrigger: {
-                    trigger: hero,
+                    trigger: heroScrollTrigger,
                     start: 'top top',
-                    end: isNarrow ? 'bottom 70%' : 'bottom top',
-                    scrub: isNarrow ? 0.55 : 0.85,
+                    end: 'bottom 70%',
+                    scrub: 0.55,
                     invalidateOnRefresh: true,
                     ...scrollTriggerDefaults,
                   },
-                },
-              );
+                });
 
-              const bgScale = hero.querySelector<HTMLElement>('.mm-hero__bg-scale');
-              if (bgScale) {
-                gsap.fromTo(
-                  bgScale,
-                  { scale: isNarrow ? 1.01 : 1.018 },
-                  {
-                    scale: isNarrow ? 0.995 : 0.988,
-                    ease: 'none',
-                    scrollTrigger: {
-                      trigger: hero,
-                      start: 'top top',
-                      end: isNarrow ? 'bottom 70%' : 'bottom top',
-                      scrub: isNarrow ? 0.55 : 0.85,
-                      invalidateOnRefresh: true,
-                      ...scrollTriggerDefaults,
-                    },
-                  },
+                mobileExit.fromTo(
+                  hero,
+                  { '--hero-exit-p': 0 },
+                  { '--hero-exit-p': 1, ease: 'power2.inOut', duration: 1 },
+                  0,
                 );
+                mobileExit.fromTo(
+                  hero,
+                  { '--hero-content-p': 0 },
+                  { '--hero-content-p': 1, ease: 'power2.in', duration: 0.55 },
+                  0,
+                );
+
+                if (bgScale) {
+                  mobileExit.fromTo(
+                    bgScale,
+                    { scale: 1, transformOrigin: '50% 100%' },
+                    { scale: 1.18, ease: 'none', duration: 1 },
+                    0,
+                  );
+                }
+              } else {
+                const desktopExit = gsap.timeline({
+                  scrollTrigger: {
+                    trigger: heroScrollTrigger,
+                    pin: hero,
+                    pinSpacing: true,
+                    start: 'top top',
+                    end: '+=85%',
+                    scrub: 0.85,
+                    invalidateOnRefresh: true,
+                    ...scrollTriggerDefaults,
+                  },
+                });
+
+                desktopExit.fromTo(
+                  hero,
+                  { '--hero-exit-p': 0 },
+                  { '--hero-exit-p': 1, ease: 'power2.inOut', duration: 1 },
+                  0,
+                );
+                desktopExit.fromTo(
+                  hero,
+                  { '--hero-content-p': 0 },
+                  { '--hero-content-p': 1, ease: 'power2.in', duration: 0.55 },
+                  0,
+                );
+
+                if (bgScale) {
+                  desktopExit.fromTo(
+                    bgScale,
+                    { scale: 1, transformOrigin: '50% 82%' },
+                    { scale: 1.38, ease: 'none', duration: 1 },
+                    0,
+                  );
+                }
+
+                if (heroContent) {
+                  gsap.set(heroContent, { force3D: true });
+                }
               }
             }
 
@@ -609,6 +653,7 @@ export function useGsapLandingMotion(
             });
             bindLandingScrollReveals(gsap, root, isNarrow, scrollTriggerDefaults);
 
+            ScrollTrigger.refresh();
           },
         );
       }, root);
