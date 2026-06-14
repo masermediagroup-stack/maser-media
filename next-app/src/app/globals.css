@@ -6625,25 +6625,20 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   }
 
   .mm-testimonials-wave .testimonial-card-who {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: baseline;
-    column-gap: clamp(0.45rem, 2vw, 0.75rem);
-    row-gap: 0.15rem;
-  }
-
-  .mm-testimonials-wave .testimonial-card-name {
-    white-space: nowrap;
-  }
-
-  .mm-testimonials-wave .testimonial-card-role {
+    display: block;
     min-width: 0;
     line-height: 1.35;
+    text-wrap: pretty;
+  }
+
+  .mm-testimonials-wave .testimonial-card-name,
+  .mm-testimonials-wave .testimonial-card-role {
+    display: inline;
   }
 
   .mm-testimonials-wave .testimonial-card-role::before {
     content: '·';
-    margin-right: 0.45rem;
+    margin-inline: 0.45rem;
     color: rgba(13, 17, 23, 0.32);
     font-weight: 400;
   }
