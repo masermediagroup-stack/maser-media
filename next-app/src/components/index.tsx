@@ -974,7 +974,9 @@ export function LandingPage({
       className="site-main mm-main"
       data-hero-motion={heroMotion}
     >
-      <Hero entrance={entrance} onCurtainDone={handleCurtainDone} />
+      <div className="mm-hero-scene">
+        <Hero entrance={entrance} onCurtainDone={handleCurtainDone} />
+      </div>
       <Clients />
       <Services />
       <ProcessBento />
