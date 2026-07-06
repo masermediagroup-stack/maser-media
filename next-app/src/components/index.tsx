@@ -600,7 +600,6 @@ export function Services() {
   const sectionRef = useRef<HTMLElement>(null);
   const laydownRef = useRef<HTMLDivElement>(null);
   const pillars = CONTENT.services.items;
-  const defaultService = pillars[0]?.title.toLowerCase() ?? 'brand';
   const servicesSubtitle =
     CONTENT.services.subtitle ||
     'Brand, web, and content systems built with one launch language: a single, coherent design vocabulary that scales from your logo to your last social post.';
@@ -663,7 +662,7 @@ export function Services() {
         </div>
 
         <div ref={laydownRef} className="mm-services-laydown-plane" data-mm-services-laydown>
-          <Accordion className="mm-services__accordion" defaultValue={[defaultService]}>
+          <Accordion className="mm-services__accordion">
             {pillars.map((pillar) => {
               const value = pillar.title.toLowerCase();
               const summary = serviceSummaries[pillar.title] ?? pillar.items[0]?.description ?? '';
