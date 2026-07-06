@@ -24,7 +24,6 @@ type RippleUniforms = {
   uResolution: { value: THREE.Vector2 };
   uTime: { value: number };
   uColor: { value: THREE.Color };
-  uAspect: { value: number };
   uRippleOrigin: { value: THREE.Vector2 };
   uRippleStartTime: { value: number };
   uRippleActive: { value: number };
@@ -56,7 +55,6 @@ function RippleShaderPlane({
       uResolution: { value: new THREE.Vector2(1, 1) },
       uTime: { value: 0 },
       uColor: { value: new THREE.Color(color) },
-      uAspect: { value: 1 },
       uRippleOrigin: { value: new THREE.Vector2(0.5, 0.5) },
       uRippleStartTime: { value: -10 },
       uRippleActive: { value: 0 },
@@ -79,7 +77,6 @@ function RippleShaderPlane({
 
     material.uniforms.uTime.value = elapsed;
     material.uniforms.uResolution.value.set(size.width, size.height);
-    material.uniforms.uAspect.value = size.width / Math.max(size.height, 1);
 
     const ripple = rippleRef.current;
     if (!ripple?.active) {
@@ -136,17 +133,17 @@ function HeroRippleCanvas({
       orthographic
       camera={{ position: [0, 0, 1], zoom: 1, near: 0.1, far: 10 }}
       gl={{
-        alpha: false,
-        antialias: false,
-        powerPreference: 'high-performance',
-        premultipliedAlpha: false,
-      }}
-      dpr={dpr}
-      frameloop={frameloop}
-      style={{ width: '100%', height: '100%', display: 'block', background: '#000' }}
-      onCreated={({ gl }) => {
-        gl.setClearColor('#000000', 1);
-      }}
+          alpha: true,
+          antialias: false,
+          powerPreference: 'high-performance',
+          premultipliedAlpha: false,
+        }}
+        dpr={dpr}
+        frameloop={frameloop}
+        style={{ width: '100%', height: '100%', display: 'block', background: 'transparent' }}
+        onCreated={({ gl }) => {
+          gl.setClearColor(0x000000, 0);
+        }}
     >
       <RippleShaderPlane
         controls={controls}

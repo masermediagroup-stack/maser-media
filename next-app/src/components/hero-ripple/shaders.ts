@@ -13,7 +13,6 @@ export const heroRippleFragmentShader = /* glsl */ `
   uniform vec2 uResolution;
   uniform float uTime;
   uniform vec3 uColor;
-  uniform float uAspect;
 
   uniform vec2 uRippleOrigin;
   uniform float uRippleStartTime;
@@ -31,8 +30,14 @@ export const heroRippleFragmentShader = /* glsl */ `
 
   const int MAX_RINGS = 6;
 
+  // Match the original SmokeyBackground coordinate space (min-dimension normalization).
+  vec2 heroUv(vec2 uv) {
+    vec2 centered = uv * uResolution - uResolution * 0.5;
+    return centered / min(uResolution.x, uResolution.y);
+  }
+
   float baseSmokeyGlow(vec2 uv, float time) {
-    vec2 centeredUV = (uv - 0.5) * vec2(uAspect, 1.0) * 2.0;
+    vec2 centeredUV = heroUv(uv);
     vec2 distortion = centeredUV;
 
     for (float i = 1.0; i < 8.0; i++) {
@@ -54,8 +59,9 @@ export const heroRippleFragmentShader = /* glsl */ `
       return 0.0;
     }
 
-    vec2 p = (sampleUv - uRippleOrigin) * vec2(uAspect, 1.0);
-    float dist = length(p);
+    vec2 p = heroUv(sampleUv);
+    vec2 origin = heroUv(uRippleOrigin);
+    float dist = length(p - origin);
     float height = 0.0;
 
     for (int i = 0; i < MAX_RINGS; i++) {
@@ -88,13 +94,14 @@ export const heroRippleFragmentShader = /* glsl */ `
     vec2 uv = vUv;
 
     vec2 displacedUv = rippleDisplacement(uv);
-    vec2 centeredDisplaced = (displacedUv - 0.5) * vec2(uAspect, 1.0) * 2.0;
 
     float glow = baseSmokeyGlow(displacedUv, time);
     vec3 baseColor = uColor * glow;
 
     float eps = 0.0018;
     float height = rippleHeightAt(uv);
+    float rippleMix = uRippleActive * step(0.0005, abs(height));
+
     float hx = rippleHeightAt(uv + vec2(eps, 0.0)) - rippleHeightAt(uv - vec2(eps, 0.0));
     float hy = rippleHeightAt(uv + vec2(0.0, eps)) - rippleHeightAt(uv - vec2(0.0, eps));
     vec3 normal = normalize(vec3(-hx * 2.4, -hy * 2.4, 1.0));
@@ -105,15 +112,11 @@ export const heroRippleFragmentShader = /* glsl */ `
 
     float ridge = smoothstep(0.08, 0.95, abs(height) / max(uRippleStrength * 0.85, 0.0001));
     float blueMask = smoothstep(0.12, 0.55, glow);
-    float whiteRidge = ridge * blueMask * uWhiteIntensity;
+    float whiteRidge = ridge * blueMask * uWhiteIntensity * rippleMix;
 
     baseColor = mix(baseColor, vec3(1.0), whiteRidge);
-    baseColor *= 0.82 + diffuse * 0.22;
-    baseColor += spec * 0.12 * blueMask;
-    baseColor = mix(vec3(0.0), baseColor, smoothstep(0.02, 0.14, glow));
-
-    float vignette = smoothstep(1.35, 0.15, length(centeredDisplaced * 0.72));
-    baseColor *= mix(0.35, 1.0, vignette);
+    baseColor *= mix(1.0, 0.82 + diffuse * 0.22, rippleMix);
+    baseColor += spec * 0.12 * blueMask * rippleMix;
 
     gl_FragColor = vec4(baseColor, 1.0);
   }
