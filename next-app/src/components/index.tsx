@@ -497,6 +497,7 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
           <div className="mm-hero__smokey-placeholder" aria-hidden />
           <HeroRippleShader
             className="mm-hero__smokey-canvas h-full min-h-0 w-full"
+            color="#10A4FF"
             rippleStrength={0.45}
             ringWidth={0.025}
             rippleSpeed={0.2}

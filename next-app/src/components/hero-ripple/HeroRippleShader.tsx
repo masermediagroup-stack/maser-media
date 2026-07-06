@@ -14,6 +14,28 @@ import {
 
 const RIPPLE_LIFETIME_S = 4.2;
 
+function hexToSrgbVec3(hex: string): THREE.Vector3 {
+  const normalized = hex.replace('#', '').trim();
+  const value =
+    normalized.length === 3
+      ? normalized
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : normalized;
+
+  if (!/^[0-9a-fA-F]{6}$/.test(value)) {
+    return new THREE.Vector3(16 / 255, 164 / 255, 1);
+  }
+
+  const int = parseInt(value, 16);
+  return new THREE.Vector3(
+    ((int >> 16) & 0xff) / 255,
+    ((int >> 8) & 0xff) / 255,
+    (int & 0xff) / 255,
+  );
+}
+
 export type RippleState = {
   origin: THREE.Vector2;
   startTime: number;
@@ -23,7 +45,7 @@ export type RippleState = {
 type RippleUniforms = {
   uResolution: { value: THREE.Vector2 };
   uTime: { value: number };
-  uColor: { value: THREE.Color };
+  uColor: { value: THREE.Vector3 };
   uRippleOrigin: { value: THREE.Vector2 };
   uRippleStartTime: { value: number };
   uRippleActive: { value: number };
@@ -54,7 +76,7 @@ function RippleShaderPlane({
     () => ({
       uResolution: { value: new THREE.Vector2(1, 1) },
       uTime: { value: 0 },
-      uColor: { value: new THREE.Color(color) },
+      uColor: { value: hexToSrgbVec3(color) },
       uRippleOrigin: { value: new THREE.Vector2(0.5, 0.5) },
       uRippleStartTime: { value: -10 },
       uRippleActive: { value: 0 },
@@ -104,6 +126,7 @@ function RippleShaderPlane({
         vertexShader={heroRippleVertexShader}
         fragmentShader={heroRippleFragmentShader}
         uniforms={uniforms}
+        toneMapped={false}
         depthWrite={false}
         depthTest={false}
       />
@@ -143,6 +166,9 @@ function HeroRippleCanvas({
         style={{ width: '100%', height: '100%', display: 'block', background: 'transparent' }}
         onCreated={({ gl }) => {
           gl.setClearColor(0x000000, 0);
+          gl.toneMapping = THREE.NoToneMapping;
+          // Match legacy raw WebGL output — sRGB values written directly, not linearized.
+          gl.outputColorSpace = THREE.LinearSRGBColorSpace;
         }}
     >
       <RippleShaderPlane
