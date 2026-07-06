@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { CONTENT } from '@/lib/content';
 import { isContactModalHref, openContactModalFromApp } from '@/lib/contactModalEvents';
-import { HeroRippleShader } from '@/components/hero-ripple';
+import { HeroShaderBackground } from '@/components/hero-shader';
 import { WorkLightswindShader } from '@/components/WorkLightswindShader';
 import { useGsapLandingMotion, useMmScrollReveals } from '@/hooks/useGsapLandingMotion';
 import { useIsClient } from '@/hooks/useIsClient';
@@ -495,16 +495,7 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
       <div className="mm-hero__bg-scale" aria-hidden>
         <div className="mm-hero__smokey">
           <div className="mm-hero__smokey-placeholder" aria-hidden />
-          <HeroRippleShader
-            className="mm-hero__smokey-canvas h-full min-h-0 w-full"
-            color="#10A4FF"
-            rippleStrength={1.35}
-            ringWidth={0.022}
-            rippleSpeed={0.28}
-            decay={8.5}
-            distortionAmount={0.42}
-            ringCount={4}
-          />
+          <HeroShaderBackground />
         </div>
       </div>
       <div className="mm-hero__exit-splash" aria-hidden />

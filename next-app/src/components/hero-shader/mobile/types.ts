@@ -1,4 +1,4 @@
-export interface HeroRippleShaderControls {
+export interface HeroMobileRippleShaderControls {
   /** Wave amplitude for each ring pass. */
   rippleStrength?: number;
   /** Distance between ripple wave peaks (UV space). */
@@ -13,17 +13,17 @@ export interface HeroRippleShaderControls {
   ringCount?: number;
 }
 
-export interface HeroRippleShaderProps extends HeroRippleShaderControls {
+export interface HeroMobileRippleShaderProps extends HeroMobileRippleShaderControls {
   className?: string;
   /** Primary shader accent (Maser blue). */
   color?: string;
 }
 
-export const DEFAULT_HERO_RIPPLE_CONTROLS = {
+export const DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS = {
   rippleStrength: 1.35,
   ringWidth: 0.022,
   rippleSpeed: 0.28,
   decay: 8.5,
   distortionAmount: 0.42,
   ringCount: 4,
-} as const satisfies Required<HeroRippleShaderControls>;
+} as const satisfies Required<HeroMobileRippleShaderControls>;

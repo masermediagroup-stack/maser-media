@@ -7,9 +7,9 @@ import * as THREE from 'three';
 import { useReducedMotionGate } from '@/hooks/useReducedMotionGate';
 import { heroRippleFragmentShader, heroRippleVertexShader } from './shaders';
 import {
-  DEFAULT_HERO_RIPPLE_CONTROLS,
-  type HeroRippleShaderControls,
-  type HeroRippleShaderProps,
+  DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS,
+  type HeroMobileRippleShaderControls,
+  type HeroMobileRippleShaderProps,
 } from './types';
 
 const RIPPLE_LIFETIME_S = 4.2;
@@ -63,7 +63,7 @@ function RippleShaderPlane({
   rippleRef,
   visibleRef,
 }: {
-  controls: Required<HeroRippleShaderControls>;
+  controls: Required<HeroMobileRippleShaderControls>;
   color: string;
   rippleRef: React.RefObject<RippleState>;
   visibleRef: React.RefObject<boolean>;
@@ -132,42 +132,39 @@ function RippleShaderPlane({
   );
 }
 
-function HeroRippleCanvas({
+function HeroMobileRippleCanvas({
   controls,
   color,
   rippleRef,
   visibleRef,
   frameloop,
 }: {
-  controls: Required<HeroRippleShaderControls>;
+  controls: Required<HeroMobileRippleShaderControls>;
   color: string;
   rippleRef: React.RefObject<RippleState>;
   visibleRef: React.RefObject<boolean>;
   frameloop: 'always' | 'never';
 }) {
-  const coarsePointer =
-    typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
-  const dpr = coarsePointer ? 1 : Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 1.25);
+  const dpr = Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 1.15);
 
   return (
     <Canvas
       orthographic
       camera={{ position: [0, 0, 1], zoom: 1, near: 0.1, far: 10 }}
       gl={{
-          alpha: true,
-          antialias: false,
-          powerPreference: 'high-performance',
-          premultipliedAlpha: false,
-        }}
-        dpr={dpr}
-        frameloop={frameloop}
-        style={{ width: '100%', height: '100%', display: 'block', background: 'transparent' }}
-        onCreated={({ gl }) => {
-          gl.setClearColor(0x000000, 0);
-          gl.toneMapping = THREE.NoToneMapping;
-          // Match legacy raw WebGL output — sRGB values written directly, not linearized.
-          gl.outputColorSpace = THREE.LinearSRGBColorSpace;
-        }}
+        alpha: true,
+        antialias: false,
+        powerPreference: 'high-performance',
+        premultipliedAlpha: false,
+      }}
+      dpr={dpr}
+      frameloop={frameloop}
+      style={{ width: '100%', height: '100%', display: 'block', background: 'transparent' }}
+      onCreated={({ gl }) => {
+        gl.setClearColor(0x000000, 0);
+        gl.toneMapping = THREE.NoToneMapping;
+        gl.outputColorSpace = THREE.LinearSRGBColorSpace;
+      }}
     >
       <RippleShaderPlane
         controls={controls}
@@ -179,16 +176,16 @@ function HeroRippleCanvas({
   );
 }
 
-export function HeroRippleShader({
+export function HeroMobileRippleShader({
   className = '',
   color = '#10A4FF',
-  rippleStrength = DEFAULT_HERO_RIPPLE_CONTROLS.rippleStrength,
-  ringWidth = DEFAULT_HERO_RIPPLE_CONTROLS.ringWidth,
-  rippleSpeed = DEFAULT_HERO_RIPPLE_CONTROLS.rippleSpeed,
-  decay = DEFAULT_HERO_RIPPLE_CONTROLS.decay,
-  distortionAmount = DEFAULT_HERO_RIPPLE_CONTROLS.distortionAmount,
-  ringCount = DEFAULT_HERO_RIPPLE_CONTROLS.ringCount,
-}: HeroRippleShaderProps) {
+  rippleStrength = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.rippleStrength,
+  ringWidth = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.ringWidth,
+  rippleSpeed = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.rippleSpeed,
+  decay = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.decay,
+  distortionAmount = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.distortionAmount,
+  ringCount = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.ringCount,
+}: HeroMobileRippleShaderProps) {
   const reduceMotion = useReducedMotionGate();
   const containerRef = useRef<HTMLDivElement>(null);
   const visibleRef = useRef(true);
@@ -200,7 +197,7 @@ export function HeroRippleShader({
     active: false,
   });
 
-  const controls = useMemo<Required<HeroRippleShaderControls>>(
+  const controls = useMemo<Required<HeroMobileRippleShaderControls>>(
     () => ({
       rippleStrength,
       ringWidth,
@@ -271,11 +268,13 @@ export function HeroRippleShader({
     return () => document.removeEventListener('visibilitychange', onVisibilityChange);
   }, []);
 
+  const canvasClassName = `mm-hero__smokey-canvas mm-hero__smokey-canvas--mobile h-full min-h-0 w-full ${className}`.trim();
+
   if (reduceMotion) {
     return (
       <div
         ref={containerRef}
-        className={`relative h-full w-full min-w-0 overflow-hidden bg-black ${className}`}
+        className={`relative h-full w-full min-w-0 overflow-hidden bg-black ${canvasClassName}`}
         aria-hidden
       >
         <div
@@ -292,10 +291,10 @@ export function HeroRippleShader({
   return (
     <div
       ref={containerRef}
-      className={`relative h-full w-full min-w-0 overflow-hidden ${className}`}
+      className={`relative h-full w-full min-w-0 overflow-hidden ${canvasClassName}`}
       aria-hidden
     >
-      <HeroRippleCanvas
+      <HeroMobileRippleCanvas
         controls={controls}
         color={color}
         rippleRef={rippleRef}
@@ -305,5 +304,3 @@ export function HeroRippleShader({
     </div>
   );
 }
-
-export default HeroRippleShader;
