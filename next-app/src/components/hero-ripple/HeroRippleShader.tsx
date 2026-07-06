@@ -53,7 +53,6 @@ type RippleUniforms = {
   uRingWidth: { value: number };
   uRippleSpeed: { value: number };
   uDecay: { value: number };
-  uWhiteIntensity: { value: number };
   uDistortionAmount: { value: number };
   uRingCount: { value: number };
 };
@@ -84,7 +83,6 @@ function RippleShaderPlane({
       uRingWidth: { value: controls.ringWidth },
       uRippleSpeed: { value: controls.rippleSpeed },
       uDecay: { value: controls.decay },
-      uWhiteIntensity: { value: controls.whiteIntensity },
       uDistortionAmount: { value: controls.distortionAmount },
       uRingCount: { value: controls.ringCount },
     }),
@@ -188,7 +186,6 @@ export function HeroRippleShader({
   ringWidth = DEFAULT_HERO_RIPPLE_CONTROLS.ringWidth,
   rippleSpeed = DEFAULT_HERO_RIPPLE_CONTROLS.rippleSpeed,
   decay = DEFAULT_HERO_RIPPLE_CONTROLS.decay,
-  whiteIntensity = DEFAULT_HERO_RIPPLE_CONTROLS.whiteIntensity,
   distortionAmount = DEFAULT_HERO_RIPPLE_CONTROLS.distortionAmount,
   ringCount = DEFAULT_HERO_RIPPLE_CONTROLS.ringCount,
 }: HeroRippleShaderProps) {
@@ -209,11 +206,10 @@ export function HeroRippleShader({
       ringWidth,
       rippleSpeed,
       decay,
-      whiteIntensity,
       distortionAmount,
       ringCount,
     }),
-    [rippleStrength, ringWidth, rippleSpeed, decay, whiteIntensity, distortionAmount, ringCount],
+    [rippleStrength, ringWidth, rippleSpeed, decay, distortionAmount, ringCount],
   );
 
   const spawnRipple = useCallback(

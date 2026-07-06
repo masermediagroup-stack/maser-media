@@ -7,9 +7,7 @@ export interface HeroRippleShaderControls {
   rippleSpeed?: number;
   /** Ring falloff sharpness — higher = tighter rings. */
   decay?: number;
-  /** Brightness of white ridge highlights on blue areas. */
-  whiteIntensity?: number;
-  /** UV displacement amount for embossed groove look. */
+  /** UV displacement amount — warps the smokey field through the ripple. */
   distortionAmount?: number;
   /** Number of concentric rings spawned per click. */
   ringCount?: number;
@@ -22,11 +20,10 @@ export interface HeroRippleShaderProps extends HeroRippleShaderControls {
 }
 
 export const DEFAULT_HERO_RIPPLE_CONTROLS = {
-  rippleStrength: 0.14,
-  ringWidth: 0.018,
-  rippleSpeed: 0.42,
-  decay: 9.5,
-  whiteIntensity: 0.72,
-  distortionAmount: 0.055,
-  ringCount: 5,
+  rippleStrength: 1.35,
+  ringWidth: 0.022,
+  rippleSpeed: 0.28,
+  decay: 8.5,
+  distortionAmount: 0.42,
+  ringCount: 4,
 } as const satisfies Required<HeroRippleShaderControls>;

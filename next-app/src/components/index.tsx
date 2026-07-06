@@ -498,13 +498,12 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
           <HeroRippleShader
             className="mm-hero__smokey-canvas h-full min-h-0 w-full"
             color="#10A4FF"
-            rippleStrength={0.45}
-            ringWidth={0.025}
-            rippleSpeed={0.2}
-            decay={12}
-            whiteIntensity={0.4}
-            distortionAmount={0.08}
-            ringCount={3}
+            rippleStrength={1.35}
+            ringWidth={0.022}
+            rippleSpeed={0.28}
+            decay={8.5}
+            distortionAmount={0.42}
+            ringCount={4}
           />
         </div>
       </div>
