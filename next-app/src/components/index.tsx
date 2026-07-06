@@ -495,7 +495,16 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
       <div className="mm-hero__bg-scale" aria-hidden>
         <div className="mm-hero__smokey">
           <div className="mm-hero__smokey-placeholder" aria-hidden />
-          <HeroRippleShader className="mm-hero__smokey-canvas h-full min-h-0 w-full" />
+          <HeroRippleShader
+            className="mm-hero__smokey-canvas h-full min-h-0 w-full"
+            rippleStrength={0.45}
+            ringWidth={0.025}
+            rippleSpeed={0.2}
+            decay={12}
+            whiteIntensity={0.4}
+            distortionAmount={0.08}
+            ringCount={3}
+          />
         </div>
       </div>
       <div className="mm-hero__exit-splash" aria-hidden />
