@@ -4496,8 +4496,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 .mm-hero__title .mm-hero-title-line-mask {
   display: block;
   overflow: clip;
-  padding-block: 0.05em;
-  margin-block: -0.05em;
+  padding-block: 0.12em;
+  margin-block: -0.12em;
 }
 
 .mm-hero__title .mm-hero-title-line {

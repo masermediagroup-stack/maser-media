@@ -532,7 +532,7 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
               className="mm-hero__mobile-logo"
               priority
             />
-            <h1 className="mm-hero__title">Maser Media brings brands, stories, and experiences to life.</h1>
+            <h1 className="mm-hero__title">We bring brands, stories, and experiences to life.</h1>
             <p className="mm-hero__lead">
               A creative team shaping culture-forward ideas through design and technology.
             </p>
