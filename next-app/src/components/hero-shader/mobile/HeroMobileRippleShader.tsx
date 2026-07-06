@@ -1,0 +1,306 @@
+'use client';
+
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import * as THREE from 'three';
+
+import { useReducedMotionGate } from '@/hooks/useReducedMotionGate';
+import { heroRippleFragmentShader, heroRippleVertexShader } from './shaders';
+import {
+  DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS,
+  type HeroMobileRippleShaderControls,
+  type HeroMobileRippleShaderProps,
+} from './types';
+
+const RIPPLE_LIFETIME_S = 4.2;
+
+function hexToSrgbVec3(hex: string): THREE.Vector3 {
+  const normalized = hex.replace('#', '').trim();
+  const value =
+    normalized.length === 3
+      ? normalized
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : normalized;
+
+  if (!/^[0-9a-fA-F]{6}$/.test(value)) {
+    return new THREE.Vector3(16 / 255, 164 / 255, 1);
+  }
+
+  const int = parseInt(value, 16);
+  return new THREE.Vector3(
+    ((int >> 16) & 0xff) / 255,
+    ((int >> 8) & 0xff) / 255,
+    (int & 0xff) / 255,
+  );
+}
+
+export type RippleState = {
+  origin: THREE.Vector2;
+  startTime: number;
+  active: boolean;
+};
+
+type RippleUniforms = {
+  uResolution: { value: THREE.Vector2 };
+  uTime: { value: number };
+  uColor: { value: THREE.Vector3 };
+  uRippleOrigin: { value: THREE.Vector2 };
+  uRippleStartTime: { value: number };
+  uRippleActive: { value: number };
+  uRippleStrength: { value: number };
+  uRingWidth: { value: number };
+  uRippleSpeed: { value: number };
+  uDecay: { value: number };
+  uDistortionAmount: { value: number };
+  uRingCount: { value: number };
+};
+
+function RippleShaderPlane({
+  controls,
+  color,
+  rippleRef,
+  visibleRef,
+}: {
+  controls: Required<HeroMobileRippleShaderControls>;
+  color: string;
+  rippleRef: React.RefObject<RippleState>;
+  visibleRef: React.RefObject<boolean>;
+}) {
+  const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const { size } = useThree();
+
+  const uniforms = useMemo<RippleUniforms>(
+    () => ({
+      uResolution: { value: new THREE.Vector2(1, 1) },
+      uTime: { value: 0 },
+      uColor: { value: hexToSrgbVec3(color) },
+      uRippleOrigin: { value: new THREE.Vector2(0.5, 0.5) },
+      uRippleStartTime: { value: -10 },
+      uRippleActive: { value: 0 },
+      uRippleStrength: { value: controls.rippleStrength },
+      uRingWidth: { value: controls.ringWidth },
+      uRippleSpeed: { value: controls.rippleSpeed },
+      uDecay: { value: controls.decay },
+      uDistortionAmount: { value: controls.distortionAmount },
+      uRingCount: { value: controls.ringCount },
+    }),
+    [controls, color],
+  );
+
+  useFrame(() => {
+    const material = materialRef.current;
+    if (!material || !visibleRef.current || document.hidden) return;
+
+    const elapsed = performance.now() / 1000;
+
+    material.uniforms.uTime.value = elapsed;
+    material.uniforms.uResolution.value.set(size.width, size.height);
+
+    const ripple = rippleRef.current;
+    if (!ripple?.active) {
+      material.uniforms.uRippleActive.value = 0;
+      return;
+    }
+
+    const rippleAge = elapsed - ripple.startTime;
+    if (rippleAge > RIPPLE_LIFETIME_S) {
+      ripple.active = false;
+      material.uniforms.uRippleActive.value = 0;
+      return;
+    }
+
+    material.uniforms.uRippleActive.value = 1;
+    material.uniforms.uRippleStartTime.value = ripple.startTime;
+    material.uniforms.uRippleOrigin.value.copy(ripple.origin);
+  });
+
+  return (
+    <mesh frustumCulled={false}>
+      <planeGeometry args={[2, 2]} />
+      <shaderMaterial
+        ref={materialRef}
+        vertexShader={heroRippleVertexShader}
+        fragmentShader={heroRippleFragmentShader}
+        uniforms={uniforms}
+        toneMapped={false}
+        depthWrite={false}
+        depthTest={false}
+      />
+    </mesh>
+  );
+}
+
+function HeroMobileRippleCanvas({
+  controls,
+  color,
+  rippleRef,
+  visibleRef,
+  frameloop,
+}: {
+  controls: Required<HeroMobileRippleShaderControls>;
+  color: string;
+  rippleRef: React.RefObject<RippleState>;
+  visibleRef: React.RefObject<boolean>;
+  frameloop: 'always' | 'never';
+}) {
+  const dpr = Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 1.15);
+
+  return (
+    <Canvas
+      orthographic
+      camera={{ position: [0, 0, 1], zoom: 1, near: 0.1, far: 10 }}
+      gl={{
+        alpha: true,
+        antialias: false,
+        powerPreference: 'high-performance',
+        premultipliedAlpha: false,
+      }}
+      dpr={dpr}
+      frameloop={frameloop}
+      style={{ width: '100%', height: '100%', display: 'block', background: 'transparent' }}
+      onCreated={({ gl }) => {
+        gl.setClearColor(0x000000, 0);
+        gl.toneMapping = THREE.NoToneMapping;
+        gl.outputColorSpace = THREE.LinearSRGBColorSpace;
+      }}
+    >
+      <RippleShaderPlane
+        controls={controls}
+        color={color}
+        rippleRef={rippleRef}
+        visibleRef={visibleRef}
+      />
+    </Canvas>
+  );
+}
+
+export function HeroMobileRippleShader({
+  className = '',
+  color = '#10A4FF',
+  rippleStrength = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.rippleStrength,
+  ringWidth = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.ringWidth,
+  rippleSpeed = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.rippleSpeed,
+  decay = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.decay,
+  distortionAmount = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.distortionAmount,
+  ringCount = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.ringCount,
+}: HeroMobileRippleShaderProps) {
+  const reduceMotion = useReducedMotionGate();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const visibleRef = useRef(true);
+  const [inView, setInView] = useState(true);
+  const [pageVisible, setPageVisible] = useState(true);
+  const rippleRef = useRef<RippleState>({
+    origin: new THREE.Vector2(0.5, 0.5),
+    startTime: -10,
+    active: false,
+  });
+
+  const controls = useMemo<Required<HeroMobileRippleShaderControls>>(
+    () => ({
+      rippleStrength,
+      ringWidth,
+      rippleSpeed,
+      decay,
+      distortionAmount,
+      ringCount,
+    }),
+    [rippleStrength, ringWidth, rippleSpeed, decay, distortionAmount, ringCount],
+  );
+
+  const spawnRipple = useCallback(
+    (clientX: number, clientY: number) => {
+      const node = containerRef.current;
+      if (!node || reduceMotion) return;
+
+      const rect = node.getBoundingClientRect();
+      if (rect.width < 1 || rect.height < 1) return;
+
+      const x = (clientX - rect.left) / rect.width;
+      const y = 1 - (clientY - rect.top) / rect.height;
+
+      rippleRef.current.origin.set(x, y);
+      rippleRef.current.startTime = performance.now() / 1000;
+      rippleRef.current.active = true;
+    },
+    [reduceMotion],
+  );
+
+  useEffect(() => {
+    const node = containerRef.current;
+    if (!node || reduceMotion) return;
+
+    const hero = node.closest<HTMLElement>('.mm-hero');
+    const interactionTarget = hero ?? node;
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.button !== 0 && event.pointerType === 'mouse') return;
+      spawnRipple(event.clientX, event.clientY);
+    };
+
+    interactionTarget.addEventListener('pointerdown', onPointerDown, { passive: true });
+    return () => interactionTarget.removeEventListener('pointerdown', onPointerDown);
+  }, [reduceMotion, spawnRipple]);
+
+  useEffect(() => {
+    const node = containerRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const next = Boolean(entry?.isIntersecting);
+        visibleRef.current = next;
+        setInView(next);
+      },
+      { rootMargin: '35% 0px 35% 0px', threshold: 0 },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      setPageVisible(!document.hidden);
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, []);
+
+  const canvasClassName = `mm-hero__smokey-canvas mm-hero__smokey-canvas--mobile h-full min-h-0 w-full ${className}`.trim();
+
+  if (reduceMotion) {
+    return (
+      <div
+        ref={containerRef}
+        className={`relative h-full w-full min-w-0 overflow-hidden bg-black ${canvasClassName}`}
+        aria-hidden
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 95% 70% at 50% 88%, rgba(16, 164, 255, 0.12), transparent 58%), #000',
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className={`relative h-full w-full min-w-0 overflow-hidden ${canvasClassName}`}
+      aria-hidden
+    >
+      <HeroMobileRippleCanvas
+        controls={controls}
+        color={color}
+        rippleRef={rippleRef}
+        visibleRef={visibleRef}
+        frameloop={inView && pageVisible ? 'always' : 'never'}
+      />
+    </div>
+  );
+}
