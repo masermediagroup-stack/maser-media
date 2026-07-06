@@ -61,6 +61,7 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
 
   const drawerCloseRef = useRef<HTMLButtonElement>(null);
   const modalCloseRef = useRef<HTMLButtonElement>(null);
+  const navRef = useRef<HTMLElement>(null);
   const modalRef = useRef<HTMLElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -133,6 +134,67 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
       window.removeEventListener("scroll", onScroll);
     };
   }, [isNarrow]);
+
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav || reduceMotion) return;
+
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    if (coarsePointer) return;
+
+    let cancelled = false;
+    let cleanup = () => {};
+
+    const run = async () => {
+      const { gsap } = await import("gsap");
+      if (cancelled || !navRef.current) return;
+
+      const targets = Array.from(
+        navRef.current.querySelectorAll<HTMLElement>(".liquid-nav-link, .liquid-nav-contact"),
+      );
+      const cleanups: Array<() => void> = [];
+
+      targets.forEach((target) => {
+        const setX = gsap.quickTo(target, "x", { duration: 0.38, ease: "power3.out" });
+        const setY = gsap.quickTo(target, "y", { duration: 0.38, ease: "power3.out" });
+
+        const onPointerMove = (event: PointerEvent) => {
+          const rect = target.getBoundingClientRect();
+          const dx = ((event.clientX - rect.left) / rect.width - 0.5) * 16;
+          const dy = ((event.clientY - rect.top) / rect.height - 0.5) * 16;
+          setX(Math.max(-8, Math.min(8, dx)));
+          setY(Math.max(-8, Math.min(8, dy)));
+        };
+
+        const onPointerLeave = () => {
+          setX(0);
+          setY(0);
+        };
+
+        target.addEventListener("pointermove", onPointerMove, { passive: true });
+        target.addEventListener("pointerleave", onPointerLeave);
+        target.addEventListener("blur", onPointerLeave);
+
+        cleanups.push(() => {
+          target.removeEventListener("pointermove", onPointerMove);
+          target.removeEventListener("pointerleave", onPointerLeave);
+          target.removeEventListener("blur", onPointerLeave);
+          gsap.set(target, { x: 0, y: 0, clearProps: "transform" });
+        });
+      });
+
+      cleanup = () => {
+        cleanups.forEach((cleanupTarget) => cleanupTarget());
+      };
+    };
+
+    void run();
+
+    return () => {
+      cancelled = true;
+      cleanup();
+    };
+  }, [reduceMotion]);
 
   /* Focus management — drawer */
   useEffect(() => {
@@ -217,6 +279,7 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
   return (
     <>
       <motion.nav
+        ref={navRef}
         className={`liquid-nav${isScrolled && !morphing ? " liquid-nav--expanded" : ""}${morphing ? " liquid-nav--morph" : ""}`}
         aria-label="Primary navigation"
         initial={entrance ? { y: -36, opacity: 0 } : false}
@@ -265,7 +328,7 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
                     </motion.span>
                   </Link>
                 ))}
-                <button type="button" className="liquid-nav-contact liquid-nav-contact--inline" onClick={() => setContactOpen(true)}>
+                <button type="button" className="liquid-nav-contact liquid-nav-contact--inline mm-tactile-button" onClick={() => setContactOpen(true)}>
                   <motion.span
                     className="liquid-nav-flip-inner"
                     initial={flipInitial}
@@ -292,7 +355,7 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
           </div>
         </div>
 
-        <button type="button" className="liquid-nav-contact liquid-nav-contact--mobile" onClick={() => setContactOpen(true)}>
+        <button type="button" className="liquid-nav-contact liquid-nav-contact--mobile mm-tactile-button" onClick={() => setContactOpen(true)}>
           <ArrowRight className="liquid-contact-arrow" size={18} aria-hidden />
           <span className="liquid-contact-text">Contact</span>
         </button>
@@ -406,7 +469,7 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
                     ))}
                     <button
                       type="button"
-                      className="liquid-nav-drawer-contact liquid-nav-drawer-contact--fullscreen"
+                      className="liquid-nav-drawer-contact liquid-nav-drawer-contact--fullscreen mm-tactile-button"
                       style={{
                         transitionDelay: reduceMotion ? "0s" : `${0.22 + NAV_ITEMS.length * 0.08}s`,
                       }}
@@ -429,7 +492,7 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
                   ))}
                   <button
                     type="button"
-                    className="liquid-nav-drawer-contact"
+                    className="liquid-nav-drawer-contact mm-tactile-button"
                     onClick={() => {
                       setOpen(false);
                       setContactOpen(true);

@@ -49,17 +49,25 @@ function useProcessBentoReveal(gridRef: RefObject<HTMLDivElement | null>) {
 
     if (prefersReducedMotion || typeof IntersectionObserver === 'undefined') {
       grid.classList.add('mm-process-bento__grid--motion-ready');
+      grid.classList.add('mm-process-bento__grid--text-motion-ready');
       return;
     }
 
+    let hasPreparedMedia = false;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry?.isIntersecting) {
+        if (entry?.isIntersecting) {
+          if (!hasPreparedMedia) {
+            grid.classList.add('mm-process-bento__grid--motion-ready');
+            hasPreparedMedia = true;
+          }
+
+          grid.classList.add('mm-process-bento__grid--text-motion-ready');
           return;
         }
 
-        grid.classList.add('mm-process-bento__grid--motion-ready');
-        observer.disconnect();
+        grid.classList.remove('mm-process-bento__grid--text-motion-ready');
       },
       {
         rootMargin: '0px 0px -18% 0px',
@@ -134,6 +142,8 @@ export function ProcessBento() {
       <header
         className="mm-process-bento__heading mm-section-heading"
         data-mm-reveal="fade"
+        data-mm-reveal-repeat="true"
+        data-mm-reveal-reset="hidden"
         data-mm-reveal-start="top 88%"
       >
         <h2 id="process-title">{title}</h2>
@@ -144,6 +154,8 @@ export function ProcessBento() {
         ref={gridRef}
         className="mm-process-bento__grid"
         data-mm-reveal-group="fade"
+        data-mm-reveal-repeat="true"
+        data-mm-reveal-reset="hidden"
         data-mm-reveal-stagger="0.09"
         data-mm-reveal-start="top 82%"
         role="list"

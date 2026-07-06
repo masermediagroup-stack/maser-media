@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, useReducedMotion } from 'motion/react';
+import { motion, useAnimationControls, useReducedMotion } from 'motion/react';
 import type { AriaRole, ReactNode } from 'react';
 import { useIsClient } from '@/hooks/useIsClient';
 
@@ -36,6 +36,7 @@ export type ScrollRevealProps = {
   variant?: ScrollRevealVariant;
   delay?: number;
   amount?: number;
+  replay?: boolean;
   as?: ScrollRevealTag;
   role?: AriaRole;
   id?: string;
@@ -47,12 +48,14 @@ export function ScrollReveal({
   variant = 'fade',
   delay = 0,
   amount = 0.22,
+  replay = false,
   as = 'div',
   role,
   id,
 }: ScrollRevealProps) {
   const reduceMotion = useReducedMotion();
   const canAnimate = useIsClient();
+  const controls = useAnimationControls();
   const Tag = motionTags[as];
   const StaticTag = as;
 
@@ -70,8 +73,11 @@ export function ScrollReveal({
       role={role}
       id={id}
       initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, amount }}
+      animate={replay ? controls : undefined}
+      whileInView={replay ? undefined : 'show'}
+      onViewportEnter={replay ? () => void controls.start('show') : undefined}
+      onViewportLeave={replay ? () => void controls.start('hidden') : undefined}
+      viewport={{ once: !replay, amount }}
       variants={variantMotion[variant]}
       transition={{ duration: 0.68, ease: [0.16, 1, 0.3, 1], delay }}
     >

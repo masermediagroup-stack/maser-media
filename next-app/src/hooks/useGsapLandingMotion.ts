@@ -72,7 +72,7 @@ export function useMmScrollReveals(rootRef: RefObject<HTMLElement | null>, enabl
               const kind = (el.dataset.mmReveal === 'blur' ? 'blur' : 'fade') as RevealKind;
               gsap.set(el, revealFromVars(kind, isNarrow));
             });
-            bindLandingScrollReveals(gsap, root, isNarrow, scrollTriggerDefaults);
+            bindLandingScrollReveals(gsap, ScrollTrigger, root, isNarrow, scrollTriggerDefaults);
           },
         );
       }, root);
@@ -114,6 +114,7 @@ function revealToVars(kind: RevealKind) {
 
 function bindLandingScrollReveals(
   gsap: typeof import('gsap').gsap,
+  ScrollTrigger: typeof import('gsap/ScrollTrigger').ScrollTrigger,
   scope: Element,
   isNarrow: boolean,
   stDefaults: typeof scrollTriggerDefaults,
@@ -127,11 +128,41 @@ function bindLandingScrollReveals(
     const trigger = el.dataset.mmRevealTrigger
       ? scope.querySelector<HTMLElement>(el.dataset.mmRevealTrigger) ?? el
       : el;
-
-    gsap.fromTo(el, revealFromVars(kind, isNarrow), {
+    const repeat = el.dataset.mmRevealRepeat === 'true';
+    const resetHidden = (el.dataset.mmRevealReset ?? 'hidden') === 'hidden';
+    const fromVars = revealFromVars(kind, isNarrow);
+    const toVars = {
       ...revealToVars(kind),
       duration: kind === 'blur' ? 0.88 : 0.72,
       ease: 'power2.out',
+    };
+
+    if (repeat) {
+      const timeline = gsap.timeline({ paused: true }).fromTo(el, fromVars, toVars);
+
+      ScrollTrigger.create({
+        trigger,
+        start: el.dataset.mmRevealStart ?? 'top 88%',
+        onEnter: () => {
+          timeline.restart();
+        },
+        onEnterBack: () => {
+          timeline.restart();
+        },
+        onLeave: () => {
+          if (resetHidden) timeline.pause(0);
+        },
+        onLeaveBack: () => {
+          if (resetHidden) timeline.pause(0);
+        },
+        ...stDefaults,
+      });
+
+      return;
+    }
+
+    gsap.fromTo(el, fromVars, {
+      ...toVars,
       scrollTrigger: {
         trigger,
         start: el.dataset.mmRevealStart ?? 'top 88%',
@@ -147,12 +178,42 @@ function bindLandingScrollReveals(
 
     const kind = (group.dataset.mmRevealGroup === 'blur' ? 'blur' : 'fade') as RevealKind;
     const stagger = Number.parseFloat(group.dataset.mmRevealStagger ?? '') || (isNarrow ? 0.1 : 0.12);
-
-    gsap.fromTo(items, revealFromVars(kind, isNarrow), {
+    const repeat = group.dataset.mmRevealRepeat === 'true';
+    const resetHidden = (group.dataset.mmRevealReset ?? 'hidden') === 'hidden';
+    const fromVars = revealFromVars(kind, isNarrow);
+    const toVars = {
       ...revealToVars(kind),
       duration: kind === 'blur' ? 0.82 : 0.68,
       ease: 'power2.out',
-      stagger: { each: stagger, from: 'start' },
+      stagger: { each: stagger, from: 'start' as const },
+    };
+
+    if (repeat) {
+      const timeline = gsap.timeline({ paused: true }).fromTo(items, fromVars, toVars);
+
+      ScrollTrigger.create({
+        trigger: group,
+        start: group.dataset.mmRevealStart ?? 'top 86%',
+        onEnter: () => {
+          timeline.restart();
+        },
+        onEnterBack: () => {
+          timeline.restart();
+        },
+        onLeave: () => {
+          if (resetHidden) timeline.pause(0);
+        },
+        onLeaveBack: () => {
+          if (resetHidden) timeline.pause(0);
+        },
+        ...stDefaults,
+      });
+
+      return;
+    }
+
+    gsap.fromTo(items, fromVars, {
+      ...toVars,
       scrollTrigger: {
         trigger: group,
         start: group.dataset.mmRevealStart ?? 'top 86%',
@@ -651,7 +712,7 @@ export function useGsapLandingMotion(
               const kind = (el.dataset.mmReveal === 'blur' ? 'blur' : 'fade') as RevealKind;
               gsap.set(el, revealFromVars(kind, isNarrow));
             });
-            bindLandingScrollReveals(gsap, root, isNarrow, scrollTriggerDefaults);
+            bindLandingScrollReveals(gsap, ScrollTrigger, root, isNarrow, scrollTriggerDefaults);
 
             ScrollTrigger.refresh();
           },

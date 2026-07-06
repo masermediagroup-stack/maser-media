@@ -4,7 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion, useAnimationControls, useReducedMotion } from 'motion/react';
 import { createPortal } from 'react-dom';
 import {
   ArrowUpRight,
@@ -295,15 +295,29 @@ function ServicesAuroraBars() {
   );
 }
 
-function FlipText({ text, className = '', stagger = 0.04 }: { text: string; className?: string; stagger?: number }) {
+function FlipText({
+  text,
+  className = '',
+  stagger = 0.04,
+  replay = false,
+}: {
+  text: string;
+  className?: string;
+  stagger?: number;
+  replay?: boolean;
+}) {
   const parts = text.split(/(\s+)/);
+  const controls = useAnimationControls();
 
   return (
     <motion.span
       className={`mm-flip-text ${className}`}
       initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, amount: 0.65 }}
+      animate={replay ? controls : undefined}
+      whileInView={replay ? undefined : 'show'}
+      onViewportEnter={replay ? () => void controls.start('show') : undefined}
+      onViewportLeave={replay ? () => void controls.start('hidden') : undefined}
+      viewport={{ once: !replay, amount: 0.65 }}
       aria-label={text}
     >
       {parts.map((part, index) => {
@@ -337,6 +351,7 @@ function RevealText({
   delay = 0,
   stagger = 0.035,
   amount = 0.45,
+  replay = false,
 }: {
   text: string;
   className?: string;
@@ -344,9 +359,11 @@ function RevealText({
   delay?: number;
   stagger?: number;
   amount?: number;
+  replay?: boolean;
 }) {
   const parts = useMemo(() => text.split(/(\s+)/).filter(Boolean), [text]);
   const reduceMotion = useReducedMotion();
+  const controls = useAnimationControls();
 
   if (reduceMotion) {
     return <span className={`mm-reveal-text ${className}`}>{text}</span>;
@@ -356,8 +373,11 @@ function RevealText({
     <motion.span
       className={`mm-reveal-text ${className}`}
       initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, amount }}
+      animate={replay ? controls : undefined}
+      whileInView={replay ? undefined : 'show'}
+      onViewportEnter={replay ? () => void controls.start('show') : undefined}
+      onViewportLeave={replay ? () => void controls.start('hidden') : undefined}
+      viewport={{ once: !replay, amount }}
       variants={{
         hidden: {},
         show: {
@@ -577,72 +597,118 @@ export function Clients() {
 }
 
 export function Services() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const laydownRef = useRef<HTMLDivElement>(null);
   const pillars = CONTENT.services.items;
   const defaultService = pillars[0]?.title.toLowerCase() ?? 'brand';
   const servicesSubtitle =
     CONTENT.services.subtitle ||
     'Brand, web, and content systems built with one launch language: a single, coherent design vocabulary that scales from your logo to your last social post.';
 
+  useEffect(() => {
+    const section = sectionRef.current;
+    const plane = laydownRef.current;
+
+    if (!section || !plane) return;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion || typeof IntersectionObserver === 'undefined') {
+      plane.classList.add('mm-services-laydown-plane--ready');
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        plane.classList.add('mm-services-laydown-plane--ready');
+        observer.disconnect();
+      },
+      { rootMargin: '0px 0px -28% 0px', threshold: 0.1 },
+    );
+
+    observer.observe(section);
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section
+      ref={sectionRef}
       className="mm-section mm-section--services mm-services"
       id="services"
       aria-labelledby="services-heading"
     >
       <ServicesAuroraBars />
-      <div className="mm-services__shell">
+      <div className="mm-services__shell mm-services-laydown-stage">
         <div className="mm-services__masthead">
-          <h2 id="services-heading" className="mm-services__title">
+          <h2
+            id="services-heading"
+            className="mm-services__title"
+            data-mm-reveal="fade"
+            data-mm-reveal-repeat="true"
+            data-mm-reveal-reset="hidden"
+            data-mm-reveal-start="top 86%"
+          >
             <span className="mm-services__title-line">Services</span>
           </h2>
-          <p className="mm-services__lede">{servicesSubtitle}</p>
+          <p
+            className="mm-services__lede"
+            data-mm-reveal="fade"
+            data-mm-reveal-repeat="true"
+            data-mm-reveal-reset="hidden"
+            data-mm-reveal-start="top 88%"
+          >
+            {servicesSubtitle}
+          </p>
         </div>
 
-        <Accordion className="mm-services__accordion" defaultValue={[defaultService]}>
-          {pillars.map((pillar) => {
-            const value = pillar.title.toLowerCase();
-            const summary = serviceSummaries[pillar.title] ?? pillar.items[0]?.description ?? '';
-            return (
-              <AccordionItem className="mm-services__accordion-item" key={pillar.title} value={value}>
-                <AccordionTrigger className="mm-services__accordion-trigger">
-                  <span className="mm-services__accordion-trigger-copy">
-                    <span className="mm-services__accordion-title">
-                      <RevealText text={pillar.title} amount={0.6} />
+        <div ref={laydownRef} className="mm-services-laydown-plane" data-mm-services-laydown>
+          <Accordion className="mm-services__accordion" defaultValue={[defaultService]}>
+            {pillars.map((pillar) => {
+              const value = pillar.title.toLowerCase();
+              const summary = serviceSummaries[pillar.title] ?? pillar.items[0]?.description ?? '';
+              return (
+                <AccordionItem className="mm-services__accordion-item" key={pillar.title} value={value}>
+                  <AccordionTrigger className="mm-services__accordion-trigger">
+                    <span className="mm-services__accordion-trigger-copy">
+                      <span className="mm-services__accordion-title">
+                        <RevealText text={pillar.title} amount={0.6} />
+                      </span>
+                      <span className="mm-services__accordion-summary">
+                        <RevealText
+                          text={summary}
+                          stagger={0.015}
+                          amount={0.55}
+                        />
+                      </span>
                     </span>
-                    <span className="mm-services__accordion-summary">
-                      <RevealText
-                        text={summary}
-                        stagger={0.015}
-                        amount={0.55}
-                      />
-                    </span>
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="mm-services__accordion-content">
-                  <ul className="mm-services__service-grid">
-                    {pillar.items.map((service) => (
-                      <motion.li
-                        className="mm-services__service-card"
-                        key={service.label}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, amount: 0.35 }}
-                        transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
-                      >
-                        <h3>{service.label}</h3>
-                        <p>{service.description}</p>
-                      </motion.li>
-                    ))}
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-            );
-          })}
-        </Accordion>
+                  </AccordionTrigger>
+                  <AccordionContent className="mm-services__accordion-content">
+                    <ul className="mm-services__service-grid">
+                      {pillar.items.map((service) => (
+                        <motion.li
+                          className="mm-services__service-card"
+                          key={service.label}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true, amount: 0.35 }}
+                          transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+                        >
+                          <h3>{service.label}</h3>
+                          <p>{service.description}</p>
+                        </motion.li>
+                      ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
+        </div>
 
         <button
           type="button"
-          className="mm-services__contact"
+          className="mm-services__contact mm-tactile-button"
           data-mm-reveal="fade"
           data-mm-reveal-start="top 90%"
           onClick={() => openContactModalFromApp()}
@@ -739,11 +805,17 @@ export function Work({ stacked = true }: WorkProps = {}) {
       <div className="relative z-10">
         <div className="mm-section-heading mm-section-heading--wide">
           <h2 className="mm-work__title">
-            <RevealText text={CONTENT.work.title} className="mm-splitting-text" stagger={0.045} amount={0.62} />
+            <RevealText text={CONTENT.work.title} className="mm-splitting-text" stagger={0.045} amount={0.62} replay />
           </h2>
           {CONTENT.work.subtitle ? (
             <p>
-              <RevealText text={CONTENT.work.subtitle} className="mm-splitting-text" stagger={0.018} delay={0.12} />
+              <RevealText
+                text={CONTENT.work.subtitle}
+                className="mm-splitting-text"
+                stagger={0.018}
+                delay={0.12}
+                replay
+              />
             </p>
           ) : null}
         </div>
@@ -773,7 +845,7 @@ export function Work({ stacked = true }: WorkProps = {}) {
         </div>
         <Link
           href="/work#main-content"
-          className="mm-work-view-all"
+          className="mm-work-view-all mm-tactile-button"
           data-mm-reveal="fade"
           data-mm-reveal-start="top 92%"
         >
@@ -857,7 +929,7 @@ export function Cta() {
           <div className="mm-cta__shell">
             <div className="mm-cta__column">
               <h2 id="contact-heading" className="mm-cta__title">
-                <FlipText text={CONTENT.cta.title} />
+                <FlipText text={CONTENT.cta.title} replay />
               </h2>
               {CONTENT.cta.subtitle ? (
                 <p className="mm-cta__lead" data-mm-reveal="fade" data-mm-reveal-start="top 90%">
@@ -867,7 +939,7 @@ export function Cta() {
               <div className="mm-cta__actions mm-cta__actions--contact">
                 <button
                   type="button"
-                  className="mm-cta__contact-btn"
+                  className="mm-cta__contact-btn mm-tactile-button"
                   onClick={() => openContactModalFromApp()}
                 >
                   {CONTENT.cta.contactButtonLabel}
@@ -1178,12 +1250,23 @@ export function Testimonials() {
         <div className="mm-testimonials-wave__layout">
           <header className="mm-testimonials-wave__head">
             {eyebrow ? (
-              <p className="mm-testimonials-wave__eyebrow" data-mm-reveal="fade" data-mm-reveal-start="top 90%">
+              <p
+                className="mm-testimonials-wave__eyebrow"
+                data-mm-reveal="fade"
+                data-mm-reveal-repeat="true"
+                data-mm-reveal-reset="hidden"
+                data-mm-reveal-start="top 90%"
+              >
                 {eyebrow}
               </p>
             ) : null}
             <h2 className="mm-testimonials-wave__title" id="testimonials-title">
-              <span className="mm-testimonials-wave__title-anim" data-mm-reveal="blur">
+              <span
+                className="mm-testimonials-wave__title-anim"
+                data-mm-reveal="blur"
+                data-mm-reveal-repeat="true"
+                data-mm-reveal-reset="hidden"
+              >
                 {title}
               </span>
             </h2>
