@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { CONTENT } from '@/lib/content';
 import { isContactModalHref, openContactModalFromApp } from '@/lib/contactModalEvents';
-import SmokeyBackground from '@/components/lightswind/smokey-background';
+import { HeroRippleShader } from '@/components/hero-ripple';
 import { WorkLightswindShader } from '@/components/WorkLightswindShader';
 import { useGsapLandingMotion, useMmScrollReveals } from '@/hooks/useGsapLandingMotion';
 import { useIsClient } from '@/hooks/useIsClient';
@@ -495,7 +495,7 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
       <div className="mm-hero__bg-scale" aria-hidden>
         <div className="mm-hero__smokey">
           <div className="mm-hero__smokey-placeholder" aria-hidden />
-          <SmokeyBackground color="#10A4FF" backdropBlurAmount="none" className="mm-hero__smokey-canvas h-full min-h-0 w-full" />
+          <HeroRippleShader className="mm-hero__smokey-canvas h-full min-h-0 w-full" />
         </div>
       </div>
       <div className="mm-hero__exit-splash" aria-hidden />
