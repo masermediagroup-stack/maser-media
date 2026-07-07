@@ -12,7 +12,7 @@ import {
   type HeroMobileRippleShaderProps,
 } from './types';
 
-const RIPPLE_LIFETIME_S = 4.2;
+const RIPPLE_LIFETIME_S = 8;
 const MAX_ACTIVE_RIPPLES = 4;
 const MAX_FRAME_DELTA_S = 1 / 30;
 const DRAG_RIPPLE_MIN_DISTANCE_PX = 34;

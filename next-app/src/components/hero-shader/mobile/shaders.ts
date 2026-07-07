@@ -29,6 +29,8 @@ export const heroRippleFragmentShader = /* glsl */ `
 
   const int MAX_RINGS = 6;
   const int MAX_RIPPLES = 4;
+  const float RIPPLE_FADE_START = 5.35;
+  const float RIPPLE_FADE_END = 8.0;
 
   vec2 heroUv(vec2 uv) {
     vec2 centered = uv * uResolution - uResolution * 0.5;
@@ -54,9 +56,12 @@ export const heroRippleFragmentShader = /* glsl */ `
     }
 
     float elapsed = max(uTime - rippleStartTime, 0.0);
-    if (elapsed > 4.5) {
+    if (elapsed > RIPPLE_FADE_END) {
       return 0.0;
     }
+
+    float tailFade = 1.0 - smoothstep(RIPPLE_FADE_START, RIPPLE_FADE_END, elapsed);
+    tailFade *= tailFade;
 
     vec2 p = heroUv(sampleUv);
     vec2 origin = heroUv(rippleOrigin);
@@ -72,7 +77,7 @@ export const heroRippleFragmentShader = /* glsl */ `
       float speedScale = 1.0 - ringIndex * 0.07;
       float radius = elapsed * uRippleSpeed * speedScale - ringIndex * (uRingWidth * 3.2);
       float ringDist = dist - radius;
-      float envelope = exp(-abs(ringDist) * uDecay) * exp(-elapsed * 0.42);
+      float envelope = exp(-abs(ringDist) * uDecay) * exp(-elapsed * 0.42) * tailFade;
       float wave = sin(ringDist / uRingWidth) * envelope;
       height += wave * uRippleStrength * (1.0 - ringIndex * 0.14);
     }
