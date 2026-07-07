@@ -14,9 +14,9 @@ export const heroRippleFragmentShader = /* glsl */ `
   uniform float uTime;
   uniform vec3 uColor;
 
-  uniform vec2 uRippleOrigin;
-  uniform float uRippleStartTime;
-  uniform float uRippleActive;
+  uniform vec2 uRippleOrigins[4];
+  uniform float uRippleStartTimes[4];
+  uniform float uRippleActives[4];
 
   uniform float uRippleStrength;
   uniform float uRingWidth;
@@ -28,6 +28,7 @@ export const heroRippleFragmentShader = /* glsl */ `
   varying vec2 vUv;
 
   const int MAX_RINGS = 6;
+  const int MAX_RIPPLES = 4;
 
   vec2 heroUv(vec2 uv) {
     vec2 centered = uv * uResolution - uResolution * 0.5;
@@ -47,18 +48,18 @@ export const heroRippleFragmentShader = /* glsl */ `
     return smoothstep(0.9, 0.2, wave);
   }
 
-  float rippleHeightAt(vec2 sampleUv) {
-    if (uRippleActive < 0.5) {
+  float rippleHeightAtSingle(vec2 sampleUv, vec2 rippleOrigin, float rippleStartTime, float rippleActive) {
+    if (rippleActive < 0.5) {
       return 0.0;
     }
 
-    float elapsed = max(uTime - uRippleStartTime, 0.0);
+    float elapsed = max(uTime - rippleStartTime, 0.0);
     if (elapsed > 4.5) {
       return 0.0;
     }
 
     vec2 p = heroUv(sampleUv);
-    vec2 origin = heroUv(uRippleOrigin);
+    vec2 origin = heroUv(rippleOrigin);
     float dist = length(p - origin);
     float height = 0.0;
 
@@ -77,6 +78,21 @@ export const heroRippleFragmentShader = /* glsl */ `
     }
 
     return height;
+  }
+
+  float rippleHeightAt(vec2 sampleUv) {
+    float height = 0.0;
+
+    for (int rippleIndex = 0; rippleIndex < MAX_RIPPLES; rippleIndex++) {
+      height += rippleHeightAtSingle(
+        sampleUv,
+        uRippleOrigins[rippleIndex],
+        uRippleStartTimes[rippleIndex],
+        uRippleActives[rippleIndex]
+      );
+    }
+
+    return clamp(height, -2.4, 2.4);
   }
 
   vec2 rippleGradient(vec2 uv) {
