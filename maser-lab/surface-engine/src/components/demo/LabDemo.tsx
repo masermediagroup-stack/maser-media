@@ -117,7 +117,7 @@ export function LabDemo() {
             {futureKinds.map(([id, meta]) => (
               <li
                 key={id}
-                className="rounded-full border border-neutral-300/70 bg-white/50 px-3 py-1 text-xs text-neutral-500"
+                className="rounded-md border border-neutral-300/70 bg-white/50 px-3 py-1 text-xs text-neutral-500"
               >
                 {meta.label}
               </li>
