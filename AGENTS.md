@@ -26,6 +26,14 @@ npm run lint
 npm run build
 ```
 
+## Maser Lab
+
+Experimental engines and foundational systems live under `maser-lab/`.
+
+- `maser-lab/surface-engine` — Maser Surface Engine (procedural monochrome materials)
+- Run with `npm run lab:surface` from the repo root
+- See `maser-lab/README.md` and `maser-lab/surface-engine/docs/ARCHITECTURE.md`
+
 ## Rules For Future Work
 
 - Keep the homepage and inner pages polished, fast, and conversion-oriented.

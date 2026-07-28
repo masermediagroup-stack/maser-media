@@ -21,3 +21,11 @@ npm run build
 ```
 
 Open the local site at http://localhost:3000 when the dev server is running.
+
+## Maser Lab
+
+```bash
+npm run lab:surface
+```
+
+See `maser-lab/README.md`.
