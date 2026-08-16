@@ -386,7 +386,7 @@ export const CONTENT: Content = {
     nextLabel: "Next",
     items: [
       {
-        quote: "Quote pending - kind words from the Miller More team coming soon.",
+        quote: "Helped me get my website running, and were collaborative through the entire process. Grateful for their creativity & turnaround.",
         name: "Miller More Handiwork",
         role: "Local home services, client since launch",
         logo: "/assets/miller-more-logo-clean.png",
@@ -395,7 +395,7 @@ export const CONTENT: Content = {
         rating: 5,
       },
       {
-        quote: "Quote pending - hand-off from the Main Street Pub & Grub crew on the way.",
+        quote: "Extremely grateful for Tyler & Grayson's hard work on getting the project perfect for us!",
         name: "Main Street Pub & Grub",
         role: "Hospitality, brand and web partner",
         logo: "/assets/main-street-logo-clean.png",
@@ -404,7 +404,7 @@ export const CONTENT: Content = {
         rating: 5,
       },
       {
-        quote: "Quote pending - sharing notes from Arpit shortly.",
+        quote: "Relaxed, hyper-adaptive, always got the work done; and done well.",
         name: "Arpit",
         role: "Founder, Paradox Customs",
         logo: "/assets/paradox-customs-logo.png",
