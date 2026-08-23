@@ -521,7 +521,7 @@ export function HomeMetaballField() {
         window.removeEventListener('resize', onResize);
         cancelAnimationFrame(raf);
         running = false;
-        if (canvas.parentNode === layer) {
+        if (layer && canvas.parentNode === layer) {
           layer.removeChild(canvas);
         }
         gl.getExtension('WEBGL_lose_context')?.loseContext();
