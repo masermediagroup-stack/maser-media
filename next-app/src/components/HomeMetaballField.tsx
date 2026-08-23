@@ -28,7 +28,10 @@ const EXCLUDE_SELECTOR = [
   '.mm-services__title',
   '.mm-services__lede',
   '.mm-services__accordion',
+  '.mm-services__service-card',
   '.mm-process-bento__heading',
+  '.mm-testimonials-wave__head',
+  '.mm-testimonials-wave .testimonial-card',
   '.mm-cta__title',
   '.mm-cta__lead',
   '.mm-cta__actions',
@@ -40,6 +43,7 @@ const EXPOSED_SELECTOR = [
   '.mm-section--clients',
   '.mm-section--services',
   '.mm-section--process',
+  '.mm-section--testimonials',
   '.mm-section--cta',
   '.mm-footer',
 ].join(',');
@@ -135,6 +139,10 @@ function isMobileViewport(): boolean {
 
 function prefersReducedMotion(): boolean {
   return window.matchMedia(REDUCED_MQ).matches;
+}
+
+function contactModalOpen(): boolean {
+  return Boolean(document.querySelector('.liquid-contact-modal'));
 }
 
 function intersectsViewport(rect: DOMRectReadOnly, slack = 0): boolean {
@@ -411,7 +419,7 @@ export function HomeMetaballField() {
         targetEnergy *= Math.exp(-dt * 3.2);
 
         const exposed = anyExposed();
-        const shouldDraw = visible && !tabHidden && exposed;
+        const shouldDraw = visible && !tabHidden && exposed && !contactModalOpen();
 
         if (shouldDraw) {
           render();
@@ -513,10 +521,18 @@ export function HomeMetaballField() {
       document.addEventListener('visibilitychange', onVisibility);
       window.addEventListener('resize', onResize, { passive: true });
 
+      const modalObserver = new MutationObserver(() => {
+        if (!contactModalOpen() && visible && !tabHidden) {
+          startLoop();
+        }
+      });
+      modalObserver.observe(document.body, { childList: true, subtree: true });
+
       smootherWatcher = () => {
         ctx.revert();
         resizeObserver.disconnect();
         exposedObserver.disconnect();
+        modalObserver.disconnect();
         document.removeEventListener('visibilitychange', onVisibility);
         window.removeEventListener('resize', onResize);
         cancelAnimationFrame(raf);
