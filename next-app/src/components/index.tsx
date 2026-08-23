@@ -29,6 +29,7 @@ import { FooterCoolButton } from './FooterCoolButton';
 import { AuroraShader, MASER_AURORA_COLOR_STOPS } from './AuroraShader';
 import { ProcessBento } from './ProcessBento';
 import { CtaLogoTilt } from './CtaLogoTilt';
+import { HomeMetaballField } from './HomeMetaballField';
 
 type EntranceProps = { entrance?: boolean };
 type NavProps = EntranceProps & { introReady?: boolean };
@@ -1048,6 +1049,7 @@ export function LandingPage({
       <div className="mm-hero-scene">
         <Hero entrance={entrance} onCurtainDone={handleCurtainDone} />
       </div>
+      <HomeMetaballField />
       <Clients />
       <Services />
       <ProcessBento />

@@ -19,6 +19,7 @@ This project uses a high-motion creative site pattern: static content first, sec
 - The hero smokey WebGL shader no longer reallocates the canvas buffer every frame and pauses offscreen.
 - The root global shader layer is now static CSS atmosphere instead of route-wide WebGL.
 - The work-section ripple mounts only when the work section is near the viewport.
+- Homepage metaballs are a homepage-only environment: they mount near the post-hero light sections, pause offscreen or when the tab is hidden, stay out of the hero / work ripple / testimonials band / contact modal, and park or turn off for reduced motion.
 
 ## How To Build Future Sections
 

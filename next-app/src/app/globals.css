@@ -271,7 +271,8 @@ body.mm-page-transition-hide-content main.mm-inner-main,
 body.mm-page-transition-hide-content .mm-global-shader,
 body.mm-page-transition-hide-content .galaxy-background,
 body.mm-page-transition-hide-content #galaxy-background,
-body.mm-page-transition-hide-content .cursor-aura-layer {
+body.mm-page-transition-hide-content .cursor-aura-layer,
+body.mm-page-transition-hide-content .mm-metaball-field__layer {
   visibility: hidden;
 }
 
@@ -4353,6 +4354,64 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 .mm-hero .hero-text-shadow,
 .mm-hero .hero-load-curtain {
   display: none !important;
+}
+
+.mm-metaball-field {
+  position: relative;
+  height: 0;
+  margin: 0 !important;
+  padding: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.mm-metaball-field__layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-color: #efefef;
+}
+
+.mm-metaball-field__layer--static {
+  background-image:
+    radial-gradient(ellipse 46% 36% at 12% 22%, rgba(16, 164, 255, 0.16), transparent 72%),
+    radial-gradient(ellipse 40% 32% at 88% 46%, rgba(0, 151, 245, 0.12), transparent 70%),
+    radial-gradient(ellipse 34% 28% at 58% 86%, rgba(0, 101, 163, 0.1), transparent 72%);
+}
+
+.mm-metaball-field__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/*
+ * Homepage metaball plate lives at z-index: -1 (behind content, above the galaxy).
+ * Light sections become transparent so stains read on #efefef. Hero, work ripple,
+ * testimonials, and the contact modal keep their own opaque surfaces.
+ */
+html.mm-home-metaballs .mm-main .mm-section.mm-section--clients.mm-clients,
+html.mm-home-metaballs .mm-main .mm-section.mm-section--services.mm-services,
+html.mm-home-metaballs .mm-main .mm-services__aurora,
+html.mm-home-metaballs .mm-main .mm-section.mm-section--process.mm-process-bento,
+html.mm-home-metaballs .mm-main .mm-cta.mm-section--cta,
+html.mm-home-metaballs .mm-main .mm-cta__surface,
+html.mm-home-metaballs .mm-main .mm-footer {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+html.mm-home-metaballs .mm-main .mm-section.mm-section--services.mm-services::after {
+  background: linear-gradient(
+    to bottom,
+    rgba(239, 239, 239, 0) 0%,
+    rgba(239, 239, 239, 0.28) 62%,
+    rgba(239, 239, 239, 0.55) 100%
+  );
 }
 
 .mm-global-shader {
