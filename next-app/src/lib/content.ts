@@ -70,8 +70,8 @@ export interface WorkItem {
   /** Intrinsic logo dimensions (transparent PNG) for `next/image` sizing. */
   logoWidth?: number;
   logoHeight?: number;
-  /** Optional card modifier for cover framing (helm = scale + translateX). */
-  cardVariant?: 'helm' | 'main-street' | 'miller-more';
+  /** Optional card modifier for logo-panel framing. */
+  cardVariant?: 'main-street' | 'miller-more';
 }
 
 export interface TestimonialCarouselItem {
@@ -226,9 +226,6 @@ export const CONTENT: Content = {
       { name: "Paradox Customs", logo: null },
       { name: "Main Street Pub & Grub", logo: null },
       { name: "Cat Eye Construction", logo: null },
-      { name: "Harbor Lane Bakery", logo: null },
-      { name: "Summit Auto Detail", logo: null },
-      { name: "Riverside Dental Studio", logo: null },
     ],
     supportingLabel: "",
     categories: [],
@@ -362,19 +359,6 @@ export const CONTENT: Content = {
         link: "/work/main-street-pub-grub",
         tags: ["Brand identity", "Logo system", "Hospitality"],
         cardVariant: "main-street",
-      },
-      {
-        title: "Helm",
-        description:
-          "A tool we are building ourselves to support how creative studios run client work.",
-        image: null,
-        logo: "/assets/helm-logo-clean.png",
-        logoWidth: 794,
-        logoHeight: 796,
-        cardLayout: "logo-panel",
-        link: "/work/helm-in-house-saas",
-        tags: ["Web App Infrastructure", "SaaS", "Project management"],
-        cardVariant: "helm",
       },
     ],
   },

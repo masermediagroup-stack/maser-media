@@ -575,7 +575,7 @@ export function useGsapLandingMotion(
             const clientsSection = root.querySelector<HTMLElement>('.mm-clients');
             const clientsHeadlineText = root.querySelector<HTMLElement>('.mm-clients__headline-text');
             const clientPanelFadeItems = clientsSection?.querySelectorAll<HTMLElement>(
-              '.mm-client-name, .mm-clients__more',
+              '.mm-client-name',
             );
 
             if (clientsHeadlineText) {

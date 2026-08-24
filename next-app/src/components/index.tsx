@@ -598,9 +598,6 @@ export function Clients() {
             <span className="mm-client-name">{item.name}</span>
           </li>
         ))}
-        <li className="mm-clients__grid-item mm-clients__grid-item--more">
-          <span className="mm-clients__more">20+ more</span>
-        </li>
       </ul>
     </section>
   );
@@ -734,6 +731,7 @@ export function Work({ stacked = true }: WorkProps = {}) {
   const reduceMotion = useReducedMotion();
   const landingProjects = CONTENT.work.items.slice(0, 3);
   const stackEnabled = stacked && landingProjects.length > 1;
+  const showViewAll = !(stacked && landingProjects.length >= CONTENT.work.items.length);
 
   useStackedWorkPosters(sectionRef, stackEnabled, reduceMotion);
   useWorkCardContentReveal(sectionRef, reduceMotion);
@@ -848,15 +846,17 @@ export function Work({ stacked = true }: WorkProps = {}) {
             ),
           )}
         </div>
-        <Link
-          href="/work#main-content"
-          className="mm-work-view-all mm-tactile-button"
-          data-mm-reveal="fade"
-          data-mm-reveal-start="top 92%"
-        >
-          <span>View all projects</span>
-          <ArrowUpRight size={20} aria-hidden />
-        </Link>
+        {showViewAll ? (
+          <Link
+            href="/work#main-content"
+            className="mm-work-view-all mm-tactile-button"
+            data-mm-reveal="fade"
+            data-mm-reveal-start="top 92%"
+          >
+            <span>View all projects</span>
+            <ArrowUpRight size={20} aria-hidden />
+          </Link>
+        ) : null}
       </div>
     </section>
   );

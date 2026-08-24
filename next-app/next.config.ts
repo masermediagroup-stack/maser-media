@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: true,
       },
+      {
+        source: "/work/helm-in-house-saas",
+        destination: "/work",
+        permanent: true,
+      },
     ];
   },
   images: {
