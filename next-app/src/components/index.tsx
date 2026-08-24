@@ -33,9 +33,28 @@ type EntranceProps = { entrance?: boolean };
 type NavProps = EntranceProps & { introReady?: boolean };
 type HeroProps = EntranceProps & {
   onCurtainDone?: () => void;
+  contentRevealed?: boolean;
 };
 type InnerPageKind = 'work' | 'about';
 type WorkProps = { stacked?: boolean };
+
+const INTRO_SCROLL_KEYS = new Set([
+  ' ',
+  'Spacebar',
+  'ArrowUp',
+  'ArrowDown',
+  'PageUp',
+  'PageDown',
+  'Home',
+  'End',
+]);
+
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  if (target.isContentEditable) return true;
+  const tag = target.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+}
 
 const CASE_IMAGE = '/assets/generated/maser-case-wall.png';
 
@@ -375,10 +394,12 @@ export function Nav({ entrance, introReady }: NavProps) {
   return <LiquidNav entrance={entrance} introReady={introReady} />;
 }
 
-export function Hero({ entrance, onCurtainDone }: HeroProps) {
+export function Hero({ entrance, onCurtainDone, contentRevealed }: HeroProps) {
   const [curtainDone, setCurtainDone] = useState(!entrance);
   const [canMountCurtain, setCanMountCurtain] = useState(false);
+  const [scrollUnlocked, setScrollUnlocked] = useState(!entrance);
   const curtainRef = useRef<HTMLDivElement>(null);
+  const copyRevealed = contentRevealed ?? !entrance;
 
   useEffect(() => {
     if (!entrance) return;
@@ -405,6 +426,53 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
   }, [canMountCurtain, curtainDone]);
 
   useLayoutEffect(() => {
+    if (!entrance || scrollUnlocked) return;
+
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+
+    const preventScroll = (event: Event) => {
+      event.preventDefault();
+    };
+    const preventKeys = (event: KeyboardEvent) => {
+      if (!INTRO_SCROLL_KEYS.has(event.key) || isEditableTarget(event.target)) return;
+      event.preventDefault();
+    };
+
+    window.addEventListener('wheel', preventScroll, { passive: false });
+    window.addEventListener('touchmove', preventScroll, { passive: false });
+    window.addEventListener('keydown', preventKeys, { capture: true });
+
+    return () => {
+      window.removeEventListener('wheel', preventScroll);
+      window.removeEventListener('touchmove', preventScroll);
+      window.removeEventListener('keydown', preventKeys, { capture: true });
+      window.history.scrollRestoration = previousScrollRestoration;
+    };
+  }, [entrance, scrollUnlocked]);
+
+  useEffect(() => {
+    if (!entrance || !copyRevealed || scrollUnlocked) return;
+    let frame2 = 0;
+    let frame3 = 0;
+    let frame4 = 0;
+    const frame1 = window.requestAnimationFrame(() => {
+      frame2 = window.requestAnimationFrame(() => {
+        frame3 = window.requestAnimationFrame(() => {
+          frame4 = window.requestAnimationFrame(() => setScrollUnlocked(true));
+        });
+      });
+    });
+    return () => {
+      window.cancelAnimationFrame(frame1);
+      window.cancelAnimationFrame(frame2);
+      window.cancelAnimationFrame(frame3);
+      window.cancelAnimationFrame(frame4);
+    };
+  }, [copyRevealed, entrance, scrollUnlocked]);
+
+  useLayoutEffect(() => {
     if (!entrance) {
       onCurtainDone?.();
       return;
@@ -414,22 +482,16 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
       return;
     }
 
-    const previousScrollRestoration = window.history.scrollRestoration;
-    const previousOverflow = document.documentElement.style.overflow;
-    const previousBodyOverflow = document.body.style.overflow;
-    window.history.scrollRestoration = 'manual';
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    window.scrollTo(0, 0);
-
+    let finished = false;
     const finishCurtain = () => {
+      if (finished) return;
+      finished = true;
       setCurtainDone(true);
-      onCurtainDone?.();
-      window.history.scrollRestoration = previousScrollRestoration;
-      document.documentElement.style.overflow = previousOverflow;
-      document.body.style.overflow = previousBodyOverflow;
       document.documentElement.classList.remove('mm-intro-pending');
       document.body.classList.add('mm-intro-complete');
+      window.requestAnimationFrame(() => {
+        onCurtainDone?.();
+      });
     };
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -439,9 +501,6 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
       const timeout = window.setTimeout(finishCurtain, 200);
       return () => {
         window.clearTimeout(timeout);
-        window.history.scrollRestoration = previousScrollRestoration;
-        document.documentElement.style.overflow = previousOverflow;
-        document.body.style.overflow = previousBodyOverflow;
         document.body.classList.remove('mm-intro-mounted');
       };
     }
@@ -457,9 +516,6 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
     return () => {
       curtain?.removeEventListener('animationend', onAnimationEnd);
       window.clearTimeout(failsafe);
-      window.history.scrollRestoration = previousScrollRestoration;
-      document.documentElement.style.overflow = previousOverflow;
-      document.body.style.overflow = previousBodyOverflow;
       document.body.classList.remove('mm-intro-mounted');
     };
   }, [canMountCurtain, entrance, onCurtainDone]);
@@ -492,7 +548,7 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
           )
         : null}
       <motion.div
-        className={`mm-hero__content${entrance && !curtainDone ? ' mm-hero__content--pre-reveal' : ''}`}
+        className={`mm-hero__content${entrance && !copyRevealed ? ' mm-hero__content--pre-reveal' : ''}`}
         initial={false}
         animate={false}
       >
@@ -962,13 +1018,21 @@ export function LandingPage({
 }) {
   const rootRef = useRef<HTMLElement>(null);
   const [curtainRevealed, setCurtainRevealed] = useState(!entrance);
+  const [introPrepared, setIntroPrepared] = useState(!entrance);
   const [heroMotion, setHeroMotion] = useState<'pending' | 'running' | 'ready'>(
     entrance ? 'pending' : 'ready',
   );
 
+  const handleHeroIntroPrepared = useCallback(() => {
+    setIntroPrepared(true);
+  }, []);
+
   const handleHeroIntroStart = useCallback(() => {
     setHeroMotion('running');
-  }, []);
+    window.requestAnimationFrame(() => {
+      onCurtainReveal?.();
+    });
+  }, [onCurtainReveal]);
 
   const handleHeroIntroDone = useCallback(() => {
     setHeroMotion('ready');
@@ -977,13 +1041,12 @@ export function LandingPage({
 
   const handleCurtainDone = useCallback(() => {
     setCurtainRevealed(true);
-    setHeroMotion('running');
-    onCurtainReveal?.();
-  }, [onCurtainReveal]);
+  }, []);
 
   useGsapLandingMotion(rootRef, {
-    animateHeroIntro: entrance && curtainRevealed,
-    holdHeroIntro: entrance && !curtainRevealed,
+    animateHeroIntro: entrance && curtainRevealed && introPrepared,
+    holdHeroIntro: entrance && (!curtainRevealed || !introPrepared),
+    onHeroIntroPrepared: handleHeroIntroPrepared,
     onHeroIntroStart: handleHeroIntroStart,
     onHeroIntroDone: handleHeroIntroDone,
   });
@@ -996,7 +1059,11 @@ export function LandingPage({
       data-hero-motion={heroMotion}
     >
       <div className="mm-hero-scene">
-        <Hero entrance={entrance} onCurtainDone={handleCurtainDone} />
+        <Hero
+          entrance={entrance}
+          onCurtainDone={handleCurtainDone}
+          contentRevealed={!entrance || heroMotion !== 'pending'}
+        />
       </div>
       <div className="mm-home-slate">
         <Clients />

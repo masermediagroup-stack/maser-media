@@ -19,10 +19,14 @@ export default function Home() {
     getServerIntroStorageSnapshot,
   );
   const introEnabled = !skipIntro;
-  const [curtainRevealed, setCurtainRevealed] = useState(skipIntro);
-  const introReady = skipIntro || curtainRevealed;
+  const [navReady, setNavReady] = useState(skipIntro);
+  const introReady = skipIntro || navReady;
   const handleCurtainReveal = useCallback(() => {
-    setCurtainRevealed(true);
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        setNavReady(true);
+      });
+    });
   }, []);
   const handleHeroIntroDone = useCallback(() => {
     markHomeIntroPlayed();

@@ -44,7 +44,7 @@ try {
         <style
           dangerouslySetInnerHTML={{
             __html:
-              'html.mm-intro-pending .mm-preload-fallback{opacity:1!important;visibility:visible!important}body.mm-intro-mounted .mm-preload-fallback,body.mm-intro-complete .mm-preload-fallback{opacity:0!important;visibility:hidden!important}',
+              'html{scrollbar-gutter:stable;overflow-x:hidden;overflow-y:scroll}html.mm-intro-pending .mm-preload-fallback{opacity:1!important;visibility:visible!important}body.mm-intro-mounted .mm-preload-fallback,body.mm-intro-complete .mm-preload-fallback{opacity:0!important;visibility:hidden!important}',
           }}
         />
         <div className="mm-preload-fallback" aria-hidden="true" />

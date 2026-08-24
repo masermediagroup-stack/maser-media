@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import type { RefObject } from 'react';
 
 function prefersReducedMotion(): boolean {
@@ -229,22 +229,38 @@ export function useGsapLandingMotion(
   {
     animateHeroIntro = true,
     holdHeroIntro = false,
+    onHeroIntroPrepared,
     onHeroIntroStart,
     onHeroIntroDone,
   }: {
     animateHeroIntro?: boolean;
     holdHeroIntro?: boolean;
+    onHeroIntroPrepared?: () => void;
     onHeroIntroStart?: () => void;
     onHeroIntroDone?: () => void;
   } = {},
 ) {
+  const animateHeroIntroRef = useRef(animateHeroIntro);
+  const holdHeroIntroRef = useRef(holdHeroIntro);
+  const onHeroIntroPreparedRef = useRef(onHeroIntroPrepared);
+  const onHeroIntroStartRef = useRef(onHeroIntroStart);
+  const onHeroIntroDoneRef = useRef(onHeroIntroDone);
+  const playHeroIntroRef = useRef<() => void>(() => {});
+
+  useLayoutEffect(() => {
+    animateHeroIntroRef.current = animateHeroIntro;
+    holdHeroIntroRef.current = holdHeroIntro;
+    onHeroIntroPreparedRef.current = onHeroIntroPrepared;
+    onHeroIntroStartRef.current = onHeroIntroStart;
+    onHeroIntroDoneRef.current = onHeroIntroDone;
+  }, [animateHeroIntro, holdHeroIntro, onHeroIntroPrepared, onHeroIntroStart, onHeroIntroDone]);
+
   useLayoutEffect(() => {
     if (!rootRef.current) return;
 
-    if (holdHeroIntro) {
+    const prepareHeroIntro = holdHeroIntroRef.current || animateHeroIntroRef.current;
+    if (holdHeroIntroRef.current) {
       rootRef.current.dataset.heroMotion = 'pending';
-      void loadLandingMotionModules();
-      return;
     }
 
     let cleanup = () => {};
@@ -257,6 +273,34 @@ export function useGsapLandingMotion(
       gsap.registerPlugin(ScrollTrigger, SplitText);
       const root = rootRef.current;
       const reduced = prefersReducedMotion();
+      const introTweens: Array<{ paused: () => boolean; play: () => unknown }> = [];
+      let introPlayed = false;
+      let introPrepared = false;
+
+      const markIntroPrepared = (heroTitleEl: HTMLElement | null | undefined) => {
+        if (introPrepared) return;
+        introPrepared = true;
+        if (heroTitleEl) {
+          const measuredHeight = heroTitleEl.offsetHeight;
+          if (measuredHeight > 0) {
+            heroTitleEl.style.minHeight = `${measuredHeight}px`;
+          }
+        }
+        onHeroIntroPreparedRef.current?.();
+      };
+
+      const playHeroIntro = () => {
+        if (introPlayed) return;
+        introPlayed = true;
+        if (prepareHeroIntro) {
+          root.dataset.heroMotion = 'running';
+          onHeroIntroStartRef.current?.();
+        }
+        introTweens.forEach((tween) => {
+          if (tween.paused()) tween.play();
+        });
+      };
+      playHeroIntroRef.current = playHeroIntro;
 
       const ctx = gsap.context(() => {
         const hero = root.querySelector<HTMLElement>('.mm-hero');
@@ -264,10 +308,23 @@ export function useGsapLandingMotion(
         const heroLead = hero?.querySelector<HTMLElement>('.mm-hero__lead');
 
         if (reduced) {
-          root.dataset.heroMotion = 'ready';
-          if (animateHeroIntro) {
-            onHeroIntroStart?.();
-            onHeroIntroDone?.();
+          if (!prepareHeroIntro) {
+            root.dataset.heroMotion = 'ready';
+          } else if (animateHeroIntroRef.current) {
+            onHeroIntroPreparedRef.current?.();
+            playHeroIntro();
+            root.dataset.heroMotion = 'ready';
+            onHeroIntroDoneRef.current?.();
+          } else {
+            onHeroIntroPreparedRef.current?.();
+            root.dataset.heroMotion = 'pending';
+            playHeroIntroRef.current = () => {
+              if (introPlayed) return;
+              introPlayed = true;
+              root.dataset.heroMotion = 'ready';
+              onHeroIntroStartRef.current?.();
+              onHeroIntroDoneRef.current?.();
+            };
           }
           if (hero) gsap.set(hero, { '--hero-exit-p': 0, '--hero-content-p': 0 });
           gsap.utils.toArray<HTMLElement>('.mm-section, .marquee-system', root).forEach((el) => {
@@ -310,7 +367,7 @@ export function useGsapLandingMotion(
         let heroIntroDone = false;
 
         const markHeroIntroReady = () => {
-          if (!animateHeroIntro) {
+          if (!prepareHeroIntro) {
             root.dataset.heroMotion = 'ready';
             return;
           }
@@ -318,15 +375,15 @@ export function useGsapLandingMotion(
           if (!heroIntroDone && heroIntroCompleteCount >= heroIntroSegmentCount) {
             heroIntroDone = true;
             root.dataset.heroMotion = 'ready';
-            onHeroIntroDone?.();
+            onHeroIntroDoneRef.current?.();
           }
         };
 
-        if (!animateHeroIntro) {
+        if (!prepareHeroIntro) {
           root.dataset.heroMotion = 'ready';
         }
 
-        if (animateHeroIntro && heroTitle) {
+        if (prepareHeroIntro && heroTitle) {
           SplitText.create(heroTitle, {
             type: 'lines',
             mask: 'lines',
@@ -338,20 +395,25 @@ export function useGsapLandingMotion(
               );
               heroTitleLineCount = Math.max(linesTopToBottom.length, 1);
 
-              return gsap.from(linesTopToBottom, {
+              const tween = gsap.from(linesTopToBottom, {
                 yPercent: 112,
                 autoAlpha: 0,
                 duration: heroTitleDuration,
                 stagger: { each: heroTitleStagger, from: 'start' },
                 ease: 'power4.out',
                 delay: heroTitleDelay,
+                paused: !animateHeroIntroRef.current,
+                immediateRender: true,
                 onComplete: markHeroIntroReady,
               });
+              introTweens.push(tween);
+              markIntroPrepared(heroTitle);
+              return tween;
             },
           });
         }
 
-        if (animateHeroIntro && heroLead) {
+        if (prepareHeroIntro && heroLead) {
           SplitText.create(heroLead, {
             type: 'lines',
             mask: 'lines',
@@ -362,7 +424,7 @@ export function useGsapLandingMotion(
                 (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top,
               );
 
-              return gsap.from(linesTopToBottom, {
+              const tween = gsap.from(linesTopToBottom, {
                 yPercent: 112,
                 autoAlpha: 0,
                 duration: 0.6,
@@ -373,19 +435,26 @@ export function useGsapLandingMotion(
                   heroTitleDuration +
                   heroTitleStagger * (heroTitleLineCount - 1) +
                   heroLeadGap,
+                paused: !animateHeroIntroRef.current,
+                immediateRender: true,
                 onComplete: markHeroIntroReady,
               });
+              introTweens.push(tween);
+              if (!heroTitle) {
+                markIntroPrepared(heroLead);
+              }
+              return tween;
             },
           });
         }
 
-        if (animateHeroIntro && heroIntroSegmentCount === 0) {
+        if (prepareHeroIntro && heroIntroSegmentCount === 0) {
+          markIntroPrepared(heroTitle);
+          playHeroIntro();
           root.dataset.heroMotion = 'ready';
-          onHeroIntroStart?.();
-          onHeroIntroDone?.();
-        } else if (animateHeroIntro) {
-          root.dataset.heroMotion = 'running';
-          onHeroIntroStart?.();
+          onHeroIntroDoneRef.current?.();
+        } else if (animateHeroIntroRef.current) {
+          playHeroIntro();
         }
 
         mm.add(
@@ -396,16 +465,19 @@ export function useGsapLandingMotion(
           (context) => {
             const isNarrow = Boolean(context.conditions?.isNarrow);
 
-            if (animateHeroIntro && isNarrow && hero) {
+            if (prepareHeroIntro && isNarrow && hero) {
               const mobileLogo = hero.querySelector<HTMLElement>('.mm-hero__mobile-logo');
               if (mobileLogo) {
-                gsap.from(mobileLogo, {
+                const logoTween = gsap.from(mobileLogo, {
                   autoAlpha: 0,
                   y: 14,
                   duration: 0.75,
                   delay: heroTitleDelay,
                   ease: 'power3.out',
+                  paused: !animateHeroIntroRef.current,
+                  immediateRender: true,
                 });
+                introTweens.push(logoTween);
               }
             }
 
@@ -720,13 +792,32 @@ export function useGsapLandingMotion(
       }, root);
 
       cleanup = () => ctx.revert();
+
+      if (animateHeroIntroRef.current) {
+        playHeroIntro();
+      }
     };
 
     void run();
 
     return () => {
       cancelled = true;
+      playHeroIntroRef.current = () => {};
       cleanup();
     };
-  }, [animateHeroIntro, holdHeroIntro, onHeroIntroDone, onHeroIntroStart, rootRef]);
+  }, [rootRef]);
+
+  useLayoutEffect(() => {
+    if (!animateHeroIntro) return;
+    let innerFrame = 0;
+    const outerFrame = window.requestAnimationFrame(() => {
+      innerFrame = window.requestAnimationFrame(() => {
+        playHeroIntroRef.current();
+      });
+    });
+    return () => {
+      window.cancelAnimationFrame(outerFrame);
+      window.cancelAnimationFrame(innerFrame);
+    };
+  }, [animateHeroIntro]);
 }
