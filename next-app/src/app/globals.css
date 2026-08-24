@@ -268,9 +268,6 @@ body.mm-page-transition-hide-content #smooth-content,
 body.mm-page-transition-hide-content .mm-smooth-wrapper,
 body.mm-page-transition-hide-content .mm-smooth-content,
 body.mm-page-transition-hide-content main.mm-inner-main,
-body.mm-page-transition-hide-content .mm-global-shader,
-body.mm-page-transition-hide-content .galaxy-background,
-body.mm-page-transition-hide-content #galaxy-background,
 body.mm-page-transition-hide-content .cursor-aura-layer {
   visibility: hidden;
 }
@@ -325,59 +322,9 @@ section[id],
   }
 }
 
-body.galaxy-active {
-  display: flex;
-  flex-direction: column;
-  background-color: #030303;
-  -webkit-font-smoothing: antialiased;
-  min-height: 100dvh;
-  overflow-x: hidden;
-  position: relative;
-  isolation: isolate;
-}
-
-/* Seamless backdrop from hero through rest of page */
-body.galaxy-active .hero-bg {
-  background: transparent;
-}
-
-/* Shader fade only: no opaque page fill so the fixed backdrop can read through into Clients */
-body.galaxy-active .hero-bg::after {
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.75) 0%,
-    rgba(0, 0, 0, 0.35) 42%,
-    rgba(0, 0, 0, 0.08) 78%,
-    transparent 100%
-  );
-}
-
 .mm-smooth-wrapper,
 .mm-smooth-content {
   width: 100%;
-}
-
-/* Homepage only: smooth-scroll wrapper is the in-flow flex child on body.galaxy-active. */
-html:not(.mm-inner-route) body.galaxy-active > #smooth-wrapper,
-html:not(.mm-inner-route) body.galaxy-active > .mm-smooth-wrapper {
-  flex: 1 0 auto;
-  min-height: 0;
-}
-
-/* Hero title: dark rim only. Light tinted text-shadows read as a white flare on refresh / scale — keep them off. */
-body.galaxy-active .hero-title:not(.hero-title--story) {
-  text-shadow:
-    0 0 60px rgba(0, 0, 0, 0.9),
-    0 0 30px rgba(0, 0, 0, 0.7),
-    0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-body.galaxy-active .hero-title.hero-title--story .hero-title__primary {
-  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.45);
-}
-
-body.galaxy-active .hero-title.hero-title--story .hero-title__highlight {
-  filter: drop-shadow(0 2px 14px rgba(0, 0, 0, 0.45));
 }
 
 img {
@@ -915,10 +862,6 @@ a {
   background: linear-gradient(to bottom, transparent, var(--color-bg));
   z-index: 2;
   pointer-events: none;
-}
-
-body.galaxy-active .hero::after {
-  background: linear-gradient(to bottom, transparent, transparent);
 }
 
 .hero-brand {
@@ -3798,11 +3741,31 @@ body.mm-intro-complete .mm-preload-fallback {
 
 .mm-main > .mm-hero-scene ~ * {
   z-index: 2;
-  isolation: isolate;
 }
 
 .mm-main > * + * {
   margin-top: -1px;
+}
+
+/*
+ * Homepage post-hero ground: one opaque authorable plate.
+ * Sections inside stay transparent so they share this sheet.
+ */
+.mm-home-slate {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--mm-section-surface);
+  /* Downward only — covers bottom overscroll without painting over the hero. */
+  box-shadow: 0 100vh 0 0 var(--mm-section-surface);
+}
+
+.mm-home-slate > .mm-section,
+.mm-home-slate > .mm-cta,
+.mm-home-slate > .mm-footer,
+.mm-home-slate .mm-cta__surface,
+.mm-home-slate .mm-process-bento__pad {
+  background: transparent !important;
+  background-image: none !important;
 }
 
 .mm-hero-scene {
@@ -3841,23 +3804,22 @@ html.mm-inner-route .mm-inner-main:has(.mm-inner-main__stack > .mm-inner-hero--e
  * ScrollSmoother inline heights on html/body — phantom document height + fixed backdrop = bleed.
  *
  * Single model: document height = in-flow content only (no min-height:100dvh on main/stack).
- * Site backdrop stays fixed behind; html/body use solid #03060d; footer opaque cap hides edge bleed.
- * Homepage keeps body.galaxy-active flex + #smooth-wrapper (see rules above). Class is set in
- * InnerPageMain — do not rely on :has(.mm-inner-main) alone.
+ * html/body use solid #03060d; footer opaque cap hides edge bleed.
+ * Class is set in InnerPageMain — do not rely on :has(.mm-inner-main) alone.
  */
 html.mm-inner-route {
   background-color: #03060d;
   min-height: 0;
 }
 
-html.mm-inner-route body.galaxy-active {
+html.mm-inner-route body {
   display: block;
   min-height: 0;
   height: auto;
   background-color: #03060d;
 }
 
-html.mm-inner-route body.galaxy-active > main.mm-inner-main {
+html.mm-inner-route body > main.mm-inner-main {
   display: block;
   width: 100%;
   min-height: 0;
@@ -3874,7 +3836,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child {
   position: relative;
   z-index: 1;
   margin-bottom: 0;
-  /* Light footer: extend solid surface past last pixel (galaxy is fixed z-index:-2) */
+  /* Light footer: extend solid surface past last pixel */
   box-shadow: 0 48px 0 48px var(--mm-cta-bg, var(--mm-section-surface));
 }
 
@@ -3899,17 +3861,11 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-section.mm-section--clients.mm-clients {
-  background:
-    radial-gradient(ellipse 90% 62% at 50% 100%, rgba(16, 164, 255, 0.18), transparent 58%),
-    linear-gradient(180deg, #03060d 0%, #050a12 48%, #0a2f4c 100%);
   margin-top: -1px;
 }
 
 .mm-section.mm-section--work.mm-work {
-  --mm-work-fallback-bg:
-    radial-gradient(ellipse 82% 58% at 50% 12%, rgba(16, 164, 255, 0.1), transparent 62%),
-    linear-gradient(180deg, var(--mm-section-surface) 0%, #f4f7fa 48%, var(--mm-section-surface) 100%);
-  background: var(--mm-work-fallback-bg);
+  background: var(--mm-section-surface);
 }
 
 .mm-work__blue-wash {
@@ -3917,29 +3873,10 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   display: none;
 }
 
-/* Work ShaderGradient canvas — full-bleed background, no pointer capture */
-.mm-work__ripple-layer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-  background: var(--mm-work-fallback-bg);
-}
-
-.mm-work__ripple-layer .mm-work__shader-canvas,
-.mm-work__ripple-layer canvas {
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
-  background: var(--mm-work-fallback-bg);
-}
-
 .mm-section.mm-section--services.mm-services {
   padding-top: clamp(7rem, 13vw, 11rem);
   padding-bottom: clamp(7rem, 13vw, 11rem);
   min-height: auto;
-  background: var(--mm-section-surface);
 }
 
 .mm-section.mm-section--marquee.marquee-system {
@@ -3949,7 +3886,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-section.mm-section--testimonials.testimonials-carousel.mm-testimonials-wave {
-  background: #0065a3;
+  background: transparent;
 }
 
 .mm-cta.mm-section--cta {
@@ -3957,7 +3894,6 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   width: 100%;
   max-width: none;
   margin-inline: 0;
-  background: var(--mm-section-surface);
 }
 
 .mm-kicker {
@@ -4355,62 +4291,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   display: none !important;
 }
 
-.mm-global-shader {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 1;
-}
-
-.mm-global-shader .hero-god-rays {
-  width: 100%;
-  height: 100%;
-  box-shadow: none;
-}
-
-/* Fixed layout backdrop (see .galaxy-background) — very subtle top lift only */
-.hero-god-rays--static {
-  background:
-    radial-gradient(ellipse 90% 55% at 50% 0%, rgba(255, 255, 255, 0.045), transparent 58%);
-}
-
-.galaxy-background {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 100% 72% at 50% -8%, rgba(255, 255, 255, 0.05), transparent 52%),
-    radial-gradient(ellipse 80% 60% at 88% 92%, rgba(255, 255, 255, 0.025), transparent 55%),
-    linear-gradient(180deg, #000000 0%, #050506 48%, #030303 100%);
-}
-
-@media (max-width: 767px), (pointer: coarse) {
-  .mm-global-shader {
-    opacity: 0.85;
-  }
-}
-
+/* Hard crop under the hero — no blend into the post-hero slate. */
 .mm-hero::after {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  bottom: -1px;
-  z-index: 1;
-  height: clamp(16rem, 34vh, 30rem);
-  pointer-events: none;
-  opacity: calc(1 - var(--hero-exit-p) * 0.72);
-  background: linear-gradient(
-    180deg,
-    rgba(3, 6, 13, 0) 0%,
-    rgba(3, 6, 13, calc(0.08 * (1 - var(--hero-exit-p) * 0.5))) 28%,
-    rgba(3, 6, 13, calc(0.42 * (1 - var(--hero-exit-p) * 0.55))) 58%,
-    rgba(3, 6, 13, calc(0.84 * (1 - var(--hero-exit-p) * 0.65))) 82%,
-    rgba(3, 6, 13, calc(1 - var(--hero-exit-p) * 0.7)) 100%
-  );
+  content: none;
 }
 
 .mm-hero::before {
@@ -4944,92 +4827,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   max-width: none;
   padding: clamp(5.5rem, 10vw, 8rem) var(--mm-section-pad-x);
   padding-bottom: clamp(5.5rem, 10vw, 8rem);
-  background: var(--mm-section-surface);
   color: var(--mm-services-ink);
   overflow-x: clip;
-}
-
-/* Soft bottom fade over aurora/shader — avoids a hard horizontal cut before Process */
-.mm-section.mm-section--services.mm-services::after {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  height: clamp(7.5rem, 16vh, 12.5rem);
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(239, 239, 239, 0) 0%,
-    rgba(239, 239, 239, 0.62) 48%,
-    var(--mm-section-surface) 100%
-  );
-}
-
-.mm-services__aurora {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  background: var(--mm-section-surface);
-}
-
-.mm-services__aurora-bars {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: flex-end;
-  gap: clamp(0.14rem, 0.25vw, 0.22rem);
-  padding-inline: clamp(1rem, 3vw, 3rem);
-  opacity: 0.28;
-}
-
-.mm-services__aurora-bar-wrap {
-  display: flex;
-  flex: 1 1 0;
-  min-width: 0;
-  height: 100%;
-  align-items: flex-end;
-}
-
-.mm-services__aurora-bar {
-  height: var(--service-bar-height);
-  width: 100%;
-  border-radius: 999rem 999rem 0 0;
-  background:
-    linear-gradient(
-      to top,
-      rgba(16, 164, 255, 0.48) 0%,
-      rgba(16, 164, 255, 0.3) 34%,
-      rgba(157, 221, 255, 0.16) 68%,
-      rgba(255, 255, 255, 0) 100%
-    );
-  filter: blur(0.25px);
-  transform: scaleY(var(--service-bar-drift));
-  transform-origin: 50% 100%;
-  animation: mm-services-aurora-breathe 7.5s ease-in-out infinite;
-  animation-delay: var(--service-bar-delay);
-  will-change: transform;
-}
-
-@keyframes mm-services-aurora-breathe {
-  0%,
-  100% {
-    transform: scaleY(calc(var(--service-bar-drift) * 0.92));
-  }
-
-  50% {
-    transform: scaleY(calc(var(--service-bar-drift) * 1.08));
-  }
-}
-
-.mm-services__aurora-mask {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 92% 78% at 50% 92%, rgba(239, 239, 239, 0) 0%, rgba(239, 239, 239, 0.42) 66%, var(--mm-section-surface) 100%),
-    linear-gradient(to bottom, var(--mm-section-surface) 0%, rgba(239, 239, 239, 0.28) 38%, rgba(239, 239, 239, 0.48) 100%);
 }
 
 .mm-services__shell {
@@ -5318,19 +5117,6 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .mm-services__aurora-bars {
-    gap: 0.34rem;
-    opacity: 0.2;
-  }
-
-  .mm-services__aurora-bar-wrap:nth-child(2n) {
-    display: none;
-  }
-
-  .mm-services__aurora-bar {
-    animation-duration: 10s;
-  }
-
   .mm-services__contact {
     min-height: 4rem;
     padding-inline: 1.15rem;
@@ -5338,12 +5124,6 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mm-services__aurora-bar {
-    animation: none;
-    transform: none;
-    will-change: auto;
-  }
-
   .accordion-chevron {
     transition: none;
   }
@@ -5533,6 +5313,10 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   padding-top: clamp(6rem, 13vw, 9rem);
   padding-bottom: clamp(4.5rem, 9vw, 6.5rem);
   padding-inline: var(--mm-section-pad-x);
+}
+
+.mm-home-slate .mm-cta__surface {
+  background: transparent;
 }
 
 .mm-cta__inner {
@@ -6055,9 +5839,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   /* Content-sized band: avoid `1fr` + indefinite height expanding to full marquee list height */
   min-height: 0;
   overflow: hidden;
-  background: #0065a3;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
+  border-top: 0;
+  border-bottom: 0;
 }
 
 .testimonials-carousel.mm-testimonials-wave.mm-section {
@@ -6083,16 +5867,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-testimonials-wave__gradient {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(
-    112deg,
-    rgba(0, 20, 42, 0.86) 0%,
-    rgba(0, 101, 163, 0.5) 42%,
-    rgba(248, 248, 248, 0.3) 100%
-  );
+  display: none;
 }
 
 .mm-testimonials-hearts {
@@ -7865,6 +7640,20 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   color: #07111f;
 }
 
+/* Homepage: one shared plate. Beat per-section paper fills so rooms do not repaint. */
+.mm-home-slate > .mm-section.mm-section--clients.mm-clients,
+.mm-home-slate > .mm-section.mm-section--services.mm-services,
+.mm-home-slate > .mm-section.mm-section--process.mm-process-bento,
+.mm-home-slate > .mm-section.mm-section--work.mm-work,
+.mm-home-slate > .mm-section.mm-section--testimonials.testimonials-carousel.mm-testimonials-wave,
+.mm-home-slate > .mm-cta.mm-section--cta,
+.mm-home-slate > .mm-footer,
+.mm-home-slate .mm-cta__surface,
+.mm-home-slate .mm-process-bento__pad {
+  background: transparent !important;
+  background-image: none !important;
+}
+
 .mm-clients__headline {
   color: #07111f;
 }
@@ -7955,7 +7744,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-section.mm-section--work.mm-work {
-  background: var(--mm-work-fallback-bg);
+  background: var(--mm-section-surface);
   color: var(--mm-ink);
 }
 
@@ -8427,6 +8216,10 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 /* Process gray pad ends the seam; light blue pad-top keeps "Our Work" off the Work top edge. */
+.mm-home-slate
+  > .mm-section.mm-section--process.mm-process-bento
+  + .mm-section.mm-section--work.mm-work
+  > .relative.z-10,
 .mm-main
   > .mm-section.mm-section--process.mm-process-bento
   + .mm-section.mm-section--work.mm-work
@@ -8434,12 +8227,14 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   padding-top: var(--mm-work-pad-top-seam);
 }
 
-/* Process → Work: surface padding stays #efefef; Work sits under Process in the 1px overlap. */
+/* Process → Work: Work sits under Process in the 1px overlap. */
+.mm-home-slate > .mm-section.mm-section--process.mm-process-bento + .mm-section.mm-section--work.mm-work,
 .mm-main > .mm-section.mm-section--process.mm-process-bento + .mm-section.mm-section--work.mm-work {
   margin-top: -1px;
   z-index: 0;
 }
 
+.mm-home-slate > .mm-section.mm-section--services.mm-services + .mm-section.mm-section--process.mm-process-bento,
 .mm-main > .mm-section.mm-section--services.mm-services + .mm-section.mm-section--process.mm-process-bento {
   margin-top: -2px;
 }
@@ -8462,7 +8257,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   padding-top: var(--mm-process-bento-pad-block);
   /* Layout box must include bottom-row shell shadows (not counted in grid track size). */
   padding-bottom: var(--mm-process-bento-shadow-bleed);
-  background: var(--mm-section-surface) !important;
+  background: var(--mm-section-surface);
   color: #07111f;
   --mm-process-blue: #10a4ff;
   --mm-process-blue-deep: #0065a3;
@@ -8484,7 +8279,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   width: 100%;
   height: calc(var(--mm-process-bento-pad-block) + 100px);
   margin-top: 0;
-  background: var(--mm-section-surface);
+  background: transparent;
   pointer-events: none;
 }
 
@@ -9111,8 +8906,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-section.mm-section--work.mm-work {
-  background: var(--mm-work-fallback-bg);
-  background-size: auto;
+  background: var(--mm-section-surface);
 }
 
 @media (max-width: 760px) {

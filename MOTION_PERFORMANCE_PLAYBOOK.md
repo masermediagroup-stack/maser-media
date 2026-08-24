@@ -13,12 +13,8 @@ This project uses a high-motion creative site pattern: static content first, sec
 
 ## What Changed Here
 
-- Services aurora bars no longer update React state every animation frame.
-- Services bars now animate with CSS `transform: scaleY(...)`; phones render fewer visible bars.
-- The galaxy canvas now stops animating once the user scrolls past the galaxy-visible part of the page and pauses in hidden tabs.
+- Homepage post-hero ground is one `#efefef` / `--mm-section-surface` plate (`.mm-home-slate`). Do not remount GalaxyBackground, GlobalShaderLayer, Services aurora, or a Work-section shader.
 - The hero smokey WebGL shader no longer reallocates the canvas buffer every frame and pauses offscreen.
-- The root global shader layer is now static CSS atmosphere instead of route-wide WebGL.
-- The work-section ripple mounts only when the work section is near the viewport.
 
 ## How To Build Future Sections
 
