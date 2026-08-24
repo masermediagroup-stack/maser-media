@@ -327,6 +327,10 @@ export function useGsapLandingMotion(
             };
           }
           if (hero) gsap.set(hero, { '--hero-exit-p': 0, '--hero-content-p': 0 });
+          const mobileLogo = hero?.querySelector<HTMLElement>('.mm-hero__mobile-logo');
+          if (mobileLogo) {
+            gsap.set(mobileLogo, { autoAlpha: 1, y: 0, clearProps: 'transform' });
+          }
           gsap.utils.toArray<HTMLElement>('.mm-section, .marquee-system', root).forEach((el) => {
             gsap.fromTo(
               el,
@@ -468,15 +472,19 @@ export function useGsapLandingMotion(
             if (prepareHeroIntro && isNarrow && hero) {
               const mobileLogo = hero.querySelector<HTMLElement>('.mm-hero__mobile-logo');
               if (mobileLogo) {
-                const logoTween = gsap.from(mobileLogo, {
-                  autoAlpha: 0,
-                  y: 14,
-                  duration: 0.75,
-                  delay: heroTitleDelay,
-                  ease: 'power3.out',
-                  paused: !animateHeroIntroRef.current,
-                  immediateRender: true,
-                });
+                const logoTween = gsap.fromTo(
+                  mobileLogo,
+                  { autoAlpha: 0, y: 14 },
+                  {
+                    autoAlpha: 1,
+                    y: 0,
+                    duration: 0.75,
+                    delay: heroTitleDelay,
+                    ease: 'power3.out',
+                    paused: !animateHeroIntroRef.current,
+                    immediateRender: true,
+                  },
+                );
                 introTweens.push(logoTween);
               }
             }
