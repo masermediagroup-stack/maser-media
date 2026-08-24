@@ -19,7 +19,7 @@ This project uses a high-motion creative site pattern: static content first, sec
 ## How To Build Future Sections
 
 1. Start with static semantic markup and CSS. The page should be readable and visually acceptable before any animation runs.
-2. Add one section environment at a time: hero shader, services motion, work ripple, testimonial aurora, etc.
+2. Add one section environment at a time. Homepage post-hero is a single slate — do not stack full-section loops on it.
 3. Give each environment a lifecycle:
    - Mount near viewport.
    - Start when visible.
