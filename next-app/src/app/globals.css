@@ -4647,20 +4647,6 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-clients::after {
   content: none;
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(-1 * clamp(4.5rem, 8vw, 7rem));
-  height: clamp(4.5rem, 8vw, 7rem);
-  pointer-events: none;
-  z-index: 1;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.95) 0%,
-    rgba(0, 0, 0, 0.72) 42%,
-    rgba(0, 0, 0, 0.34) 72%,
-    rgba(0, 0, 0, 0) 100%
-  );
 }
 
 .mm-client-strip {
@@ -5849,14 +5835,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-testimonials-wave__aurora {
-  position: absolute;
-  inset: -1px;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-  background:
-    radial-gradient(ellipse 76% 58% at 14% 10%, rgba(248, 248, 248, 0.42), transparent 58%),
-    linear-gradient(135deg, #0065a3 0%, #10a4ff 54%, #f8f8f8 100%);
+  display: none;
 }
 
 .mm-testimonials-wave__aurora > div,
@@ -6294,16 +6273,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 /* Testimonials — three-card randomized fade band */
 .mm-section.mm-section--testimonials.testimonials-carousel.mm-testimonials-wave {
   min-height: 0;
-  background-color: var(--mm-cta-bg, var(--mm-section-surface)) !important;
-  background-image:
-    linear-gradient(
-      180deg,
-      #00446f 0%,
-      #0065a3 18%,
-      #0898de 42%,
-      rgba(239, 239, 239, 0.9) 80%,
-      var(--mm-cta-bg, var(--mm-section-surface)) 100%
-    ) !important;
+  background: transparent;
   border: 0;
 }
 
@@ -6647,16 +6617,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
       #020204;
   }
 
-  /* Keep the hero-to-clients fade, but don't crush the initial fold into a black band on phones. */
   .mm-hero::after {
-    height: clamp(9rem, 20svh, 14rem);
-    background: linear-gradient(
-      180deg,
-      rgba(3, 6, 13, 0) 0%,
-      rgba(3, 6, 13, 0.05) 36%,
-      rgba(3, 6, 13, 0.24) 72%,
-      rgba(3, 6, 13, 0.58) 100%
-    );
+    content: none;
   }
 
   .mm-hero__content {
@@ -7388,7 +7350,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 /* Browser comment pass: light launch sections and gradient trust word. */
 .mm-section.mm-section--clients.mm-clients {
-  background: var(--mm-section-surface) !important;
+  background: transparent !important;
 }
 
 .mm-clients__headline {
@@ -7587,7 +7549,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-section.mm-section--testimonials.testimonials-carousel.mm-testimonials-wave {
-  background: var(--mm-section-surface) !important;
+  background: transparent !important;
   background-image: none !important;
 }
 
@@ -7636,7 +7598,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 /* Launch finish: post-hero proof, trust, and FAQ surfaces. Hero styles stay untouched. */
 .mm-section.mm-section--clients.mm-clients {
-  background: var(--mm-section-surface) !important;
+  background: transparent !important;
   color: #07111f;
 }
 
@@ -8203,16 +8165,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   padding-bottom: clamp(7rem, 12vw, 10rem);
 }
 
-/* Hairline at Work top edge only — do not bleed upward into Process surface padding. */
 .mm-section.mm-section--work.mm-work::before {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  height: 1px;
-  z-index: 0;
-  pointer-events: none;
-  background: #10a4ff;
+  content: none;
 }
 
 /* Process gray pad ends the seam; light blue pad-top keeps "Our Work" off the Work top edge. */
@@ -8257,7 +8211,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   padding-top: var(--mm-process-bento-pad-block);
   /* Layout box must include bottom-row shell shadows (not counted in grid track size). */
   padding-bottom: var(--mm-process-bento-shadow-bleed);
-  background: var(--mm-section-surface);
+  background: transparent;
   color: #07111f;
   --mm-process-blue: #10a4ff;
   --mm-process-blue-deep: #0065a3;
