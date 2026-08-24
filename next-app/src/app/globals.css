@@ -229,6 +229,10 @@ html {
   scroll-behavior: smooth;
   background-color: var(--color-bg);
   overscroll-behavior-y: none;
+  /* Keep the classic-scrollbar gutter from first paint so intro unlock cannot shrink the layout viewport. */
+  scrollbar-gutter: stable;
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 body {
@@ -3773,6 +3777,18 @@ html.mm-intro-pending .mm-preload-fallback {
   visibility: visible;
 }
 
+/* Intro lock must not use overflow:hidden — that collapses the gutter and shoves the page on curtain lift. */
+html.mm-intro-pending {
+  overflow-x: hidden;
+  overflow-y: scroll;
+  overscroll-behavior: none;
+}
+
+html.mm-intro-pending body {
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
 body.mm-intro-mounted .mm-preload-fallback,
 body.mm-intro-complete .mm-preload-fallback {
   opacity: 0;
@@ -7088,12 +7104,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transition:
-    top var(--liquid-nav-morph-duration) var(--liquid-nav-morph-ease),
-    width 240ms ease,
-    left 240ms ease,
-    right 240ms ease,
-    transform 240ms ease;
+  /* Do not transition left/right/width: classic scrollbar gutter appearing would squeeze the bar over 240ms. */
+  transition: top var(--liquid-nav-morph-duration) var(--liquid-nav-morph-ease);
 }
 
 /* Width morph animates here (no backdrop-filter) so blur stays crisp — inner bubble stays width:100%. */

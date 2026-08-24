@@ -38,6 +38,24 @@ type HeroProps = EntranceProps & {
 type InnerPageKind = 'work' | 'about';
 type WorkProps = { stacked?: boolean };
 
+const INTRO_SCROLL_KEYS = new Set([
+  ' ',
+  'Spacebar',
+  'ArrowUp',
+  'ArrowDown',
+  'PageUp',
+  'PageDown',
+  'Home',
+  'End',
+]);
+
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  if (target.isContentEditable) return true;
+  const tag = target.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+}
+
 const CASE_IMAGE = '/assets/generated/maser-case-wall.png';
 
 const motionPanels = [
@@ -451,6 +469,33 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
   }, [canMountCurtain, curtainDone]);
 
   useLayoutEffect(() => {
+    if (!entrance || curtainDone) return;
+
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+
+    const preventScroll = (event: Event) => {
+      event.preventDefault();
+    };
+    const preventKeys = (event: KeyboardEvent) => {
+      if (!INTRO_SCROLL_KEYS.has(event.key) || isEditableTarget(event.target)) return;
+      event.preventDefault();
+    };
+
+    window.addEventListener('wheel', preventScroll, { passive: false });
+    window.addEventListener('touchmove', preventScroll, { passive: false });
+    window.addEventListener('keydown', preventKeys, { capture: true });
+
+    return () => {
+      window.removeEventListener('wheel', preventScroll);
+      window.removeEventListener('touchmove', preventScroll);
+      window.removeEventListener('keydown', preventKeys, { capture: true });
+      window.history.scrollRestoration = previousScrollRestoration;
+    };
+  }, [entrance, curtainDone]);
+
+  useLayoutEffect(() => {
     if (!entrance) {
       onCurtainDone?.();
       return;
@@ -460,20 +505,12 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
       return;
     }
 
-    const previousScrollRestoration = window.history.scrollRestoration;
-    const previousOverflow = document.documentElement.style.overflow;
-    const previousBodyOverflow = document.body.style.overflow;
-    window.history.scrollRestoration = 'manual';
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    window.scrollTo(0, 0);
-
+    let finished = false;
     const finishCurtain = () => {
+      if (finished) return;
+      finished = true;
       setCurtainDone(true);
       onCurtainDone?.();
-      window.history.scrollRestoration = previousScrollRestoration;
-      document.documentElement.style.overflow = previousOverflow;
-      document.body.style.overflow = previousBodyOverflow;
       document.documentElement.classList.remove('mm-intro-pending');
       document.body.classList.add('mm-intro-complete');
     };
@@ -485,9 +522,6 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
       const timeout = window.setTimeout(finishCurtain, 200);
       return () => {
         window.clearTimeout(timeout);
-        window.history.scrollRestoration = previousScrollRestoration;
-        document.documentElement.style.overflow = previousOverflow;
-        document.body.style.overflow = previousBodyOverflow;
         document.body.classList.remove('mm-intro-mounted');
       };
     }
@@ -503,9 +537,6 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
     return () => {
       curtain?.removeEventListener('animationend', onAnimationEnd);
       window.clearTimeout(failsafe);
-      window.history.scrollRestoration = previousScrollRestoration;
-      document.documentElement.style.overflow = previousOverflow;
-      document.body.style.overflow = previousBodyOverflow;
       document.body.classList.remove('mm-intro-mounted');
     };
   }, [canMountCurtain, entrance, onCurtainDone]);

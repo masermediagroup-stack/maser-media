@@ -20,7 +20,11 @@ export function GsapSmoothScroll({ children }: { children: React.ReactNode }) {
 
     let cancelled = false;
     let cleanup = () => {};
+    let deferFrame = 0;
+    let settleFrame = 0;
 
+    // Start immediately so ScrollSmoother can settle under the load curtain.
+    // Do not key creation off curtain reveal — that lands on the same tick as intro unlock.
     const run = async () => {
       const [{ gsap }, { ScrollTrigger }, { ScrollSmoother }] = await Promise.all([
         import('gsap'),
@@ -32,37 +36,55 @@ export function GsapSmoothScroll({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
-      ScrollSmoother.get()?.kill();
+      const instantiate = () => {
+        if (cancelled || !wrapperRef.current || !contentRef.current) {
+          return;
+        }
 
-      const smoother = ScrollSmoother.create({
-        wrapper: wrapperRef.current,
-        content: contentRef.current,
-        smooth: 0.35,
-        smoothTouch: false,
-        normalizeScroll: false,
-        ignoreMobileResize: true,
-        effects: false,
-      });
+        gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+        ScrollSmoother.get()?.kill();
 
-      ScrollTrigger.refresh();
-
-      cleanup = () => {
-        smoother.kill();
-        wrapperRef.current?.removeAttribute('style');
-        contentRef.current?.removeAttribute('style');
-        document.querySelectorAll('.pin-spacer').forEach((node) => {
-          node.remove();
+        const smoother = ScrollSmoother.create({
+          wrapper: wrapperRef.current,
+          content: contentRef.current,
+          smooth: 0.35,
+          smoothTouch: false,
+          normalizeScroll: false,
+          ignoreMobileResize: true,
+          effects: false,
         });
-        ScrollTrigger.clearScrollMemory?.();
+
         ScrollTrigger.refresh();
+
+        cleanup = () => {
+          smoother.kill();
+          wrapperRef.current?.removeAttribute('style');
+          contentRef.current?.removeAttribute('style');
+          document.querySelectorAll('.pin-spacer').forEach((node) => {
+            node.remove();
+          });
+          ScrollTrigger.clearScrollMemory?.();
+          ScrollTrigger.refresh();
+        };
       };
+
+      // If the curtain already lifted, skip this frame so create() cannot share a turn with finishCurtain.
+      if (document.body.classList.contains('mm-intro-complete')) {
+        deferFrame = window.requestAnimationFrame(() => {
+          settleFrame = window.requestAnimationFrame(instantiate);
+        });
+        return;
+      }
+
+      instantiate();
     };
 
     void run();
 
     return () => {
       cancelled = true;
+      window.cancelAnimationFrame(deferFrame);
+      window.cancelAnimationFrame(settleFrame);
       cleanup();
     };
   }, [reduceMotion]);
