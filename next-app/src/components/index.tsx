@@ -15,7 +15,6 @@ import {
 import { CONTENT } from '@/lib/content';
 import { isContactModalHref, openContactModalFromApp } from '@/lib/contactModalEvents';
 import { HeroShaderBackground } from '@/components/hero-shader';
-import { WorkLightswindShader } from '@/components/WorkLightswindShader';
 import { useGsapLandingMotion, useMmScrollReveals } from '@/hooks/useGsapLandingMotion';
 import { useIsClient } from '@/hooks/useIsClient';
 import { ScrollReveal } from '@/components/ScrollReveal';
@@ -249,51 +248,6 @@ const serviceSummaries: Record<string, string> = {
   Digital:
     'Photo, video, content, search, email, and paid creative that keep the launch moving after the site goes live.',
 };
-
-const serviceAuroraBars = 28;
-
-function getAuroraBarHeight(index: number, total: number, time: number, minHeight: number, maxHeight: number) {
-  const normalized = total <= 1 ? 0 : index / (total - 1);
-  const arch = Math.sin(normalized * Math.PI);
-  const phaseOne = (index / total) * Math.PI * 2;
-  const phaseTwo = (index / total) * Math.PI * 5.3;
-  const wave = 0.5 + 0.25 * Math.sin(time * 1.1 + phaseOne) + 0.25 * Math.sin(time * 0.7 + phaseTwo);
-  const blended = arch * 0.65 + wave * 0.35;
-
-  return minHeight + blended * (maxHeight - minHeight);
-}
-
-function ServicesAuroraBars() {
-  const bars = useMemo(
-    () =>
-      Array.from({ length: serviceAuroraBars }, (_, index) => ({
-        height: getAuroraBarHeight(index, serviceAuroraBars, 0, 0.16, 0.82),
-        delay: index * -0.18,
-        drift: 0.82 + ((index % 7) * 0.045),
-      })),
-    [],
-  );
-
-  return (
-    <div className="mm-services__aurora" aria-hidden="true">
-      <div className="mm-services__aurora-bars">
-        {bars.map((bar, index) => (
-          <div className="mm-services__aurora-bar-wrap" key={`service-aurora-${index}`}>
-            <div
-              className="mm-services__aurora-bar"
-              style={{
-                ['--service-bar-height' as string]: `${bar.height * 100}%`,
-                ['--service-bar-delay' as string]: `${bar.delay}s`,
-                ['--service-bar-drift' as string]: bar.drift,
-              }}
-            />
-          </div>
-        ))}
-      </div>
-      <div className="mm-services__aurora-mask" />
-    </div>
-  );
-}
 
 function FlipText({
   text,
@@ -637,7 +591,6 @@ export function Services() {
       id="services"
       aria-labelledby="services-heading"
     >
-      <ServicesAuroraBars />
       <div className="mm-services__shell mm-services-laydown-stage">
         <div className="mm-services__masthead">
           <h2
@@ -795,12 +748,9 @@ export function Work({ stacked = true }: WorkProps = {}) {
   return (
     <section
       ref={sectionRef}
-      className={`mm-section mm-section--work mm-work relative overflow-hidden${stackEnabled ? ' mm-work--stacked' : ''}`}
+      className={`mm-section mm-section--work mm-work relative${stackEnabled ? ' mm-work--stacked' : ''}`}
       id="work"
     >
-      <div className="mm-work__ripple-layer" aria-hidden>
-        <WorkLightswindShader color="#10a4ff" />
-      </div>
       <div className="relative z-10">
         <div className="mm-section-heading mm-section-heading--wide">
           <h2 className="mm-work__title">
@@ -1048,13 +998,15 @@ export function LandingPage({
       <div className="mm-hero-scene">
         <Hero entrance={entrance} onCurtainDone={handleCurtainDone} />
       </div>
-      <Clients />
-      <Services />
-      <ProcessBento />
-      <Work />
-      <Testimonials />
-      <Cta />
-      <Footer />
+      <div className="mm-home-slate">
+        <Clients />
+        <Services />
+        <ProcessBento />
+        <Work />
+        <Testimonials />
+        <Cta />
+        <Footer />
+      </div>
     </main>
   );
 }
@@ -1244,7 +1196,6 @@ export function Testimonials() {
       id="testimonials"
       aria-labelledby="testimonials-title"
     >
-      <div className="mm-testimonials-wave__gradient" aria-hidden />
       <div className="testimonials-carousel-inner mm-testimonials-wave__inner">
         <div className="mm-testimonials-wave__layout">
           <header className="mm-testimonials-wave__head">
@@ -1323,5 +1274,4 @@ export function CrashPlayground() {
   );
 }
 
-export { GalaxyBackground } from './GalaxyBackground';
 export { InnerRouteShell } from './InnerRouteShell';

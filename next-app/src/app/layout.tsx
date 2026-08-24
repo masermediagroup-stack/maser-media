@@ -3,7 +3,6 @@ import { Poppins, Geist } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { CursorAura } from "@/components/CursorAura";
-import { GlobalShaderLayer } from "@/components/GlobalShaderLayer";
 import { PageTransitionShell } from "@/components/PageTransitionShell";
 import { cn } from "@/lib/utils";
 
@@ -52,7 +51,6 @@ try {
         <a href="#main-content" className="skip-to-content">
           Skip to main content
         </a>
-        <GlobalShaderLayer />
         <CursorAura />
         <PageTransitionShell>{children}</PageTransitionShell>
         <SpeedInsights />

@@ -145,15 +145,7 @@ Work cards use stable card heights:
 
 At a `390px` mobile viewport, the cards currently compute to about `296px` tall. Keep this lower mobile height unless content becomes unreadable.
 
-The Work shader and fallback must share the same landing-page surface:
-
-```css
---mm-work-fallback-bg:
-  radial-gradient(ellipse 82% 58% at 50% 12%, rgba(16, 164, 255, 0.1), transparent 62%),
-  linear-gradient(180deg, var(--mm-section-surface) 0%, #f4f7fa 48%, var(--mm-section-surface) 100%);
-```
-
-If WebGL fails, the fallback must still look intentional.
+Homepage Work sits on the shared post-hero slate (`--mm-section-surface`). Do not reintroduce a Work-only wash, glow, or shader behind the cards.
 
 ### Testimonials
 

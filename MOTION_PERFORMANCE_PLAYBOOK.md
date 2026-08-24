@@ -13,17 +13,13 @@ This project uses a high-motion creative site pattern: static content first, sec
 
 ## What Changed Here
 
-- Services aurora bars no longer update React state every animation frame.
-- Services bars now animate with CSS `transform: scaleY(...)`; phones render fewer visible bars.
-- The galaxy canvas now stops animating once the user scrolls past the galaxy-visible part of the page and pauses in hidden tabs.
+- Homepage post-hero ground is one `#efefef` / `--mm-section-surface` plate (`.mm-home-slate`). Do not remount GalaxyBackground, GlobalShaderLayer, Services aurora, or a Work-section shader.
 - The hero smokey WebGL shader no longer reallocates the canvas buffer every frame and pauses offscreen.
-- The root global shader layer is now static CSS atmosphere instead of route-wide WebGL.
-- The work-section ripple mounts only when the work section is near the viewport.
 
 ## How To Build Future Sections
 
 1. Start with static semantic markup and CSS. The page should be readable and visually acceptable before any animation runs.
-2. Add one section environment at a time: hero shader, services motion, work ripple, testimonial aurora, etc.
+2. Add one section environment at a time. Homepage post-hero is a single slate — do not stack full-section loops on it.
 3. Give each environment a lifecycle:
    - Mount near viewport.
    - Start when visible.

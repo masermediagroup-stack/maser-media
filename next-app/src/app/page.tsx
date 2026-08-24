@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { MotionConfig } from 'motion/react';
-import { GalaxyBackground, LandingPage, Nav } from '@/components';
+import { LandingPage, Nav } from '@/components';
 import { GsapSmoothScroll } from '@/components/GsapSmoothScroll';
 import { preloadLandingMotionModules } from '@/hooks/useGsapLandingMotion';
 import {
@@ -35,7 +35,6 @@ export default function Home() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <GalaxyBackground />
       <Nav entrance={introEnabled} introReady={introReady} />
       <GsapSmoothScroll>
         <LandingPage
