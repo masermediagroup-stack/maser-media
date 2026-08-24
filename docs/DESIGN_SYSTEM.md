@@ -162,7 +162,6 @@ Project placeholders use the light gray surface, nav, eyebrow, large project hea
 Routes added:
 
 - `/work/main-street-pub-grub`
-- `/work/helm-in-house-saas`
 
 ## Motion Rules
 

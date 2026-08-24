@@ -18,6 +18,13 @@ const NAV_NARROW_MAX_PX = 920;
 /** Same default as Lightswind `MorphingNavigation` — compact pill after this scroll. */
 const MORPH_SCROLL_THRESHOLD = 100;
 
+/** Mobile/narrow fullscreen drawer — tune open feel without touching desktop morph. */
+const MOBILE_DRAWER_CLIP_DURATION_S = 0.52;
+const MOBILE_DRAWER_CLIP_EASE = [0.25, 0.46, 0.45, 0.94] as const;
+const MOBILE_DRAWER_CONTENT_DELAY_START_S = 0.12;
+const MOBILE_DRAWER_CONTENT_STAGGER_S = 0.045;
+const MOBILE_DRAWER_BACKDROP_DURATION_S = 0.15;
+
 const FOCUSABLE = 'a[href],button:not([disabled]),input,textarea,select,[tabindex]:not([tabindex="-1"])';
 
 /** Ease-out–heavy cubic-bezier for expand flip (matches gentler bar morph feel). */
@@ -382,7 +389,7 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: reduceMotion ? 0 : 0.2 }}
+              transition={{ duration: reduceMotion ? 0 : MOBILE_DRAWER_BACKDROP_DURATION_S }}
               aria-label="Close menu"
             />
             <motion.aside
@@ -419,8 +426,8 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
                   : { x: reduceMotion ? 0 : "100%" }
               }
               transition={{
-                duration: reduceMotion ? 0 : fullscreenMenuOpen ? 0.95 : 0.3,
-                ease: fullscreenMenuOpen ? [0.25, 0.46, 0.45, 0.94] : [0.22, 1, 0.36, 1],
+                duration: reduceMotion ? 0 : fullscreenMenuOpen ? MOBILE_DRAWER_CLIP_DURATION_S : 0.3,
+                ease: fullscreenMenuOpen ? MOBILE_DRAWER_CLIP_EASE : [0.22, 1, 0.36, 1],
               }}
             >
               <button
@@ -456,7 +463,9 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
                         className="liquid-nav-drawer-link liquid-nav-drawer-link--fullscreen"
                         onClick={() => setOpen(false)}
                         style={{
-                          transitionDelay: reduceMotion ? "0s" : `${0.22 + index * 0.08}s`,
+                          transitionDelay: reduceMotion
+                            ? "0s"
+                            : `${MOBILE_DRAWER_CONTENT_DELAY_START_S + index * MOBILE_DRAWER_CONTENT_STAGGER_S}s`,
                         }}
                       >
                         <ChevronRight
@@ -471,7 +480,9 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
                       type="button"
                       className="liquid-nav-drawer-contact liquid-nav-drawer-contact--fullscreen mm-tactile-button"
                       style={{
-                        transitionDelay: reduceMotion ? "0s" : `${0.22 + NAV_ITEMS.length * 0.08}s`,
+                        transitionDelay: reduceMotion
+                          ? "0s"
+                          : `${MOBILE_DRAWER_CONTENT_DELAY_START_S + NAV_ITEMS.length * MOBILE_DRAWER_CONTENT_STAGGER_S}s`,
                       }}
                       onClick={() => {
                         setOpen(false);
@@ -518,7 +529,7 @@ export function LiquidNav({ entrance, introReady = !entrance }: Props) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: reduceMotion ? 0 : 0.2 }}
+              transition={{ duration: reduceMotion ? 0 : MOBILE_DRAWER_BACKDROP_DURATION_S }}
               aria-label="Close contact form"
             />
             <motion.section

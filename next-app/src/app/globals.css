@@ -2993,8 +2993,8 @@ button.premium-btn {
   opacity: 0;
   transition:
     color 180ms ease,
-    opacity 360ms ease,
-    transform 360ms ease;
+    opacity 240ms ease,
+    transform 240ms ease;
 }
 
 .liquid-nav-drawer--fullscreen .liquid-nav-drawer-link--fullscreen {
@@ -7927,11 +7927,6 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   height: min(64%, 14rem);
 }
 
-.mm-work-projects .mm-work-card--helm .mm-work-card__logo {
-  min-height: clamp(8.5rem, 68%, 16rem);
-  height: min(84%, 18rem);
-}
-
 .mm-work-projects .mm-work-card--logo-panel .mm-work-card__logo-img {
   position: static !important;
   inset: auto !important;
@@ -8982,11 +8977,6 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   .mm-work-projects .mm-work-card--main-street .mm-work-card__logo {
     min-height: clamp(4.8rem, 27vw, 7.1rem);
     height: min(48%, 7.6rem);
-  }
-
-  .mm-work-projects .mm-work-card--helm .mm-work-card__logo {
-    min-height: clamp(5.75rem, 34vw, 8.8rem);
-    height: min(58%, 9.5rem);
   }
 
   .mm-section.mm-section--process.mm-process-bento {
