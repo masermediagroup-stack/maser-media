@@ -4512,6 +4512,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   max-width: 54rem;
   text-align: center;
   overflow: visible;
+  /* Reserve the split-line box before intro play so the headline cannot re-seat after becoming visible. */
+  min-height: calc(var(--mm-type-display) * var(--mm-leading-display) * 2);
 }
 
 .mm-hero__title .mm-hero-title-line-mask {
@@ -4545,7 +4547,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-hero__content--pre-reveal {
-  visibility: hidden;
+  /* Keep measurable for SplitText — visibility:hidden caused a late headline re-seat after reveal. */
+  opacity: 0;
   pointer-events: none;
 }
 

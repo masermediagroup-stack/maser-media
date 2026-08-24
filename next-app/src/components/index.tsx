@@ -34,6 +34,7 @@ type EntranceProps = { entrance?: boolean };
 type NavProps = EntranceProps & { introReady?: boolean };
 type HeroProps = EntranceProps & {
   onCurtainDone?: () => void;
+  contentRevealed?: boolean;
 };
 type InnerPageKind = 'work' | 'about';
 type WorkProps = { stacked?: boolean };
@@ -439,10 +440,12 @@ export function Nav({ entrance, introReady }: NavProps) {
   return <LiquidNav entrance={entrance} introReady={introReady} />;
 }
 
-export function Hero({ entrance, onCurtainDone }: HeroProps) {
+export function Hero({ entrance, onCurtainDone, contentRevealed }: HeroProps) {
   const [curtainDone, setCurtainDone] = useState(!entrance);
   const [canMountCurtain, setCanMountCurtain] = useState(false);
+  const [scrollUnlocked, setScrollUnlocked] = useState(!entrance);
   const curtainRef = useRef<HTMLDivElement>(null);
+  const copyRevealed = contentRevealed ?? !entrance;
 
   useEffect(() => {
     if (!entrance) return;
@@ -469,7 +472,7 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
   }, [canMountCurtain, curtainDone]);
 
   useLayoutEffect(() => {
-    if (!entrance || curtainDone) return;
+    if (!entrance || scrollUnlocked) return;
 
     const previousScrollRestoration = window.history.scrollRestoration;
     window.history.scrollRestoration = 'manual';
@@ -493,7 +496,27 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
       window.removeEventListener('keydown', preventKeys, { capture: true });
       window.history.scrollRestoration = previousScrollRestoration;
     };
-  }, [entrance, curtainDone]);
+  }, [entrance, scrollUnlocked]);
+
+  useEffect(() => {
+    if (!entrance || !copyRevealed || scrollUnlocked) return;
+    let frame2 = 0;
+    let frame3 = 0;
+    let frame4 = 0;
+    const frame1 = window.requestAnimationFrame(() => {
+      frame2 = window.requestAnimationFrame(() => {
+        frame3 = window.requestAnimationFrame(() => {
+          frame4 = window.requestAnimationFrame(() => setScrollUnlocked(true));
+        });
+      });
+    });
+    return () => {
+      window.cancelAnimationFrame(frame1);
+      window.cancelAnimationFrame(frame2);
+      window.cancelAnimationFrame(frame3);
+      window.cancelAnimationFrame(frame4);
+    };
+  }, [copyRevealed, entrance, scrollUnlocked]);
 
   useLayoutEffect(() => {
     if (!entrance) {
@@ -510,9 +533,11 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
       if (finished) return;
       finished = true;
       setCurtainDone(true);
-      onCurtainDone?.();
       document.documentElement.classList.remove('mm-intro-pending');
       document.body.classList.add('mm-intro-complete');
+      window.requestAnimationFrame(() => {
+        onCurtainDone?.();
+      });
     };
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -569,7 +594,7 @@ export function Hero({ entrance, onCurtainDone }: HeroProps) {
           )
         : null}
       <motion.div
-        className={`mm-hero__content${entrance && !curtainDone ? ' mm-hero__content--pre-reveal' : ''}`}
+        className={`mm-hero__content${entrance && !copyRevealed ? ' mm-hero__content--pre-reveal' : ''}`}
         initial={false}
         animate={false}
       >
@@ -1043,13 +1068,21 @@ export function LandingPage({
 }) {
   const rootRef = useRef<HTMLElement>(null);
   const [curtainRevealed, setCurtainRevealed] = useState(!entrance);
+  const [introPrepared, setIntroPrepared] = useState(!entrance);
   const [heroMotion, setHeroMotion] = useState<'pending' | 'running' | 'ready'>(
     entrance ? 'pending' : 'ready',
   );
 
+  const handleHeroIntroPrepared = useCallback(() => {
+    setIntroPrepared(true);
+  }, []);
+
   const handleHeroIntroStart = useCallback(() => {
     setHeroMotion('running');
-  }, []);
+    window.requestAnimationFrame(() => {
+      onCurtainReveal?.();
+    });
+  }, [onCurtainReveal]);
 
   const handleHeroIntroDone = useCallback(() => {
     setHeroMotion('ready');
@@ -1058,13 +1091,12 @@ export function LandingPage({
 
   const handleCurtainDone = useCallback(() => {
     setCurtainRevealed(true);
-    setHeroMotion('running');
-    onCurtainReveal?.();
-  }, [onCurtainReveal]);
+  }, []);
 
   useGsapLandingMotion(rootRef, {
-    animateHeroIntro: entrance && curtainRevealed,
-    holdHeroIntro: entrance && !curtainRevealed,
+    animateHeroIntro: entrance && curtainRevealed && introPrepared,
+    holdHeroIntro: entrance && (!curtainRevealed || !introPrepared),
+    onHeroIntroPrepared: handleHeroIntroPrepared,
     onHeroIntroStart: handleHeroIntroStart,
     onHeroIntroDone: handleHeroIntroDone,
   });
@@ -1077,7 +1109,11 @@ export function LandingPage({
       data-hero-motion={heroMotion}
     >
       <div className="mm-hero-scene">
-        <Hero entrance={entrance} onCurtainDone={handleCurtainDone} />
+        <Hero
+          entrance={entrance}
+          onCurtainDone={handleCurtainDone}
+          contentRevealed={!entrance || heroMotion !== 'pending'}
+        />
       </div>
       <Clients />
       <Services />
