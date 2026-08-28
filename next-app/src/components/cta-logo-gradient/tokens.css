@@ -1,0 +1,167 @@
+/* Product tokens for the homepage CTA mark (CtaLogoTilt replacement).
+   Demo page chrome lives in demo.css — do not copy that file to production. */
+
+.clg-hit {
+  --clg-blue: #10a4ff;
+  --clg-white: #f5fbff;
+  --clg-dark: #0872c4;
+  --clg-period: 9s;
+  --clg-angle: 118deg;
+  --clg-tile: 8.5rem;
+  --clg-highlight: 0.42;
+  --clg-shade: 0.38;
+  --clg-glow: 0.55;
+  --cta-logo-tilt-x: 0deg;
+  --cta-logo-tilt-y: 0deg;
+  --cta-logo-tilt-z: 0px;
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 3776.87 / 1915.83;
+  border-radius: 1rem;
+  pointer-events: auto;
+  transform-style: preserve-3d;
+  outline: none;
+}
+
+.clg-hit:focus-visible {
+  outline: 2px solid rgba(16, 164, 255, 0.7);
+  outline-offset: 0.4rem;
+}
+
+.clg-viewport {
+  position: absolute;
+  inset: 0;
+  perspective: var(--clg-perspective, 920px);
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
+  overflow: visible;
+}
+
+.clg-tilt {
+  position: absolute;
+  inset: 0;
+  transform-origin: center center;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--cta-logo-tilt-x, 0deg))
+    rotateY(var(--cta-logo-tilt-y, 0deg))
+    translate3d(0, 0, var(--cta-logo-tilt-z, 0px));
+  will-change: transform;
+}
+
+.clg-plate {
+  z-index: 0;
+  object-fit: contain;
+  object-position: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.clg-mark {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: url("/assets/cta-logo-gradient/Blue-HD.svg");
+  mask-image: url("/assets/cta-logo-gradient/Blue-HD.svg");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.clg-wash-layer,
+.clg-canvas,
+.clg-ascii {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+@property --clg-tl {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #10a4ff;
+}
+
+@property --clg-tr {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #10a4ff;
+}
+
+@property --clg-bl {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #10a4ff;
+}
+
+@property --clg-br {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #10a4ff;
+}
+
+.clg-wash-layer {
+  z-index: 1;
+  overflow: hidden;
+}
+
+.clg-wash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  --clg-hi: color-mix(
+    in srgb,
+    var(--clg-blue) 100%,
+    var(--clg-white) calc(var(--clg-highlight) * 55%)
+  );
+  --clg-lo: color-mix(
+    in srgb,
+    var(--clg-blue) 100%,
+    var(--clg-dark) calc(var(--clg-shade) * 70%)
+  );
+  --clg-tl: var(--clg-blue);
+  --clg-tr: var(--clg-hi);
+  --clg-bl: var(--clg-blue);
+  --clg-br: var(--clg-lo);
+  background:
+    radial-gradient(120% 120% at 0% 0%, var(--clg-tl) 0%, transparent 78%),
+    radial-gradient(120% 120% at 100% 0%, var(--clg-tr) 0%, transparent 78%),
+    radial-gradient(120% 120% at 0% 100%, var(--clg-bl) 0%, transparent 78%),
+    radial-gradient(120% 120% at 100% 100%, var(--clg-br) 0%, transparent 78%),
+    var(--clg-blue);
+}
+
+.clg-canvas {
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+}
+
+.clg-ascii {
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.clg-mark[data-gpu="painting"] .clg-canvas {
+  opacity: 1;
+}
+
+.clg-mark[data-gpu="painting"] .clg-wash-layer {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clg-tilt {
+    transform: none !important;
+  }
+}

@@ -5,6 +5,22 @@ import { fileURLToPath } from "node:url";
 const nextConfig: NextConfig = {
   turbopack: {
     root: path.dirname(fileURLToPath(import.meta.url)),
+    rules: {
+      "*.wgsl": {
+        loaders: ["@vgpu/wgsl/loader-webpack"],
+        as: "*.js",
+      },
+    },
+  },
+  webpack: (config) => {
+    const rules = config.module?.rules;
+    if (Array.isArray(rules)) {
+      rules.push({
+        test: /\.wgsl$/,
+        loader: "@vgpu/wgsl/loader-webpack",
+      });
+    }
+    return config;
   },
   async redirects() {
     return [
