@@ -20,9 +20,9 @@ export const ASCII_CELL_W = Math.max(8, Math.round(ASCII_FOOTER_FONT * 0.78)) / 
 export const ASCII_CELL_H = ASCII_FOOTER_FONT / 5;
 
 export const CTA_LOGO_GRADIENT_DEFAULTS: CtaLogoGradientLook = {
-  speed: 1,
-  highlight: 0.42,
-  shade: 0.38,
+  speed: 1.5,
+  highlight: 1,
+  shade: 1,
   glow: 0.55,
   angle: 118,
 };
