@@ -562,10 +562,12 @@ export function Hero({ entrance, onCurtainDone, contentRevealed }: HeroProps) {
               className="mm-hero__mobile-logo"
               priority
             />
-            <h1 className="mm-hero__title">We bring brands, stories, and experiences to life.</h1>
-            <p className="mm-hero__lead">
-              A creative team shaping culture-forward ideas through design and technology.
-            </p>
+            <h1 className="mm-hero__title">
+              {CONTENT.hero.storyTitle}
+              <br />
+              {CONTENT.hero.storyHighlight}
+            </h1>
+            <p className="mm-hero__lead">{CONTENT.hero.lead}</p>
           </div>
         </div>
       </motion.div>
@@ -654,7 +656,7 @@ export function Services() {
             data-mm-reveal-reset="hidden"
             data-mm-reveal-start="top 86%"
           >
-            <span className="mm-services__title-line">Services</span>
+            <span className="mm-services__title-line">{CONTENT.services.title}</span>
           </h2>
           <p
             className="mm-services__lede"
@@ -731,7 +733,7 @@ export function Work({ stacked = true }: WorkProps = {}) {
   const reduceMotion = useReducedMotion();
   const landingProjects = CONTENT.work.items.slice(0, 3);
   const stackEnabled = stacked && landingProjects.length > 1;
-  const showViewAll = !(stacked && landingProjects.length >= CONTENT.work.items.length);
+  const showViewAll = stacked && landingProjects.length < CONTENT.work.items.length;
 
   useStackedWorkPosters(sectionRef, stackEnabled, reduceMotion);
   useWorkCardContentReveal(sectionRef, reduceMotion);
@@ -853,7 +855,7 @@ export function Work({ stacked = true }: WorkProps = {}) {
             data-mm-reveal="fade"
             data-mm-reveal-start="top 92%"
           >
-            <span>View all projects</span>
+            <span>{CONTENT.work.viewAllLabel}</span>
             <ArrowUpRight size={20} aria-hidden />
           </Link>
         ) : null}

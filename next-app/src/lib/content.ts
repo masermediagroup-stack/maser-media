@@ -21,7 +21,7 @@ export interface HeroConfig {
   storyHighlight: string;
   lead: string;
   trustStrip: string[];
-  trustedBy: {
+  trustedBy?: {
     prefix: string;
     rotatingWords: string[];
     ariaLabel: string;
@@ -130,6 +130,7 @@ export interface Content {
   work: {
     title: string;
     subtitle: string;
+    viewAllLabel: string;
     items: WorkItem[];
   };
   testimonials: TestimonialsConfig;
@@ -193,11 +194,6 @@ export const CONTENT: Content = {
     storyHighlight: "HERE WE ARE.",
     lead: "We work as one integrated studio so your story, visuals, and site stay aligned from first sketch to launch - fewer handoffs, clearer outcomes.",
     trustStrip: ["Startups shipping fast", "Service brands going digital", "Founder-led products"],
-    trustedBy: {
-      prefix: "Trusted by 1k+",
-      rotatingWords: ["founders", "teams", "brands"],
-      ariaLabel: "Trusted by over one thousand founders, teams, and brands",
-    },
     heroLogo: {
       src: "/assets/logo-maser-cloud-white-transparent.png",
       alt: "Maser Media",
@@ -332,12 +328,13 @@ export const CONTENT: Content = {
 
   work: {
     title: "Our Work",
-    subtitle: "A live list. It changes as we build.",
+    subtitle: "Launches we've shaped with founders, local brands, and teams who needed one crew.",
+    viewAllLabel: "See the work",
     items: [
       {
         title: "Miller More Handiwork",
         description:
-          "A website build focused on gathering local clients for home improvement and handiwork services. - showing off a professional portfolio",
+          "A portfolio-forward site for a local handyman brand—built to turn search traffic into booked jobs.",
         image: null,
         logo: "/assets/miller-more-logo-clean.png",
         logoWidth: 1077,
@@ -350,7 +347,7 @@ export const CONTENT: Content = {
       {
         title: "Main Street Pub & Grub",
         description:
-          "A neighborhood pub deserved an identity as welcoming as the room itself. We built the brand foundation - logo system, typography, and color.",
+          "A neighborhood pub identity as welcoming as the room itself—logo system, typography, and color built to travel across menu, signage, and launch.",
         image: null,
         logo: "/assets/main-street-logo-clean.png",
         logoWidth: 1326,
