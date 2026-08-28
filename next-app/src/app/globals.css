@@ -5374,64 +5374,14 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 .mm-cta__logo-link {
   display: block;
   width: min(100%, clamp(18rem, 40vw, 40rem));
-  perspective: 920px;
-  transform-style: preserve-3d;
   text-decoration: none;
   overflow: visible;
-}
-
-.mm-cta__logo-shell {
-  display: block;
-  width: 100%;
-  position: relative;
-  transform-style: preserve-3d;
-  aspect-ratio: 3776.87 / 1915.83;
-  overflow: visible;
-}
-
-.mm-cta__logo-viewport {
-  position: absolute;
-  inset: 5%;
-  overflow: visible;
-  transform-style: preserve-3d;
-  transform: rotateX(var(--cta-logo-tilt-x, 0deg)) rotateY(var(--cta-logo-tilt-y, 0deg))
-    translate3d(0, 0, var(--cta-logo-tilt-z, 0px));
-  transform-origin: center center;
-  will-change: transform;
-  --cta-logo-tilt-x: 0deg;
-  --cta-logo-tilt-y: 0deg;
-  --cta-logo-tilt-z: 0px;
-}
-
-.mm-cta__logo {
-  display: block;
-  object-fit: contain;
-  object-position: center;
-}
-
-.mm-cta__logo-shell.mm-cta__logo--active .mm-cta__logo-viewport {
-  filter:
-    drop-shadow(0 10px 22px rgba(255, 255, 255, 0.34))
-    drop-shadow(0 0 28px rgba(122, 196, 255, 0.22));
-}
-
-.mm-cta__logo-link:focus-visible .mm-cta__logo-viewport {
-  filter:
-    drop-shadow(0 8px 18px rgba(255, 255, 255, 0.32))
-    drop-shadow(0 0 26px rgba(255, 255, 255, 0.2));
 }
 
 .mm-cta__logo-link:focus-visible {
   border-radius: 12px;
   outline: 2px solid rgba(255, 255, 255, 0.55);
   outline-offset: 0.4rem;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mm-cta__logo-viewport {
-    transition: none;
-    will-change: auto;
-  }
 }
 
 .mm-flip-text {
