@@ -1,22 +1,18 @@
 'use client';
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 
 import { useReducedMotionGate } from '@/hooks/useReducedMotionGate';
 import { heroRippleFragmentShader, heroRippleVertexShader } from './shaders';
 import {
   DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS,
-  type HeroMobileRippleShaderControls,
   type HeroMobileRippleShaderProps,
 } from './types';
 
-const RIPPLE_LIFETIME_S = 8;
 const MAX_ACTIVE_RIPPLES = 4;
 const MAX_FRAME_DELTA_S = 1 / 30;
-const DRAG_RIPPLE_MIN_DISTANCE_PX = 34;
-const DRAG_RIPPLE_MIN_INTERVAL_S = 0.16;
 
 function hexToSrgbVec3(hex: string): THREE.Vector3 {
   const normalized = hex.replace('#', '').trim();
@@ -40,18 +36,7 @@ function hexToSrgbVec3(hex: string): THREE.Vector3 {
   );
 }
 
-export type RippleState = {
-  origin: THREE.Vector2;
-  startTime: number;
-  active: boolean;
-};
-
-type RipplePoolState = {
-  ripples: RippleState[];
-  nextIndex: number;
-};
-
-type RippleUniforms = {
+type DriftUniforms = {
   uResolution: { value: THREE.Vector2 };
   uTime: { value: number };
   uColor: { value: THREE.Vector3 };
@@ -66,23 +51,20 @@ type RippleUniforms = {
   uRingCount: { value: number };
 };
 
-function RippleShaderPlane({
-  controls,
+function DriftShaderPlane({
   color,
-  rippleRef,
   visibleRef,
   shaderClockRef,
 }: {
-  controls: Required<HeroMobileRippleShaderControls>;
   color: string;
-  rippleRef: React.RefObject<RipplePoolState>;
   visibleRef: React.RefObject<boolean>;
   shaderClockRef: React.RefObject<number>;
 }) {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   const { size } = useThree();
+  const controls = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS;
 
-  const uniforms = useMemo<RippleUniforms>(
+  const uniforms = useMemo<DriftUniforms>(
     () => ({
       uResolution: { value: new THREE.Vector2(1, 1) },
       uTime: { value: 0 },
@@ -99,7 +81,7 @@ function RippleShaderPlane({
       uDistortionAmount: { value: controls.distortionAmount },
       uRingCount: { value: controls.ringCount },
     }),
-    [controls, color],
+    [color, controls],
   );
 
   useFrame((_, delta) => {
@@ -107,23 +89,8 @@ function RippleShaderPlane({
     if (!material || !visibleRef.current || document.hidden) return;
 
     shaderClockRef.current += Math.min(delta, MAX_FRAME_DELTA_S);
-    const elapsed = shaderClockRef.current;
-
-    material.uniforms.uTime.value = elapsed;
+    material.uniforms.uTime.value = shaderClockRef.current;
     material.uniforms.uResolution.value.set(size.width, size.height);
-
-    rippleRef.current.ripples.forEach((ripple, index) => {
-      const rippleAge = elapsed - ripple.startTime;
-      const active = ripple.active && rippleAge <= RIPPLE_LIFETIME_S;
-
-      if (!active) {
-        ripple.active = false;
-      }
-
-      material.uniforms.uRippleActives.value[index] = active ? 1 : 0;
-      material.uniforms.uRippleStartTimes.value[index] = ripple.startTime;
-      material.uniforms.uRippleOrigins.value[index].copy(ripple.origin);
-    });
   });
 
   return (
@@ -142,16 +109,12 @@ function RippleShaderPlane({
   );
 }
 
-function HeroMobileRippleCanvas({
-  controls,
+function HeroMobileDriftCanvas({
   color,
-  rippleRef,
   visibleRef,
   shaderClockRef,
 }: {
-  controls: Required<HeroMobileRippleShaderControls>;
   color: string;
-  rippleRef: React.RefObject<RipplePoolState>;
   visibleRef: React.RefObject<boolean>;
   shaderClockRef: React.RefObject<number>;
 }) {
@@ -176,13 +139,7 @@ function HeroMobileRippleCanvas({
         gl.outputColorSpace = THREE.LinearSRGBColorSpace;
       }}
     >
-      <RippleShaderPlane
-        controls={controls}
-        color={color}
-        rippleRef={rippleRef}
-        visibleRef={visibleRef}
-        shaderClockRef={shaderClockRef}
-      />
+      <DriftShaderPlane color={color} visibleRef={visibleRef} shaderClockRef={shaderClockRef} />
     </Canvas>
   );
 }
@@ -190,128 +147,11 @@ function HeroMobileRippleCanvas({
 export function HeroMobileRippleShader({
   className = '',
   color = '#10A4FF',
-  rippleStrength = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.rippleStrength,
-  ringWidth = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.ringWidth,
-  rippleSpeed = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.rippleSpeed,
-  decay = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.decay,
-  distortionAmount = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.distortionAmount,
-  ringCount = DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.ringCount,
 }: HeroMobileRippleShaderProps) {
   const reduceMotion = useReducedMotionGate();
   const containerRef = useRef<HTMLDivElement>(null);
   const visibleRef = useRef(true);
   const shaderClockRef = useRef(0);
-  const activePointerRef = useRef<{
-    id: number;
-    x: number;
-    y: number;
-    time: number;
-  } | null>(null);
-  const rippleRef = useRef<RipplePoolState>({
-    nextIndex: 0,
-    ripples: Array.from({ length: MAX_ACTIVE_RIPPLES }, () => ({
-      origin: new THREE.Vector2(0.5, 0.5),
-      startTime: -10,
-      active: false,
-    })),
-  });
-
-  const controls = useMemo<Required<HeroMobileRippleShaderControls>>(
-    () => ({
-      rippleStrength,
-      ringWidth,
-      rippleSpeed,
-      decay,
-      distortionAmount,
-      ringCount,
-    }),
-    [rippleStrength, ringWidth, rippleSpeed, decay, distortionAmount, ringCount],
-  );
-
-  const spawnRipple = useCallback(
-    (clientX: number, clientY: number) => {
-      const node = containerRef.current;
-      if (!node || reduceMotion) return;
-
-      const rect = node.getBoundingClientRect();
-      if (rect.width < 1 || rect.height < 1) return;
-
-      const x = THREE.MathUtils.clamp((clientX - rect.left) / rect.width, 0, 1);
-      const y = THREE.MathUtils.clamp(1 - (clientY - rect.top) / rect.height, 0, 1);
-      const pool = rippleRef.current;
-      const slot = pool.ripples[pool.nextIndex];
-
-      slot.origin.set(x, y);
-      slot.startTime = shaderClockRef.current;
-      slot.active = true;
-      pool.nextIndex = (pool.nextIndex + 1) % pool.ripples.length;
-    },
-    [reduceMotion],
-  );
-
-  const clearRipples = useCallback(() => {
-    activePointerRef.current = null;
-    rippleRef.current.ripples.forEach((ripple) => {
-      ripple.active = false;
-      ripple.startTime = -10;
-    });
-  }, []);
-
-  useEffect(() => {
-    const node = containerRef.current;
-    if (!node || reduceMotion) return;
-
-    const hero = node.closest<HTMLElement>('.mm-hero');
-    const interactionTarget = hero ?? node;
-
-    const onPointerDown = (event: PointerEvent) => {
-      if (event.button !== 0 && event.pointerType === 'mouse') return;
-      spawnRipple(event.clientX, event.clientY);
-      activePointerRef.current = {
-        id: event.pointerId,
-        x: event.clientX,
-        y: event.clientY,
-        time: shaderClockRef.current,
-      };
-    };
-
-    const onPointerMove = (event: PointerEvent) => {
-      const activePointer = activePointerRef.current;
-      if (!activePointer || activePointer.id !== event.pointerId) return;
-
-      const dx = event.clientX - activePointer.x;
-      const dy = event.clientY - activePointer.y;
-      const distance = Math.hypot(dx, dy);
-      const elapsed = shaderClockRef.current - activePointer.time;
-
-      if (distance < DRAG_RIPPLE_MIN_DISTANCE_PX || elapsed < DRAG_RIPPLE_MIN_INTERVAL_S) {
-        return;
-      }
-
-      spawnRipple(event.clientX, event.clientY);
-      activePointer.x = event.clientX;
-      activePointer.y = event.clientY;
-      activePointer.time = shaderClockRef.current;
-    };
-
-    const onPointerEnd = (event: PointerEvent) => {
-      if (activePointerRef.current?.id === event.pointerId) {
-        activePointerRef.current = null;
-      }
-    };
-
-    interactionTarget.addEventListener('pointerdown', onPointerDown, { passive: true });
-    interactionTarget.addEventListener('pointermove', onPointerMove, { passive: true });
-    interactionTarget.addEventListener('pointerup', onPointerEnd, { passive: true });
-    interactionTarget.addEventListener('pointercancel', onPointerEnd, { passive: true });
-
-    return () => {
-      interactionTarget.removeEventListener('pointerdown', onPointerDown);
-      interactionTarget.removeEventListener('pointermove', onPointerMove);
-      interactionTarget.removeEventListener('pointerup', onPointerEnd);
-      interactionTarget.removeEventListener('pointercancel', onPointerEnd);
-    };
-  }, [reduceMotion, spawnRipple]);
 
   useEffect(() => {
     const node = containerRef.current;
@@ -319,28 +159,14 @@ export function HeroMobileRippleShader({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const next = Boolean(entry?.isIntersecting);
-        visibleRef.current = next;
-        if (!next) {
-          clearRipples();
-        }
+        visibleRef.current = Boolean(entry?.isIntersecting);
       },
       { rootMargin: '35% 0px 35% 0px', threshold: 0 },
     );
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [clearRipples]);
-
-  useEffect(() => {
-    const onVisibilityChange = () => {
-      if (document.hidden) {
-        clearRipples();
-      }
-    };
-    document.addEventListener('visibilitychange', onVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
-  }, [clearRipples]);
+  }, []);
 
   const canvasClassName = `mm-hero__smokey-canvas mm-hero__smokey-canvas--mobile h-full min-h-0 w-full ${className}`.trim();
 
@@ -368,10 +194,8 @@ export function HeroMobileRippleShader({
       className={`relative h-full w-full min-w-0 overflow-hidden ${canvasClassName}`}
       aria-hidden
     >
-      <HeroMobileRippleCanvas
-        controls={controls}
+      <HeroMobileDriftCanvas
         color={color}
-        rippleRef={rippleRef}
         visibleRef={visibleRef}
         shaderClockRef={shaderClockRef}
       />

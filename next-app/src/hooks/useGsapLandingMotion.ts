@@ -652,7 +652,7 @@ export function useGsapLandingMotion(
             const servicesCategoryStage = servicesSection?.querySelector<HTMLElement>('.mm-services__category-stage');
 
             if (servicesIntro) {
-              if (servicesTitle && servicesLede) {
+              if (servicesTitle) {
                 SplitText.create(servicesTitle, {
                   type: 'lines',
                   mask: 'lines',
@@ -681,7 +681,8 @@ export function useGsapLandingMotion(
                   },
                 });
 
-                SplitText.create(servicesLede, {
+                if (servicesLede) {
+                  SplitText.create(servicesLede, {
                   type: 'lines',
                   mask: 'lines',
                   linesClass: 'mm-services-lede-line++',
@@ -706,6 +707,7 @@ export function useGsapLandingMotion(
                     });
                   },
                 });
+                }
               } else {
                 gsap.set(servicesIntro, { autoAlpha: 1, y: 0 });
                 ScrollTrigger.create({

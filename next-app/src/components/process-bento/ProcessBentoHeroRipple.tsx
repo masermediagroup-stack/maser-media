@@ -46,8 +46,10 @@ export function ProcessBentoHeroRipple() {
       aria-hidden
     >
       <div className="mm-process-bento__hero-plate" />
-      <div className="mm-process-bento__hero-ripple-layer">
-        {showRipple ? <Ripple numCircles={numCircles} /> : null}
+      <div
+        className={`mm-process-bento__hero-ripple-layer${showRipple ? '' : ' mm-process-bento__hero-ripple-layer--paused'}`}
+      >
+        {reducedMotion ? null : <Ripple numCircles={numCircles} />}
       </div>
     </div>
   );

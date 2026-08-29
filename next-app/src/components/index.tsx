@@ -259,15 +259,6 @@ function useWorkCardContentReveal(
   }, [sectionRef, reduceMotion]);
 }
 
-const serviceSummaries: Record<string, string> = {
-  Brand:
-    'Positioning, identity, and visual rules that make the brand easier to recognize, trust, and extend.',
-  Web:
-    'Clear, polished pages and product surfaces built to convert without losing the craft that makes people remember you.',
-  Digital:
-    'Photo, video, content, search, email, and paid creative that keep the launch moving after the site goes live.',
-};
-
 function FlipText({
   text,
   className = '',
@@ -325,6 +316,7 @@ function RevealText({
   stagger = 0.035,
   amount = 0.45,
   replay = false,
+  blur = true,
 }: {
   text: string;
   className?: string;
@@ -333,6 +325,7 @@ function RevealText({
   stagger?: number;
   amount?: number;
   replay?: boolean;
+  blur?: boolean;
 }) {
   const parts = useMemo(() => text.split(/(\s+)/).filter(Boolean), [text]);
   const reduceMotion = useReducedMotion();
@@ -375,8 +368,12 @@ function RevealText({
           <motion.span
             className={`mm-reveal-word ${wordClassName}`}
             variants={{
-              hidden: { opacity: 0.14, y: 16, filter: 'blur(4px)' },
-              show: { opacity: 1, y: 0, filter: 'blur(0px)' },
+              hidden: blur
+                ? { opacity: 0.14, y: 16, filter: 'blur(4px)' }
+                : { opacity: 0.14, y: 16 },
+              show: blur
+                ? { opacity: 1, y: 0, filter: 'blur(0px)' }
+                : { opacity: 1, y: 0 },
             }}
             transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
             key={`${part}-${index}`}
@@ -609,9 +606,6 @@ export function Services() {
   const sectionRef = useRef<HTMLElement>(null);
   const laydownRef = useRef<HTMLDivElement>(null);
   const pillars = CONTENT.services.items;
-  const servicesSubtitle =
-    CONTENT.services.subtitle ||
-    'Brand, web, and content systems built with one launch language: a single, coherent design vocabulary that scales from your logo to your last social post.';
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -631,7 +625,9 @@ export function Services() {
         plane.classList.add('mm-services-laydown-plane--ready');
         observer.disconnect();
       },
-      { rootMargin: '0px 0px -28% 0px', threshold: 0.1 },
+      // Arm before the section is the scroll target so the 3D settle
+      // does not start cold on the same frames as scrolling into Services.
+      { rootMargin: '80% 0px 20% 0px', threshold: 0 },
     );
 
     observer.observe(section);
@@ -658,35 +654,21 @@ export function Services() {
           >
             <span className="mm-services__title-line">{CONTENT.services.title}</span>
           </h2>
-          <p
-            className="mm-services__lede"
-            data-mm-reveal="fade"
-            data-mm-reveal-repeat="true"
-            data-mm-reveal-reset="hidden"
-            data-mm-reveal-start="top 88%"
-          >
-            {servicesSubtitle}
-          </p>
         </div>
 
         <div ref={laydownRef} className="mm-services-laydown-plane" data-mm-services-laydown>
           <Accordion className="mm-services__accordion">
             {pillars.map((pillar) => {
               const value = pillar.title.toLowerCase();
-              const summary = serviceSummaries[pillar.title] ?? pillar.items[0]?.description ?? '';
               return (
                 <AccordionItem className="mm-services__accordion-item" key={pillar.title} value={value}>
                   <AccordionTrigger className="mm-services__accordion-trigger">
                     <span className="mm-services__accordion-trigger-copy">
                       <span className="mm-services__accordion-title">
-                        <RevealText text={pillar.title} amount={0.6} />
+                        <RevealText text={pillar.title} amount={0.6} blur={false} />
                       </span>
                       <span className="mm-services__accordion-summary">
-                        <RevealText
-                          text={summary}
-                          stagger={0.015}
-                          amount={0.55}
-                        />
+                        <RevealText text={pillar.lede} stagger={0.015} amount={0.55} blur={false} />
                       </span>
                     </span>
                   </AccordionTrigger>
@@ -696,13 +678,12 @@ export function Services() {
                         <motion.li
                           className="mm-services__service-card"
                           key={service.label}
-                          initial={{ opacity: 0, y: 20 }}
+                          initial={{ opacity: 0, y: 12 }}
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true, amount: 0.35 }}
                           transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
                         >
                           <h3>{service.label}</h3>
-                          <p>{service.description}</p>
                         </motion.li>
                       ))}
                     </ul>

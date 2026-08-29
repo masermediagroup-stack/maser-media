@@ -49,9 +49,10 @@ export interface ClientItem {
 
 export interface ServiceItem {
   title: string;
+  /** One-line pillar lede. Item rows are titles only. */
+  lede: string;
   items: {
     label: string;
-    description: string;
   }[];
 }
 
@@ -229,78 +230,37 @@ export const CONTENT: Content = {
 
   services: {
     title: "Serious Craft. Playful Energy.",
-    subtitle:
-      "Strategy, identity, websites, launch content, and motion shaped as one system, so the brand feels clear the first time people see it and sharper every time they come back.",
     items: [
       {
         title: "Brand",
+        lede: "The story, the mark, and the rules so the site and the campaign don’t split later.",
         items: [
-          {
-            label: "Brand Strategy",
-            description: "Clarify the audience, offer, and point of view so every launch decision has a reason behind it.",
-          },
-          {
-            label: "Logo & Identity",
-            description: "Create a recognizable identity system that feels distinct, trustworthy, and easy to use everywhere.",
-          },
-          {
-            label: "Visual Systems",
-            description: "Build the design rules, assets, and guidelines that keep web, social, decks, and campaigns aligned.",
-          },
+          { label: "Brand strategy" },
+          { label: "Logo & identity" },
+          { label: "Visual systems" },
         ],
       },
       {
         title: "Web",
+        lede: "Pages that make the offer obvious and still look like you.",
         items: [
-          {
-            label: "Web Design",
-            description: "Design websites and landing pages that make the offer clear, credible, and easy to act on.",
-          },
-          {
-            label: "UI/UX",
-            description: "Tighten flows, hierarchy, and interactions so people know where they are and what to do next.",
-          },
-          {
-            label: "Pitch Decks",
-            description: "Turn the story into a focused deck that helps buyers, partners, or investors understand the value quickly.",
-          },
-          {
-            label: "E-commerce",
-            description: "Shape storefront experiences that make products easier to browse, compare, and buy.",
-          },
+          { label: "Web design" },
+          { label: "UI/UX" },
+          { label: "Pitch decks" },
+          { label: "E-commerce" },
         ],
       },
       {
         title: "Digital",
+        lede: "Photo, film, and the campaigns that keep people seeing you after the site ships.",
         items: [
-          {
-            label: "Photography",
-            description: "Produce image systems that make the brand feel specific, current, and unmistakably yours.",
-          },
-          {
-            label: "Video",
-            description: "Create filmed, edited, and motion-led assets that explain the offer and hold attention across platforms.",
-          },
-          {
-            label: "Strategic Marketing",
-            description: "Turn goals, audience, offer, and channels into a practical plan so campaigns move with intent.",
-          },
-          {
-            label: "Creative AD Management",
-            description: "Manage paid creative from concept through iteration, keeping hooks, visuals, landing pages, and performance signals connected.",
-          },
-          {
-            label: "SEO",
-            description: "Improve site structure, page copy, and content signals so search engines understand the work and the right people can find it.",
-          },
-          {
-            label: "Content Marketing",
-            description: "Build articles, emails, social posts, and campaign assets around one message so the brand stays visible between launches.",
-          },
-          {
-            label: "Email Marketing",
-            description: "Create segmented email campaigns with sharper copy, stronger calls to action, and reporting that shows what people respond to.",
-          },
+          { label: "Photography" },
+          { label: "Video" },
+          { label: "Marketing strategy" },
+          { label: "Paid ads" },
+          { label: "SEO" },
+          { label: "Content" },
+          { label: "Email" },
         ],
       },
     ],
