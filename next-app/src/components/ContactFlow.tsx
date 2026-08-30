@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import type React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clock3, Globe2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clock3 } from "lucide-react";
 
 type ServiceId = "brand" | "web" | "copy" | "strategy" | "unsure";
 type BudgetId = "under-1000" | "1000-5000" | "5000-15000" | "15000-plus" | "unsure";
