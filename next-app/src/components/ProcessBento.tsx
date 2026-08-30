@@ -143,7 +143,7 @@ export function ProcessBento() {
         data-mm-reveal-stagger="0.09"
         data-mm-reveal-start="top 82%"
         role="list"
-        aria-label="Why it's us"
+        aria-label="Why Maser Media"
       >
         {items.map((item, index) => (
           <ProcessBentoTile

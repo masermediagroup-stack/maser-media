@@ -360,28 +360,29 @@ export const CONTENT: Content = {
   },
 
   whyMaserMedia: {
-    title: "Why it's us",
-    subtitle: "Tyler on the look. Grayson on the story. Same two people the whole way.",
+    title: "Why Maser Media",
+    subtitle:
+      "Maser Media is built for companies, startups, and brands that need a polished brand presence without slow layers.",
     pullQuote: "Two creatives. Tired of watching shops drop the ball.",
     items: [
       {
         id: "direct",
-        title: "You talk to us.",
-        text: "Feedback hits the people making it.",
+        title: "Direct communication",
+        text: "You work close to the people making the decisions and the work, so feedback stays visible and turns into progress quickly.",
         icon: "direct",
         variant: "hero",
       },
       {
         id: "system",
-        title: "One job.",
-        text: "Brand, site, and launch stay together.",
+        title: "One connected system",
+        text: "Brand, website, content, and launch assets share one point of view, so the final experience feels aligned instead of stitched together.",
         icon: "system",
         variant: "card",
       },
       {
         id: "launch",
-        title: "Ready to send.",
-        text: "We scope for what you need next week.",
+        title: "Built for launch pressure",
+        text: "Every sprint is scoped around clear decisions, realistic timelines, reusable assets, and what your team needs to send next.",
         icon: "launch",
         variant: "accent",
       },

@@ -866,19 +866,19 @@ export function MotionSystem() {
 }
 
 export function TrustSection() {
-  const { title, subtitle, pullQuote, items } = CONTENT.whyMaserMedia;
+  const { eyebrow, title, subtitle, items } = CONTENT.trust;
 
   return (
     <section className="mm-section mm-trust" aria-labelledby="trust-title">
       <div className="mm-trust__shell">
         <div className="mm-trust__copy">
+          <p className="mm-kicker">{eyebrow}</p>
           <h2 id="trust-title">{title}</h2>
           <p>{subtitle}</p>
-          <p>{pullQuote}</p>
         </div>
         <div className="mm-trust__grid">
           {items.map((item, index) => (
-            <article key={item.id} className="mm-trust__card">
+            <article key={item.title} className="mm-trust__card">
               <span>{String(index + 1).padStart(2, '0')}</span>
               <h3>{item.title}</h3>
               <p>{item.text}</p>
@@ -1067,7 +1067,6 @@ export function LandingPage({
       </div>
       <div className="mm-home-slate">
         <ProofBand />
-        <TrustSection />
         <ProcessBento />
         <Work />
         <Testimonials />
