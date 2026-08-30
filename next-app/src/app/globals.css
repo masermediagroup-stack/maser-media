@@ -4476,9 +4476,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-hero__lead {
   max-width: 46rem;
-  margin: clamp(1.2rem, 2.4vw, 1.9rem) 0 0;
+  margin: clamp(0.55rem, 1.1vw, 0.85rem) 0 0;
   color: #ffffff;
-  font-size: clamp(1rem, 1.45vw, 1.2rem);
+  font-size: var(--mm-type-body-small);
   font-weight: 470;
   line-height: 1.55;
   text-align: center;
@@ -6713,9 +6713,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
   .mm-hero__lead {
     max-width: min(100%, 20.75rem);
-    margin-top: clamp(1.05rem, 4.8vw, 1.45rem);
+    margin-top: clamp(0.45rem, 2.4vw, 0.75rem);
     color: #ffffff;
-    font-size: clamp(0.98rem, 4vw, 1.12rem);
+    font-size: var(--mm-type-body-small);
     line-height: 1.45;
   }
 
