@@ -126,20 +126,6 @@ function createTimeSlots() {
 
 const TIME_SLOTS = createTimeSlots();
 
-function getSuggestedBookingDates() {
-  const dates: Date[] = [];
-  const cursor = new Date();
-  cursor.setHours(12, 0, 0, 0);
-  cursor.setDate(cursor.getDate() + 1);
-
-  while (dates.length < 7) {
-    dates.push(new Date(cursor));
-    cursor.setDate(cursor.getDate() + 1);
-  }
-
-  return dates;
-}
-
 function toDateId(date: Date) {
   return [
     date.getFullYear(),
@@ -166,7 +152,6 @@ function formatBookingDate(dateId: string) {
 }
 
 function createInitialContactData(): ContactData {
-  const firstDate = getSuggestedBookingDates()[0];
   return {
     service: "web",
     brief: "",
@@ -175,7 +160,7 @@ function createInitialContactData(): ContactData {
     firstName: "",
     email: "",
     phone: "",
-    callDate: firstDate ? toDateId(firstDate) : "",
+    callDate: getMinBookingDateId(),
     callTime: TIME_SLOTS[0] ?? "",
   };
 }
@@ -500,39 +485,14 @@ function ScheduleStep({
   data: ContactData;
   setData: React.Dispatch<React.SetStateAction<ContactData>>;
 }) {
-  const bookingDates = useMemo(() => getSuggestedBookingDates(), []);
   const minBookingDate = useMemo(() => getMinBookingDateId(), []);
   const selectedDateLabel = formatBookingDate(data.callDate);
 
   return (
     <div className="contact-flow-scheduler">
-      <div className="contact-flow-date-grid" role="group" aria-label="Available dates">
-        {bookingDates.map((date) => {
-          const id = toDateId(date);
-          const selected = data.callDate === id;
-
-          return (
-            <button
-              type="button"
-              key={id}
-              className={`contact-flow-date${selected ? " is-selected" : ""}`}
-              aria-pressed={selected}
-              onClick={() =>
-                setData((current) => ({
-                  ...current,
-                  callDate: id,
-                }))
-              }
-            >
-              <span>{new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date)}</span>
-              <strong>{date.getDate()}</strong>
-            </button>
-          );
-        })}
-      </div>
-
       <div className="contact-flow-schedule-card">
         <label className="contact-flow-date-row" htmlFor="contact-call-date">
+          <span className="contact-flow-sr-only">Call date</span>
           <strong>{selectedDateLabel}</strong>
           <span className="contact-flow-date-cal" aria-hidden>
             <Calendar size={18} strokeWidth={2.2} />

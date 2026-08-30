@@ -3303,56 +3303,6 @@ button.premium-btn {
   white-space: nowrap;
 }
 
-.contact-flow-date-grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 0.5rem;
-  min-width: 0;
-}
-
-.contact-flow-weekdays {
-  margin-bottom: 0.45rem;
-  color: #737373;
-  font-size: 0.72rem;
-  font-weight: 760;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.contact-flow-weekdays span {
-  text-align: center;
-}
-
-.contact-flow-date,
-.contact-flow-time {
-  border: 1px solid #dfe5ea;
-  background: #fff;
-  color: #111;
-  cursor: pointer;
-  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease;
-}
-
-.contact-flow-date {
-  display: grid;
-  min-height: 3.65rem;
-  place-items: center;
-  gap: 0.12rem;
-  border-radius: 12px;
-}
-
-.contact-flow-date span {
-  color: #737373;
-  font-size: 0.72rem;
-  font-weight: 720;
-  text-transform: uppercase;
-}
-
-.contact-flow-date strong {
-  font-size: 1.12rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
 .contact-flow-time-list {
   display: none;
 }
@@ -3464,22 +3414,16 @@ button.premium-btn {
   }
 }
 
-.contact-flow-date:hover,
 .contact-flow-time:hover {
   border-color: #a6dfff;
   background: #f7fcff;
 }
 
-.contact-flow-date.is-selected,
 .contact-flow-time.is-selected {
   border-color: #10a4ff;
   background: #10a4ff;
   color: #fff;
   box-shadow: 0 10px 22px rgba(16, 164, 255, 0.2);
-}
-
-.contact-flow-date.is-selected span {
-  color: rgba(255, 255, 255, 0.78);
 }
 
 .contact-flow-fieldset {
@@ -3750,7 +3694,6 @@ button.premium-btn {
 .contact-flow-back:focus-visible,
 .contact-flow-primary:focus-visible,
 .contact-flow-option:focus-visible,
-.contact-flow-date:focus-visible,
 .contact-flow-time:focus-visible {
   outline: none;
   box-shadow: 0 0 0 4px rgba(16, 164, 255, 0.16);
@@ -7673,24 +7616,6 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
     height: 12px;
   }
 
-  .contact-flow-date-grid {
-    gap: 0.28rem;
-  }
-
-  .contact-flow-date {
-    min-height: 2.15rem;
-    gap: 0.04rem;
-    border-radius: 8px;
-  }
-
-  .contact-flow-date span {
-    font-size: 0.58rem;
-  }
-
-  .contact-flow-date strong {
-    font-size: 0.82rem;
-  }
-
   .contact-flow-dial {
     --dial-item: 1.85rem;
   }
@@ -9906,7 +9831,6 @@ h2.mm-services__title,
 
 .mm-tactile-button,
 .contact-flow-option,
-.contact-flow-date,
 .contact-flow-time {
   border: 0.5px solid rgba(7, 17, 31, 0.16) !important;
   background:
@@ -9926,8 +9850,6 @@ h2.mm-services__title,
 .mm-tactile-button:focus-visible,
 .contact-flow-option:hover,
 .contact-flow-option:focus-visible,
-.contact-flow-date:hover,
-.contact-flow-date:focus-visible,
 .contact-flow-time:hover,
 .contact-flow-time:focus-visible {
   transform: translateY(-1px);
@@ -9940,7 +9862,6 @@ h2.mm-services__title,
 
 .mm-tactile-button:active,
 .contact-flow-option:active,
-.contact-flow-date:active,
 .contact-flow-time:active {
   transform: translateY(1px);
   box-shadow:
@@ -9985,7 +9906,6 @@ h2.mm-services__title,
 .mm-cta__actions--contact .mm-cta__contact-btn:hover,
 .mm-cta__actions--contact .mm-cta__contact-btn:focus-visible,
 .contact-flow-option.is-selected,
-.contact-flow-date.is-selected,
 .contact-flow-time.is-selected {
   background:
     linear-gradient(180deg, rgba(47, 183, 255, 0.96), rgba(16, 164, 255, 0.92)) !important;
