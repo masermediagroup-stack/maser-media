@@ -164,7 +164,7 @@ function AccordionContent({
       data-open={item.open ? "" : undefined}
       aria-labelledby={item.triggerId}
       aria-hidden={!item.open}
-      className={cn("grid overflow-hidden text-sm transition-[grid-template-rows,opacity] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]", className)}
+      className={cn("grid overflow-hidden text-sm", className)}
       {...props}
     >
       <div data-slot="accordion-content-inner" className="min-h-0 overflow-hidden">

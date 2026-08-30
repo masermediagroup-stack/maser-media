@@ -109,23 +109,7 @@ function ProcessTextReveal({
 }
 
 function renderProcessPullQuote(quote: string) {
-  const lockedLine = 'Launch-ready work.';
-  const lockedLineIndex = quote.indexOf(lockedLine);
-
-  if (lockedLineIndex === -1) {
-    return <ProcessTextReveal delay={220}>{quote}</ProcessTextReveal>;
-  }
-
-  return (
-    <>
-      <ProcessTextReveal className="mm-process-bento__quote-line" delay={220}>
-        {quote.slice(0, lockedLineIndex).trimEnd()}{' '}
-      </ProcessTextReveal>
-      <ProcessTextReveal className="mm-process-bento__quote-line" nowrap delay={340}>
-        {lockedLine}
-      </ProcessTextReveal>
-    </>
-  );
+  return <ProcessTextReveal delay={220}>{quote}</ProcessTextReveal>;
 }
 
 export function ProcessBento() {

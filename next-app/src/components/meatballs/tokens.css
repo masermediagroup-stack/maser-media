@@ -1,0 +1,69 @@
+/* Chrome-free product field. No dock, knobs, or demo type tokens. */
+.lmm-canvas,
+.lmm-fallback {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.lmm-fallback {
+  overflow: hidden;
+}
+
+.lmm-fallback__blob {
+  position: absolute;
+  border-radius: 50%;
+  background:
+    linear-gradient(
+      118deg,
+      #f3f7ff 0%,
+      #10a4ff 42%,
+      #0065a3 78%,
+      #003d66 100%
+    );
+  opacity: 0.72;
+}
+
+.lmm-fallback__blob--a {
+  width: min(28vw, 220px);
+  height: min(28vw, 220px);
+  left: 42%;
+  top: 32%;
+  transform: translate(-50%, -50%);
+}
+
+.lmm-fallback__blob--b {
+  width: min(22vw, 160px);
+  height: min(22vw, 160px);
+  left: 54%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+}
+
+.lmm-fallback__blob--c {
+  width: min(18vw, 140px);
+  height: min(18vw, 140px);
+  left: 38%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.lmm-fallback__blob--d {
+  width: min(14vw, 110px);
+  height: min(14vw, 110px);
+  left: 52%;
+  top: 28%;
+  transform: translate(-50%, -50%);
+}
+
+.lmm-fallback__blob--e {
+  width: min(12vw, 96px);
+  height: min(12vw, 96px);
+  left: 34%;
+  top: 36%;
+  transform: translate(-50%, -50%);
+}

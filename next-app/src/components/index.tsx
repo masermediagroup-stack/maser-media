@@ -28,6 +28,7 @@ import { FooterCoolButton } from './FooterCoolButton';
 import { AuroraShader, MASER_AURORA_COLOR_STOPS } from './AuroraShader';
 import { ProcessBento } from './ProcessBento';
 import { CtaLogoTilt } from './CtaLogoTilt';
+import { LiquidMetalMeatballs } from '@/components/meatballs';
 
 type EntranceProps = { entrance?: boolean };
 type NavProps = EntranceProps & { introReady?: boolean };
@@ -259,15 +260,6 @@ function useWorkCardContentReveal(
   }, [sectionRef, reduceMotion]);
 }
 
-const serviceSummaries: Record<string, string> = {
-  Brand:
-    'Positioning, identity, and visual rules that make the brand easier to recognize, trust, and extend.',
-  Web:
-    'Clear, polished pages and product surfaces built to convert without losing the craft that makes people remember you.',
-  Digital:
-    'Photo, video, content, search, email, and paid creative that keep the launch moving after the site goes live.',
-};
-
 function FlipText({
   text,
   className = '',
@@ -325,6 +317,7 @@ function RevealText({
   stagger = 0.035,
   amount = 0.45,
   replay = false,
+  blur = true,
 }: {
   text: string;
   className?: string;
@@ -333,6 +326,7 @@ function RevealText({
   stagger?: number;
   amount?: number;
   replay?: boolean;
+  blur?: boolean;
 }) {
   const parts = useMemo(() => text.split(/(\s+)/).filter(Boolean), [text]);
   const reduceMotion = useReducedMotion();
@@ -375,8 +369,12 @@ function RevealText({
           <motion.span
             className={`mm-reveal-word ${wordClassName}`}
             variants={{
-              hidden: { opacity: 0.14, y: 16, filter: 'blur(4px)' },
-              show: { opacity: 1, y: 0, filter: 'blur(0px)' },
+              hidden: blur
+                ? { opacity: 0.14, y: 16, filter: 'blur(4px)' }
+                : { opacity: 0.14, y: 16 },
+              show: blur
+                ? { opacity: 1, y: 0, filter: 'blur(0px)' }
+                : { opacity: 1, y: 0 },
             }}
             transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
             key={`${part}-${index}`}
@@ -562,10 +560,11 @@ export function Hero({ entrance, onCurtainDone, contentRevealed }: HeroProps) {
               className="mm-hero__mobile-logo"
               priority
             />
-            <h1 className="mm-hero__title">We bring brands, stories, and experiences to life.</h1>
-            <p className="mm-hero__lead">
-              A creative team shaping culture-forward ideas through design and technology.
-            </p>
+            <h1 className="mm-hero__title">
+              <span className="mm-hero__title-break">{CONTENT.hero.storyTitle}</span>
+              <span className="mm-hero__title-break">{CONTENT.hero.storyHighlight}</span>
+            </h1>
+            <p className="mm-hero__lead">{CONTENT.hero.lead}</p>
           </div>
         </div>
       </motion.div>
@@ -595,7 +594,18 @@ export function Clients() {
       <ul className="mm-clients__grid" role="list">
         {items.map((item) => (
           <li key={item.name} className="mm-clients__grid-item">
-            <span className="mm-client-name">{item.name}</span>
+            {item.href ? (
+              <a
+                className="mm-client-name"
+                href={item.href}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {item.name}
+              </a>
+            ) : (
+              <span className="mm-client-name">{item.name}</span>
+            )}
           </li>
         ))}
       </ul>
@@ -607,9 +617,6 @@ export function Services() {
   const sectionRef = useRef<HTMLElement>(null);
   const laydownRef = useRef<HTMLDivElement>(null);
   const pillars = CONTENT.services.items;
-  const servicesSubtitle =
-    CONTENT.services.subtitle ||
-    'Brand, web, and content systems built with one launch language: a single, coherent design vocabulary that scales from your logo to your last social post.';
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -629,7 +636,9 @@ export function Services() {
         plane.classList.add('mm-services-laydown-plane--ready');
         observer.disconnect();
       },
-      { rootMargin: '0px 0px -28% 0px', threshold: 0.1 },
+      // Arm before the section is the scroll target so the 3D settle
+      // does not start cold on the same frames as scrolling into Services.
+      { rootMargin: '80% 0px 20% 0px', threshold: 0 },
     );
 
     observer.observe(section);
@@ -644,64 +653,40 @@ export function Services() {
       id="services"
       aria-labelledby="services-heading"
     >
-      <div className="mm-services__shell mm-services-laydown-stage">
+      <div className="mm-services__shell">
         <div className="mm-services__masthead">
-          <h2
-            id="services-heading"
-            className="mm-services__title"
-            data-mm-reveal="fade"
-            data-mm-reveal-repeat="true"
-            data-mm-reveal-reset="hidden"
-            data-mm-reveal-start="top 86%"
-          >
-            <span className="mm-services__title-line">Services</span>
+          <h2 id="services-heading" className="mm-services__title">
+            {CONTENT.services.title.split(/(?<=\.)\s+/).map((line) => (
+              <span className="mm-services__title-line" key={line}>
+                {line}
+              </span>
+            ))}
           </h2>
-          <p
-            className="mm-services__lede"
-            data-mm-reveal="fade"
-            data-mm-reveal-repeat="true"
-            data-mm-reveal-reset="hidden"
-            data-mm-reveal-start="top 88%"
-          >
-            {servicesSubtitle}
-          </p>
         </div>
 
+        <div className="mm-services-laydown-stage">
         <div ref={laydownRef} className="mm-services-laydown-plane" data-mm-services-laydown>
           <Accordion className="mm-services__accordion">
             {pillars.map((pillar) => {
               const value = pillar.title.toLowerCase();
-              const summary = serviceSummaries[pillar.title] ?? pillar.items[0]?.description ?? '';
               return (
                 <AccordionItem className="mm-services__accordion-item" key={pillar.title} value={value}>
                   <AccordionTrigger className="mm-services__accordion-trigger">
                     <span className="mm-services__accordion-trigger-copy">
                       <span className="mm-services__accordion-title">
-                        <RevealText text={pillar.title} amount={0.6} />
+                        <RevealText text={pillar.title} amount={0.6} blur={false} />
                       </span>
                       <span className="mm-services__accordion-summary">
-                        <RevealText
-                          text={summary}
-                          stagger={0.015}
-                          amount={0.55}
-                        />
+                        <RevealText text={pillar.lede} stagger={0.015} amount={0.55} blur={false} />
                       </span>
                     </span>
                   </AccordionTrigger>
                   <AccordionContent className="mm-services__accordion-content">
                     <ul className="mm-services__service-grid">
                       {pillar.items.map((service) => (
-                        <motion.li
-                          className="mm-services__service-card"
-                          key={service.label}
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true, amount: 0.35 }}
-                          transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
-                        >
+                        <li className="mm-services__service-card" key={service.label}>
                           <h3>{service.label}</h3>
-                          <p>{service.description}</p>
-                        </motion.li>
+                        </li>
                       ))}
                     </ul>
                   </AccordionContent>
@@ -709,6 +694,7 @@ export function Services() {
               );
             })}
           </Accordion>
+        </div>
         </div>
 
         <button
@@ -731,7 +717,7 @@ export function Work({ stacked = true }: WorkProps = {}) {
   const reduceMotion = useReducedMotion();
   const landingProjects = CONTENT.work.items.slice(0, 3);
   const stackEnabled = stacked && landingProjects.length > 1;
-  const showViewAll = !(stacked && landingProjects.length >= CONTENT.work.items.length);
+  const showViewAll = stacked && landingProjects.length < CONTENT.work.items.length;
 
   useStackedWorkPosters(sectionRef, stackEnabled, reduceMotion);
   useWorkCardContentReveal(sectionRef, reduceMotion);
@@ -853,7 +839,7 @@ export function Work({ stacked = true }: WorkProps = {}) {
             data-mm-reveal="fade"
             data-mm-reveal-start="top 92%"
           >
-            <span>View all projects</span>
+            <span>{CONTENT.work.viewAllLabel}</span>
             <ArrowUpRight size={20} aria-hidden />
           </Link>
         ) : null}
@@ -1007,6 +993,20 @@ export function Footer() {
   );
 }
 
+function ProofBand() {
+  const bandRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div ref={bandRef} className="mm-proof-band">
+      <LiquidMetalMeatballs triggerRef={bandRef} className="mm-proof-band__field" />
+      <div className="mm-proof-band__content">
+        <Clients />
+        <Services />
+      </div>
+    </div>
+  );
+}
+
 export function LandingPage({
   entrance = true,
   onCurtainReveal,
@@ -1066,8 +1066,7 @@ export function LandingPage({
         />
       </div>
       <div className="mm-home-slate">
-        <Clients />
-        <Services />
+        <ProofBand />
         <ProcessBento />
         <Work />
         <Testimonials />

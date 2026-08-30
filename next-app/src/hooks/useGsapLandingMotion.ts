@@ -652,36 +652,56 @@ export function useGsapLandingMotion(
             const servicesCategoryStage = servicesSection?.querySelector<HTMLElement>('.mm-services__category-stage');
 
             if (servicesIntro) {
-              if (servicesTitle && servicesLede) {
-                SplitText.create(servicesTitle, {
-                  type: 'lines',
-                  mask: 'lines',
-                  linesClass: 'mm-services-title-line++',
-                  autoSplit: true,
-                  onSplit(self) {
-                    const linesTopToBottom = [...self.lines].sort(
-                      (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top,
-                    );
+              if (servicesTitle) {
+                const authoredTitleLines = gsap.utils.toArray<HTMLElement>(
+                  servicesTitle.querySelectorAll('.mm-services__title-line'),
+                );
 
-                    return gsap.from(linesTopToBottom, {
-                      xPercent: -16,
-                      yPercent: 105,
-                      autoAlpha: 0,
-                      duration: isNarrow ? 0.72 : 0.95,
-                      stagger: { each: 0.075, from: 'start' },
-                      ease: 'power4.out',
-                      scrollTrigger: {
-                        trigger: servicesIntro,
-                        start: 'top 86%',
-                        toggleActions: 'play none none none',
-                        ...stToggleActive(servicesIntro),
-                        ...scrollTriggerDefaults,
-                      },
-                    });
-                  },
-                });
+                if (authoredTitleLines.length) {
+                  gsap.from(authoredTitleLines, {
+                    autoAlpha: 0,
+                    y: isNarrow ? 16 : 22,
+                    duration: isNarrow ? 0.72 : 0.95,
+                    stagger: { each: 0.075, from: 'start' },
+                    ease: 'power4.out',
+                    scrollTrigger: {
+                      trigger: servicesIntro,
+                      start: 'top 86%',
+                      toggleActions: 'play none none none',
+                      ...stToggleActive(servicesIntro),
+                      ...scrollTriggerDefaults,
+                    },
+                  });
+                } else {
+                  SplitText.create(servicesTitle, {
+                    type: 'lines',
+                    linesClass: 'mm-services-title-line++',
+                    autoSplit: true,
+                    onSplit(self) {
+                      const linesTopToBottom = [...self.lines].sort(
+                        (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top,
+                      );
 
-                SplitText.create(servicesLede, {
+                      return gsap.from(linesTopToBottom, {
+                        autoAlpha: 0,
+                        y: isNarrow ? 16 : 22,
+                        duration: isNarrow ? 0.72 : 0.95,
+                        stagger: { each: 0.075, from: 'start' },
+                        ease: 'power4.out',
+                        scrollTrigger: {
+                          trigger: servicesIntro,
+                          start: 'top 86%',
+                          toggleActions: 'play none none none',
+                          ...stToggleActive(servicesIntro),
+                          ...scrollTriggerDefaults,
+                        },
+                      });
+                    },
+                  });
+                }
+
+                if (servicesLede) {
+                  SplitText.create(servicesLede, {
                   type: 'lines',
                   mask: 'lines',
                   linesClass: 'mm-services-lede-line++',
@@ -706,6 +726,7 @@ export function useGsapLandingMotion(
                     });
                   },
                 });
+                }
               } else {
                 gsap.set(servicesIntro, { autoAlpha: 1, y: 0 });
                 ScrollTrigger.create({

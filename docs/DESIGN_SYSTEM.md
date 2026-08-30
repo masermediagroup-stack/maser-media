@@ -121,7 +121,7 @@ Light surface. Centered heading and two/four-column client list. Use the shared 
 
 ### Services
 
-Heading text is `Services`. The accordion is the main content surface. Accordion titles should be prominent but below section-heading scale. Service cards should remain calm and readable on mobile.
+Heading text is `Serious Craft. Playful Energy.` The accordion is the main content surface: one lede per category, then titles only. Keep pillar hover color. Do not restore item essays or a shared hover-swap blurb.
 
 ### Process
 

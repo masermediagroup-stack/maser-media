@@ -21,7 +21,7 @@ export interface HeroConfig {
   storyHighlight: string;
   lead: string;
   trustStrip: string[];
-  trustedBy: {
+  trustedBy?: {
     prefix: string;
     rotatingWords: string[];
     ariaLabel: string;
@@ -45,13 +45,15 @@ export interface HeroConfig {
 export interface ClientItem {
   name: string;
   logo: string | null;
+  href?: string;
 }
 
 export interface ServiceItem {
   title: string;
+  /** One-line pillar lede. Item rows are titles only. */
+  lede: string;
   items: {
     label: string;
-    description: string;
   }[];
 }
 
@@ -130,6 +132,7 @@ export interface Content {
   work: {
     title: string;
     subtitle: string;
+    viewAllLabel: string;
     items: WorkItem[];
   };
   testimonials: TestimonialsConfig;
@@ -190,14 +193,9 @@ export const CONTENT: Content = {
     layout: 'editorial',
     badge: "One crew. Brand, product, and web.",
     storyTitle: "Need one creative team?",
-    storyHighlight: "HERE WE ARE.",
-    lead: "We work as one integrated studio so your story, visuals, and site stay aligned from first sketch to launch - fewer handoffs, clearer outcomes.",
+    storyHighlight: "Here we are.",
+    lead: "Fewer handoffs. Clearer outcomes.",
     trustStrip: ["Startups shipping fast", "Service brands going digital", "Founder-led products"],
-    trustedBy: {
-      prefix: "Trusted by 1k+",
-      rotatingWords: ["founders", "teams", "brands"],
-      ariaLabel: "Trusted by over one thousand founders, teams, and brands",
-    },
     heroLogo: {
       src: "/assets/logo-maser-cloud-white-transparent.png",
       alt: "Maser Media",
@@ -226,6 +224,7 @@ export const CONTENT: Content = {
       { name: "Paradox Customs", logo: null },
       { name: "Main Street Pub & Grub", logo: null },
       { name: "Cat Eye Construction", logo: null },
+      { name: "319Junk", logo: null, href: "https://319junk.com" },
     ],
     supportingLabel: "",
     categories: [],
@@ -233,78 +232,37 @@ export const CONTENT: Content = {
 
   services: {
     title: "Serious Craft. Playful Energy.",
-    subtitle:
-      "Strategy, identity, websites, launch content, and motion shaped as one system, so the brand feels clear the first time people see it and sharper every time they come back.",
     items: [
       {
         title: "Brand",
+        lede: "The story, the mark, and the rules so the site and the campaign don’t split later.",
         items: [
-          {
-            label: "Brand Strategy",
-            description: "Clarify the audience, offer, and point of view so every launch decision has a reason behind it.",
-          },
-          {
-            label: "Logo & Identity",
-            description: "Create a recognizable identity system that feels distinct, trustworthy, and easy to use everywhere.",
-          },
-          {
-            label: "Visual Systems",
-            description: "Build the design rules, assets, and guidelines that keep web, social, decks, and campaigns aligned.",
-          },
+          { label: "Brand strategy" },
+          { label: "Logo & identity" },
+          { label: "Visual systems" },
         ],
       },
       {
         title: "Web",
+        lede: "Pages that make the offer obvious and still look like you.",
         items: [
-          {
-            label: "Web Design",
-            description: "Design websites and landing pages that make the offer clear, credible, and easy to act on.",
-          },
-          {
-            label: "UI/UX",
-            description: "Tighten flows, hierarchy, and interactions so people know where they are and what to do next.",
-          },
-          {
-            label: "Pitch Decks",
-            description: "Turn the story into a focused deck that helps buyers, partners, or investors understand the value quickly.",
-          },
-          {
-            label: "E-commerce",
-            description: "Shape storefront experiences that make products easier to browse, compare, and buy.",
-          },
+          { label: "Web design" },
+          { label: "UI/UX" },
+          { label: "Pitch decks" },
+          { label: "E-commerce" },
         ],
       },
       {
         title: "Digital",
+        lede: "Photo, film, and the campaigns that keep people seeing you after the site ships.",
         items: [
-          {
-            label: "Photography",
-            description: "Produce image systems that make the brand feel specific, current, and unmistakably yours.",
-          },
-          {
-            label: "Video",
-            description: "Create filmed, edited, and motion-led assets that explain the offer and hold attention across platforms.",
-          },
-          {
-            label: "Strategic Marketing",
-            description: "Turn goals, audience, offer, and channels into a practical plan so campaigns move with intent.",
-          },
-          {
-            label: "Creative AD Management",
-            description: "Manage paid creative from concept through iteration, keeping hooks, visuals, landing pages, and performance signals connected.",
-          },
-          {
-            label: "SEO",
-            description: "Improve site structure, page copy, and content signals so search engines understand the work and the right people can find it.",
-          },
-          {
-            label: "Content Marketing",
-            description: "Build articles, emails, social posts, and campaign assets around one message so the brand stays visible between launches.",
-          },
-          {
-            label: "Email Marketing",
-            description: "Create segmented email campaigns with sharper copy, stronger calls to action, and reporting that shows what people respond to.",
-          },
+          { label: "Photography" },
+          { label: "Video" },
+          { label: "Marketing strategy" },
+          { label: "Paid ads" },
+          { label: "SEO" },
+          { label: "Content" },
+          { label: "Email" },
         ],
       },
     ],
@@ -332,12 +290,13 @@ export const CONTENT: Content = {
 
   work: {
     title: "Our Work",
-    subtitle: "A live list. It changes as we build.",
+    subtitle: "Launches we've shaped with founders, local brands, and teams who needed one crew.",
+    viewAllLabel: "See the work",
     items: [
       {
         title: "Miller More Handiwork",
         description:
-          "A website build focused on gathering local clients for home improvement and handiwork services. - showing off a professional portfolio",
+          "A portfolio-forward site for a local handyman brand—built to turn search traffic into booked jobs.",
         image: null,
         logo: "/assets/miller-more-logo-clean.png",
         logoWidth: 1077,
@@ -350,7 +309,7 @@ export const CONTENT: Content = {
       {
         title: "Main Street Pub & Grub",
         description:
-          "A neighborhood pub deserved an identity as welcoming as the room itself. We built the brand foundation - logo system, typography, and color.",
+          "A neighborhood pub identity as welcoming as the room itself—logo system, typography, and color built to travel across menu, signage, and launch.",
         image: null,
         logo: "/assets/main-street-logo-clean.png",
         logoWidth: 1326,
@@ -404,7 +363,7 @@ export const CONTENT: Content = {
     title: "Why Maser Media",
     subtitle:
       "Maser Media is built for companies, startups, and brands that need a polished brand presence without slow layers.",
-    pullQuote: "One studio. Clear decisions. Launch-ready work.",
+    pullQuote: "Two creatives. Tired of watching shops drop the ball.",
     items: [
       {
         id: "direct",

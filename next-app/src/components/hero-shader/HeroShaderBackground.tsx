@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { HERO_SHADER_MOBILE_MQ } from './constants';
 import { HeroDesktopSmokeyShader } from './desktop';
 import { HeroMobileRippleShader } from './mobile';
-import { DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS } from './mobile/types';
 
 type HeroShaderVariant = 'desktop' | 'mobile';
 
@@ -29,17 +28,7 @@ export function HeroShaderBackground() {
   }
 
   if (variant === 'mobile') {
-    return (
-      <HeroMobileRippleShader
-        color="#10A4FF"
-        rippleStrength={DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.rippleStrength}
-        ringWidth={DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.ringWidth}
-        rippleSpeed={DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.rippleSpeed}
-        decay={DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.decay}
-        distortionAmount={DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.distortionAmount}
-        ringCount={DEFAULT_HERO_MOBILE_RIPPLE_CONTROLS.ringCount}
-      />
-    );
+    return <HeroMobileRippleShader color="#10A4FF" />;
   }
 
   return <HeroDesktopSmokeyShader />;
