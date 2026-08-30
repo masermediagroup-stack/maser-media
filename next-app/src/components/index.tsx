@@ -1,10 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { AnimatePresence, motion, useAnimationControls, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { createPortal } from 'react-dom';
 import {
   ArrowUpRight,
@@ -17,7 +17,7 @@ import { isContactModalHref, openContactModalFromApp } from '@/lib/contactModalE
 import { HeroShaderBackground } from '@/components/hero-shader';
 import { useGsapLandingMotion, useMmScrollReveals } from '@/hooks/useGsapLandingMotion';
 import { useIsClient } from '@/hooks/useIsClient';
-import { TITLE_DISSOLVE_VIEWPORT } from '@/lib/stickyHeader';
+import { RevealText, FlipText, SectionTitleReveal } from '@/components/RevealText';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { HOME_INTRO_CURTAIN_MS } from '@/lib/homeIntro';
 import { sanitizeScrollArtifacts } from '@/lib/scrollSanitize';
@@ -261,134 +261,6 @@ function useWorkCardContentReveal(
   }, [sectionRef, reduceMotion]);
 }
 
-function FlipText({
-  text,
-  className = '',
-  stagger = 0.04,
-  replay = false,
-}: {
-  text: string;
-  className?: string;
-  stagger?: number;
-  replay?: boolean;
-}) {
-  const parts = text.split(/(\s+)/);
-  const controls = useAnimationControls();
-
-  return (
-    <motion.span
-      className={`mm-flip-text ${className}`}
-      initial="hidden"
-      animate={replay ? controls : undefined}
-      whileInView={replay ? undefined : 'show'}
-      onViewportEnter={replay ? () => void controls.start('show') : undefined}
-      onViewportLeave={replay ? () => void controls.start('hidden') : undefined}
-      viewport={{ once: !replay, ...(replay ? TITLE_DISSOLVE_VIEWPORT : { amount: 0.65 }) }}
-      aria-label={text}
-    >
-      {parts.map((part, index) => {
-        if (/^\s+$/.test(part)) {
-          return <span aria-hidden key={`space-${index}`}> </span>;
-        }
-
-        return (
-          <motion.span
-            className="mm-flip-text__word"
-            variants={{
-              hidden: { opacity: 0, y: 18, rotateX: -86 },
-              show: { opacity: 1, y: 0, rotateX: 0 },
-            }}
-            transition={{ duration: 0.62, ease: [0.22, 1, 0.36, 1], delay: index * stagger }}
-            key={`${part}-${index}`}
-            aria-hidden
-          >
-            {part}
-          </motion.span>
-        );
-      })}
-    </motion.span>
-  );
-}
-
-function RevealText({
-  text,
-  className = '',
-  wordClassName = '',
-  delay = 0,
-  stagger = 0.035,
-  amount = 0.45,
-  replay = false,
-  blur = true,
-}: {
-  text: string;
-  className?: string;
-  wordClassName?: string;
-  delay?: number;
-  stagger?: number;
-  amount?: number;
-  replay?: boolean;
-  blur?: boolean;
-}) {
-  const parts = useMemo(() => text.split(/(\s+)/).filter(Boolean), [text]);
-  const reduceMotion = useReducedMotion();
-  const controls = useAnimationControls();
-
-  if (reduceMotion) {
-    return <span className={`mm-reveal-text ${className}`}>{text}</span>;
-  }
-
-  return (
-    <motion.span
-      className={`mm-reveal-text ${className}`}
-      initial="hidden"
-      animate={replay ? controls : undefined}
-      whileInView={replay ? undefined : 'show'}
-      onViewportEnter={replay ? () => void controls.start('show') : undefined}
-      onViewportLeave={replay ? () => void controls.start('hidden') : undefined}
-      viewport={{ once: !replay, ...(replay ? TITLE_DISSOLVE_VIEWPORT : { amount }) }}
-      variants={{
-        hidden: {},
-        show: {
-          transition: {
-            delayChildren: delay,
-            staggerChildren: stagger,
-          },
-        },
-      }}
-      aria-label={text}
-    >
-      {parts.map((part, index) => {
-        if (/^\s+$/.test(part)) {
-          return (
-            <span className="mm-reveal-space" aria-hidden key={`space-${index}`}>
-              {part}
-            </span>
-          );
-        }
-
-        return (
-          <motion.span
-            className={`mm-reveal-word ${wordClassName}`}
-            variants={{
-              hidden: blur
-                ? { opacity: 0.14, y: 16, filter: 'blur(4px)' }
-                : { opacity: 0.14, y: 16 },
-              show: blur
-                ? { opacity: 1, y: 0, filter: 'blur(0px)' }
-                : { opacity: 1, y: 0 },
-            }}
-            transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
-            key={`${part}-${index}`}
-            aria-hidden
-          >
-            {part}
-          </motion.span>
-        );
-      })}
-    </motion.span>
-  );
-}
-
 export function Nav({ entrance, introReady }: NavProps) {
   return <LiquidNav entrance={entrance} introReady={introReady} />;
 }
@@ -583,11 +455,11 @@ export function Clients() {
     <section className="mm-section mm-section--clients mm-clients" aria-labelledby="clients-heading">
       <h2 id="clients-heading" className="mm-clients__headline">
         <span className="mm-clients__headline-text">
-          {headingBase}
+          <SectionTitleReveal text={headingBase} />
           {headingAccent ? (
             <>
               {' '}
-              <span className="mm-gradient-word">{headingAccent}</span>
+              <SectionTitleReveal text={headingAccent} wordClassName="mm-gradient-word" />
             </>
           ) : null}
         </span>
@@ -659,7 +531,7 @@ export function Services() {
           <h2 id="services-heading" className="mm-services__title">
             {CONTENT.services.title.split(/(?<=\.)\s+/).map((line) => (
               <span className="mm-services__title-line" key={line}>
-                {line}
+                <SectionTitleReveal text={line} />
               </span>
             ))}
           </h2>
@@ -795,7 +667,7 @@ export function Work({ stacked = true }: WorkProps = {}) {
       <div className="relative z-10">
         <div className="mm-section-heading mm-section-heading--wide">
           <h2 className="mm-work__title">
-            <RevealText text={CONTENT.work.title} className="mm-splitting-text" stagger={0.045} amount={0.62} replay />
+            <SectionTitleReveal text={CONTENT.work.title} className="mm-splitting-text" />
           </h2>
           {CONTENT.work.subtitle ? (
             <p>
@@ -1278,15 +1150,7 @@ export function Testimonials() {
               </p>
             ) : null}
             <h2 className="mm-testimonials-wave__title" id="testimonials-title">
-              <span
-                className="mm-testimonials-wave__title-anim"
-                data-mm-reveal="blur"
-                data-mm-reveal-repeat="true"
-                data-mm-reveal-reset="hidden"
-                data-mm-reveal-until="header"
-              >
-                {title}
-              </span>
+              <SectionTitleReveal text={title} className="mm-testimonials-wave__title-anim" />
             </h2>
           </header>
 

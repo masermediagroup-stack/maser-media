@@ -4,13 +4,9 @@
  */
 export const STICKY_HEADER_OFFSET_PX = 112;
 
-export function sectionTitleDissolveEnd(): string {
-  return `top top+=${STICKY_HEADER_OFFSET_PX}`;
-}
-
 /**
- * Motion viewport for replay section titles: stay "in view" until the
- * heading's top reaches the sticky header, then leave (dissolve).
+ * Motion viewport for replay section titles (Our Work pattern):
+ * `amount: "all"` + top inset matching the sticky liquid-nav collision line.
  */
 export const TITLE_DISSOLVE_VIEWPORT = {
   amount: 'all' as const,

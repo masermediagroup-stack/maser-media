@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import type { CSSProperties, ReactNode, RefObject } from 'react';
 import { CONTENT } from '@/lib/content';
+import { SectionTitleReveal } from '@/components/RevealText';
 import { ProcessIconByKey } from '@/components/ProcessIcons';
 import { ProcessBentoGridBackground } from '@/components/process-bento/ProcessBentoGridBackground';
 import { ProcessBentoHeroRipple } from '@/components/process-bento/ProcessBentoHeroRipple';
@@ -123,15 +124,10 @@ export function ProcessBento() {
       className="mm-section mm-section--process mm-process-bento"
       aria-labelledby="process-title"
     >
-      <header
-        className="mm-process-bento__heading mm-section-heading"
-        data-mm-reveal="fade"
-        data-mm-reveal-repeat="true"
-        data-mm-reveal-reset="hidden"
-        data-mm-reveal-start="top 88%"
-        data-mm-reveal-until="header"
-      >
-        <h2 id="process-title">{title}</h2>
+      <header className="mm-process-bento__heading mm-section-heading">
+        <h2 id="process-title">
+          <SectionTitleReveal text={title} />
+        </h2>
         <p>{subtitle}</p>
       </header>
 

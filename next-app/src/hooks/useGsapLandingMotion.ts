@@ -2,7 +2,6 @@
 
 import { useLayoutEffect, useRef } from 'react';
 import type { RefObject } from 'react';
-import { sectionTitleDissolveEnd } from '@/lib/stickyHeader';
 
 function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined') return false;
@@ -131,7 +130,6 @@ function bindLandingScrollReveals(
       : el;
     const repeat = el.dataset.mmRevealRepeat === 'true';
     const resetHidden = (el.dataset.mmRevealReset ?? 'hidden') === 'hidden';
-    const untilHeader = el.dataset.mmRevealUntil === 'header';
     const fromVars = revealFromVars(kind, isNarrow);
     const toVars = {
       ...revealToVars(kind),
@@ -145,22 +143,17 @@ function bindLandingScrollReveals(
       ScrollTrigger.create({
         trigger,
         start: el.dataset.mmRevealStart ?? 'top 88%',
-        ...(untilHeader ? { end: sectionTitleDissolveEnd(), invalidateOnRefresh: true } : {}),
         onEnter: () => {
-          if (untilHeader) timeline.play();
-          else timeline.restart();
+          timeline.restart();
         },
         onEnterBack: () => {
-          if (untilHeader) timeline.play();
-          else timeline.restart();
+          timeline.restart();
         },
         onLeave: () => {
-          if (untilHeader) timeline.reverse();
-          else if (resetHidden) timeline.pause(0);
+          if (resetHidden) timeline.pause(0);
         },
         onLeaveBack: () => {
-          if (untilHeader) timeline.reverse();
-          else if (resetHidden) timeline.pause(0);
+          if (resetHidden) timeline.pause(0);
         },
         ...stDefaults,
       });
@@ -173,13 +166,7 @@ function bindLandingScrollReveals(
       scrollTrigger: {
         trigger,
         start: el.dataset.mmRevealStart ?? 'top 88%',
-        ...(untilHeader
-          ? {
-              end: sectionTitleDissolveEnd(),
-              toggleActions: 'play reverse play reverse',
-              invalidateOnRefresh: true,
-            }
-          : { toggleActions: 'play none none none' }),
+        toggleActions: 'play none none none',
         ...stDefaults,
       },
     });
@@ -193,7 +180,6 @@ function bindLandingScrollReveals(
     const stagger = Number.parseFloat(group.dataset.mmRevealStagger ?? '') || (isNarrow ? 0.1 : 0.12);
     const repeat = group.dataset.mmRevealRepeat === 'true';
     const resetHidden = (group.dataset.mmRevealReset ?? 'hidden') === 'hidden';
-    const untilHeader = group.dataset.mmRevealUntil === 'header';
     const fromVars = revealFromVars(kind, isNarrow);
     const toVars = {
       ...revealToVars(kind),
@@ -208,22 +194,17 @@ function bindLandingScrollReveals(
       ScrollTrigger.create({
         trigger: group,
         start: group.dataset.mmRevealStart ?? 'top 86%',
-        ...(untilHeader ? { end: sectionTitleDissolveEnd(), invalidateOnRefresh: true } : {}),
         onEnter: () => {
-          if (untilHeader) timeline.play();
-          else timeline.restart();
+          timeline.restart();
         },
         onEnterBack: () => {
-          if (untilHeader) timeline.play();
-          else timeline.restart();
+          timeline.restart();
         },
         onLeave: () => {
-          if (untilHeader) timeline.reverse();
-          else if (resetHidden) timeline.pause(0);
+          if (resetHidden) timeline.pause(0);
         },
         onLeaveBack: () => {
-          if (untilHeader) timeline.reverse();
-          else if (resetHidden) timeline.pause(0);
+          if (resetHidden) timeline.pause(0);
         },
         ...stDefaults,
       });
@@ -236,13 +217,7 @@ function bindLandingScrollReveals(
       scrollTrigger: {
         trigger: group,
         start: group.dataset.mmRevealStart ?? 'top 86%',
-        ...(untilHeader
-          ? {
-              end: sectionTitleDissolveEnd(),
-              toggleActions: 'play reverse play reverse',
-              invalidateOnRefresh: true,
-            }
-          : { toggleActions: 'play none none none' }),
+        toggleActions: 'play none none none',
         ...stDefaults,
       },
     });
@@ -598,32 +573,9 @@ export function useGsapLandingMotion(
             }
 
             const clientsSection = root.querySelector<HTMLElement>('.mm-clients');
-            const clientsHeadlineText = root.querySelector<HTMLElement>('.mm-clients__headline-text');
             const clientPanelFadeItems = clientsSection?.querySelectorAll<HTMLElement>(
               '.mm-client-name',
             );
-
-            if (clientsHeadlineText) {
-              gsap.fromTo(
-                clientsHeadlineText,
-                { autoAlpha: 0, y: isNarrow ? 14 : 22 },
-                {
-                  autoAlpha: 1,
-                  y: 0,
-                  duration: isNarrow ? 1.45 : 1.85,
-                  ease: 'power2.out',
-                  scrollTrigger: {
-                    trigger: clientsHeadlineText,
-                    start: 'top 88%',
-                    end: sectionTitleDissolveEnd(),
-                    toggleActions: 'play reverse play reverse',
-                    invalidateOnRefresh: true,
-                    ...stToggleActive(clientsHeadlineText),
-                    ...scrollTriggerDefaults,
-                  },
-                },
-              );
-            }
 
             if (clientsSection && clientPanelFadeItems && clientPanelFadeItems.length) {
               SplitText.create(clientPanelFadeItems, {
@@ -673,96 +625,7 @@ export function useGsapLandingMotion(
             }
 
             const servicesSection = root.querySelector<HTMLElement>('#services');
-            const servicesIntro = servicesSection?.querySelector<HTMLElement>('.mm-services__masthead');
-            const servicesTitle = servicesSection?.querySelector<HTMLElement>('.mm-services__title');
-            const servicesLede = servicesSection?.querySelector<HTMLElement>('.mm-services__lede');
             const servicesCategoryStage = servicesSection?.querySelector<HTMLElement>('.mm-services__category-stage');
-
-            if (servicesIntro) {
-              if (servicesTitle) {
-                const authoredTitleLines = gsap.utils.toArray<HTMLElement>(
-                  servicesTitle.querySelectorAll('.mm-services__title-line'),
-                );
-
-                const servicesTitleReveal = {
-                  trigger: servicesTitle,
-                  start: 'top 86%',
-                  end: sectionTitleDissolveEnd(),
-                  toggleActions: 'play reverse play reverse' as const,
-                  invalidateOnRefresh: true,
-                  ...stToggleActive(servicesIntro),
-                  ...scrollTriggerDefaults,
-                };
-
-                if (authoredTitleLines.length) {
-                  gsap.from(authoredTitleLines, {
-                    autoAlpha: 0,
-                    y: isNarrow ? 16 : 22,
-                    duration: isNarrow ? 0.72 : 0.95,
-                    stagger: { each: 0.075, from: 'start' },
-                    ease: 'power4.out',
-                    scrollTrigger: servicesTitleReveal,
-                  });
-                } else {
-                  SplitText.create(servicesTitle, {
-                    type: 'lines',
-                    linesClass: 'mm-services-title-line++',
-                    autoSplit: true,
-                    onSplit(self) {
-                      const linesTopToBottom = [...self.lines].sort(
-                        (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top,
-                      );
-
-                      return gsap.from(linesTopToBottom, {
-                        autoAlpha: 0,
-                        y: isNarrow ? 16 : 22,
-                        duration: isNarrow ? 0.72 : 0.95,
-                        stagger: { each: 0.075, from: 'start' },
-                        ease: 'power4.out',
-                        scrollTrigger: servicesTitleReveal,
-                      });
-                    },
-                  });
-                }
-
-                if (servicesLede) {
-                  SplitText.create(servicesLede, {
-                  type: 'lines',
-                  mask: 'lines',
-                  linesClass: 'mm-services-lede-line++',
-                  autoSplit: true,
-                  onSplit(self) {
-                    const linesTopToBottom = [...self.lines].sort(
-                      (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top,
-                    );
-
-                    return gsap.from(linesTopToBottom, {
-                      xPercent: 18,
-                      autoAlpha: 0,
-                      duration: 0.72,
-                      stagger: { each: 0.055, from: 'start' },
-                      ease: 'power3.out',
-                      scrollTrigger: {
-                        trigger: servicesIntro,
-                        start: 'top 86%',
-                        toggleActions: 'play none none none',
-                        ...scrollTriggerDefaults,
-                      },
-                    });
-                  },
-                });
-                }
-              } else {
-                gsap.set(servicesIntro, { autoAlpha: 1, y: 0 });
-                ScrollTrigger.create({
-                  trigger: servicesIntro,
-                  start: 'top 88%',
-                  toggleActions: 'play none none none',
-                  ...stToggleActive(servicesIntro),
-                  ...scrollTriggerDefaults,
-                });
-              }
-            }
 
             if (servicesCategoryStage) {
               gsap.fromTo(
