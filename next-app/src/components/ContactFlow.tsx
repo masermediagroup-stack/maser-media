@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import type React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clock3 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, Check, CheckCircle2, Clock3 } from "lucide-react";
+import { ContactTimeDial } from "@/components/ContactTimeDial";
 
 type ServiceId = "brand" | "web" | "copy" | "strategy" | "unsure";
 type BudgetId = "under-1000" | "1000-5000" | "5000-15000" | "15000-plus" | "unsure";
@@ -505,15 +506,40 @@ function ScheduleStep({
 
   return (
     <div className="contact-flow-scheduler">
-      <div className="contact-flow-calendar-panel">
-        <div className="contact-flow-calendar-head">
-          <span>Pick a date</span>
+      <div className="contact-flow-date-grid" role="group" aria-label="Available dates">
+        {bookingDates.map((date) => {
+          const id = toDateId(date);
+          const selected = data.callDate === id;
+
+          return (
+            <button
+              type="button"
+              key={id}
+              className={`contact-flow-date${selected ? " is-selected" : ""}`}
+              aria-pressed={selected}
+              onClick={() =>
+                setData((current) => ({
+                  ...current,
+                  callDate: id,
+                }))
+              }
+            >
+              <span>{new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date)}</span>
+              <strong>{date.getDate()}</strong>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="contact-flow-schedule-card">
+        <label className="contact-flow-date-row" htmlFor="contact-call-date">
           <strong>{selectedDateLabel}</strong>
-        </div>
-        <label className="contact-flow-date-input-label" htmlFor="contact-call-date">
+          <span className="contact-flow-date-cal" aria-hidden>
+            <Calendar size={18} strokeWidth={2.2} />
+          </span>
           <input
             id="contact-call-date"
-            className="contact-flow-input contact-flow-date-input"
+            className="contact-flow-date-row-input"
             type="date"
             min={minBookingDate}
             value={data.callDate}
@@ -526,33 +552,7 @@ function ScheduleStep({
             }}
           />
         </label>
-        <div className="contact-flow-date-grid" role="group" aria-label="Available dates">
-          {bookingDates.map((date) => {
-            const id = toDateId(date);
-            const selected = data.callDate === id;
 
-            return (
-              <button
-                type="button"
-                key={id}
-                className={`contact-flow-date${selected ? " is-selected" : ""}`}
-                aria-pressed={selected}
-                onClick={() =>
-                  setData((current) => ({
-                    ...current,
-                    callDate: id,
-                  }))
-                }
-              >
-                <span>{new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date)}</span>
-                <strong>{date.getDate()}</strong>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="contact-flow-time-panel">
         <div className="contact-flow-calendar-head contact-flow-time-head">
           <div className="contact-flow-time-head-start">
             <span>Pick a time</span>
@@ -563,23 +563,12 @@ function ScheduleStep({
           </div>
           <strong>{data.callTime ? `${data.callTime} CST` : "20m slots CST"}</strong>
         </div>
-        <div className="contact-flow-time-list" role="group" aria-label="Available times">
-          {TIME_SLOTS.map((time) => {
-            const selected = data.callTime === time;
 
-            return (
-              <button
-                type="button"
-                key={time}
-                className={`contact-flow-time${selected ? " is-selected" : ""}`}
-                aria-pressed={selected}
-                onClick={() => setData((current) => ({ ...current, callTime: time }))}
-              >
-                {time}
-              </button>
-            );
-          })}
-        </div>
+        <ContactTimeDial
+          slots={TIME_SLOTS}
+          value={data.callTime}
+          onChange={(callTime) => setData((current) => ({ ...current, callTime }))}
+        />
       </div>
     </div>
   );
