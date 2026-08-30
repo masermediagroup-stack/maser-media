@@ -561,9 +561,8 @@ export function Hero({ entrance, onCurtainDone, contentRevealed }: HeroProps) {
               priority
             />
             <h1 className="mm-hero__title">
-              {CONTENT.hero.storyTitle}
-              <br />
-              {CONTENT.hero.storyHighlight}
+              <span className="mm-hero__title-break">{CONTENT.hero.storyTitle}</span>
+              <span className="mm-hero__title-break">{CONTENT.hero.storyHighlight}</span>
             </h1>
             <p className="mm-hero__lead">{CONTENT.hero.lead}</p>
           </div>
@@ -664,7 +663,11 @@ export function Services() {
             data-mm-reveal-reset="hidden"
             data-mm-reveal-start="top 86%"
           >
-            <span className="mm-services__title-line">{CONTENT.services.title}</span>
+            {CONTENT.services.title.split(/(?<=\.)\s+/).map((line) => (
+              <span className="mm-services__title-line" key={line}>
+                {line}
+              </span>
+            ))}
           </h2>
         </div>
 

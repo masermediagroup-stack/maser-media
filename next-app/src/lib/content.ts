@@ -193,7 +193,7 @@ export const CONTENT: Content = {
     layout: 'editorial',
     badge: "One crew. Brand, product, and web.",
     storyTitle: "Need one creative team?",
-    storyHighlight: "HERE WE ARE.",
+    storyHighlight: "Here we are.",
     lead: "Fewer handoffs. Clearer outcomes.",
     trustStrip: ["Startups shipping fast", "Service brands going digital", "Founder-led products"],
     heroLogo: {
