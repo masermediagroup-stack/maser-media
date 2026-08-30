@@ -7535,6 +7535,14 @@ a.mm-client-name:focus-visible {
   overflow: visible !important;
 }
 
+.mm-section.mm-section--services.mm-services,
+.mm-services__shell,
+.mm-services__masthead,
+.mm-services__title,
+.mm-services__title-line {
+  overflow: visible !important;
+}
+
 .mm-services__masthead {
   max-width: min(100%, 50rem);
   padding-bottom: 1.2rem;
