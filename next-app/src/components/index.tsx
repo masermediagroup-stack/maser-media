@@ -433,11 +433,13 @@ export function Hero({ entrance, onCurtainDone, contentRevealed }: HeroProps) {
               className="mm-hero__mobile-logo"
               priority
             />
-            <h1 className="mm-hero__title">
-              <span className="mm-hero__title-break">{CONTENT.hero.storyTitle}</span>
-              <span className="mm-hero__title-break">{CONTENT.hero.storyHighlight}</span>
-            </h1>
-            <p className="mm-hero__lead">{CONTENT.hero.lead}</p>
+            <div className="mm-hero__headline">
+              <h1 className="mm-hero__title">
+                <span className="mm-hero__title-break">{CONTENT.hero.storyTitle}</span>
+                <span className="mm-hero__title-break">{CONTENT.hero.storyHighlight}</span>
+              </h1>
+              <p className="mm-hero__lead">{CONTENT.hero.lead}</p>
+            </div>
           </div>
         </div>
       </motion.div>

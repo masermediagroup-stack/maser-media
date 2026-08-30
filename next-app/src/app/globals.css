@@ -4397,8 +4397,17 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   margin-inline: auto;
   display: grid;
   justify-items: center;
+  gap: clamp(1rem, 3.2vw, 1.55rem);
   text-align: center;
   transform: translateY(clamp(-4.5rem, -10svh, -2.5rem));
+}
+
+.mm-hero__headline {
+  display: grid;
+  gap: clamp(0.28rem, 0.65vw, 0.42rem);
+  justify-items: center;
+  width: 100%;
+  max-width: min(100%, 56rem);
 }
 
 /* Primary display scale (hero h1); reuse on lower-level headings via .mm-type-display when a route must not duplicate h1. */
@@ -4418,8 +4427,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   color: #ffffff;
   text-align: center;
   overflow: visible;
-  /* Reserve the split-line box before intro play so the headline cannot re-seat after becoming visible. */
-  min-height: calc(var(--mm-type-display) * var(--mm-leading-display) * 2);
+  /* Two authored lines at this element’s font-size — not the global display clamp. */
+  min-height: calc(2 * 1lh);
 }
 
 .mm-hero__title-break {
@@ -4476,7 +4485,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-hero__lead {
   max-width: 46rem;
-  margin: clamp(0.55rem, 1.1vw, 0.85rem) 0 0;
+  margin: 0;
   color: #ffffff;
   font-size: var(--mm-type-body-small);
   font-weight: 470;
@@ -6712,7 +6721,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
   .mm-hero__lead {
     max-width: min(100%, 20.75rem);
-    margin-top: clamp(0.45rem, 2.4vw, 0.75rem);
+    margin: 0;
     color: #ffffff;
     font-size: var(--mm-type-body-small);
     line-height: 1.45;
