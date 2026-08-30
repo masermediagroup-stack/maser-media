@@ -13,6 +13,7 @@ export function RevealText({
   amount = 0.45,
   replay = false,
   blur = true,
+  singleLine = false,
 }: {
   text: string;
   className?: string;
@@ -22,18 +23,26 @@ export function RevealText({
   amount?: number;
   replay?: boolean;
   blur?: boolean;
+  singleLine?: boolean;
 }) {
   const parts = useMemo(() => text.split(/(\s+)/).filter(Boolean), [text]);
   const reduceMotion = useReducedMotion();
   const controls = useAnimationControls();
+  const revealClassName = [
+    'mm-reveal-text',
+    singleLine ? 'mm-reveal-text--single-line' : '',
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   if (reduceMotion) {
-    return <span className={`mm-reveal-text ${className}`}>{text}</span>;
+    return <span className={revealClassName}>{text}</span>;
   }
 
   return (
     <motion.span
-      className={`mm-reveal-text ${className}`}
+      className={revealClassName}
       initial="hidden"
       animate={replay ? controls : undefined}
       whileInView={replay ? undefined : 'show'}
@@ -83,16 +92,23 @@ export function RevealText({
   );
 }
 
-/** Homepage section H1/H2 dissolve — matches Our Work (`RevealText` + header inset). */
+/** Short section titles stay one row (word stagger, no vertical stack). */
+const SECTION_TITLE_SINGLE_LINE_MAX_WORDS = 5;
+
 export function SectionTitleReveal({
   text,
   className = '',
   wordClassName = '',
+  singleLine,
 }: {
   text: string;
   className?: string;
   wordClassName?: string;
+  singleLine?: boolean;
 }) {
+  const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+  const forceSingleLine = singleLine ?? wordCount <= SECTION_TITLE_SINGLE_LINE_MAX_WORDS;
+
   return (
     <RevealText
       text={text}
@@ -101,6 +117,7 @@ export function SectionTitleReveal({
       stagger={0.045}
       amount={0.62}
       replay
+      singleLine={forceSingleLine}
     />
   );
 }

@@ -5952,11 +5952,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-testimonials-wave__title {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
+  display: block;
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
@@ -5972,13 +5968,16 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-testimonials-wave__title-anim {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  justify-content: center;
   text-align: center;
   color: #07111f;
   overflow: visible;
   text-shadow: none;
+  white-space: nowrap;
 }
 
 .mm-testimonials-wave__title-line {
@@ -8891,6 +8890,19 @@ a.mm-client-name:focus-visible {
   flex-wrap: wrap;
   align-items: baseline;
   overflow: visible;
+}
+
+.mm-reveal-text--single-line {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.mm-reveal-text--single-line .mm-reveal-word,
+.mm-reveal-text--single-line .mm-reveal-space {
+  white-space: nowrap;
 }
 
 .mm-reveal-word {
