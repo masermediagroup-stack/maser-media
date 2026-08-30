@@ -3102,15 +3102,19 @@ button.premium-btn {
 .contact-flow-wrap {
   width: 100%;
   max-width: 880px;
+  min-width: 0;
   margin: 0 auto;
   color: #0a0a0a;
 }
 
 .contact-flow-shell {
   display: flex;
+  min-width: 0;
   min-height: 0;
+  max-width: 100%;
   flex-direction: column;
   gap: clamp(1rem, 2.4vw, 1.45rem);
+  overflow-x: hidden;
   border-radius: 28px;
   padding: clamp(1.75rem, 3.8vw, 2.55rem) clamp(1.35rem, 4vw, 2.45rem) clamp(1.35rem, 3.2vw, 2rem);
   background: #fff;
@@ -3124,7 +3128,8 @@ button.premium-btn {
   text-align: center;
 }
 
-.contact-flow-header {
+.contact-flow-header,
+.contact-flow-progress {
   max-width: calc(100% - 3.2rem);
 }
 
@@ -3155,7 +3160,10 @@ button.premium-btn {
 }
 
 .contact-flow-progress {
+  width: 100%;
+  min-width: 0;
   height: 6px;
+  box-sizing: border-box;
   border-radius: 999px;
   overflow: hidden;
   background: #e8e8e8;
@@ -3170,7 +3178,9 @@ button.premium-btn {
 }
 
 .contact-flow-step {
+  min-width: 0;
   min-height: 0;
+  max-width: 100%;
 }
 
 .contact-flow-scheduler {
@@ -3185,6 +3195,7 @@ button.premium-btn {
 .contact-flow-calendar-panel,
 .contact-flow-time-panel {
   min-width: 0;
+  max-width: 100%;
   padding: clamp(1rem, 2.2vw, 1.35rem);
 }
 
@@ -3239,8 +3250,9 @@ button.premium-btn {
 
 .contact-flow-date-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(3.25rem, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .contact-flow-weekdays {
@@ -3289,6 +3301,7 @@ button.premium-btn {
 .contact-flow-time-list {
   display: grid;
   gap: 0.55rem;
+  min-width: 0;
   max-height: 15.65rem;
   overflow: auto;
   padding-right: 0;
@@ -3623,13 +3636,6 @@ button.premium-btn {
 
   .contact-flow-shell {
     min-height: auto;
-  }
-
-  .contact-flow-grid--services,
-  .contact-flow-grid--budget,
-  .contact-flow-grid--heard-about,
-  .contact-flow-actions {
-    grid-template-columns: 1fr;
   }
 
   .contact-flow-scheduler {
@@ -7297,7 +7303,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .liquid-contact-modal {
   position: fixed !important;
-  overflow: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
   padding-top: 0 !important;
 }
 
@@ -7366,6 +7373,193 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .liquid-contact-modal .contact-flow-wrap {
   padding-top: 1.25rem !important;
+}
+
+@media (max-width: 760px) {
+  .liquid-contact-modal {
+    overflow-x: hidden !important;
+  }
+
+  .liquid-contact-modal .contact-flow-wrap {
+    padding-top: 0.7rem !important;
+  }
+
+  .contact-flow-header,
+  .contact-flow-progress {
+    max-width: calc(100% - 3.2rem);
+  }
+
+  .contact-flow-shell {
+    gap: 0.55rem;
+    padding: 0.95rem 0.9rem 0.8rem;
+  }
+
+  .contact-flow-step-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+  }
+
+  .contact-flow-title {
+    margin-top: 0.28rem;
+  }
+
+  .contact-flow-subtitle {
+    margin-top: 0.28rem;
+    font-size: 0.88rem;
+    line-height: 1.35;
+  }
+
+  .contact-flow-grid {
+    gap: 0.4rem;
+  }
+
+  .contact-flow-grid--services,
+  .contact-flow-grid--budget,
+  .contact-flow-grid--heard-about,
+  .contact-flow-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .contact-flow-option,
+  .contact-flow-input,
+  .contact-flow-primary,
+  .contact-flow-back {
+    min-height: 2.4rem;
+    border-radius: 12px;
+  }
+
+  .contact-flow-option {
+    gap: 0.45rem;
+    padding: 0.38rem 0.62rem;
+  }
+
+  .contact-flow-option-label {
+    font-size: 0.82rem;
+    line-height: 1.15;
+  }
+
+  .contact-flow-option-check {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .contact-flow-option--budget,
+  .contact-flow-option--heard-about {
+    min-height: 2.25rem;
+    padding-inline: 0.62rem;
+  }
+
+  .contact-flow-primary,
+  .contact-flow-back {
+    gap: 0.35rem;
+    padding-inline: 0.55rem;
+    font-size: 0.82rem;
+  }
+
+  .contact-flow-primary svg,
+  .contact-flow-back svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .contact-flow-fields {
+    gap: 0.65rem;
+  }
+
+  .contact-flow-input {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.92rem;
+  }
+
+  .contact-flow-textarea {
+    min-height: 7.25rem;
+  }
+
+  .contact-flow-text-field {
+    gap: 0.3rem;
+    font-size: 0.88rem;
+  }
+
+  .contact-flow-field-note {
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+
+  .contact-flow-calendar-panel,
+  .contact-flow-time-panel {
+    padding: 0.55rem 0.6rem;
+  }
+
+  .contact-flow-calendar-head {
+    gap: 0.45rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .contact-flow-calendar-head span {
+    font-size: 0.62rem;
+  }
+
+  .contact-flow-calendar-head strong {
+    font-size: 0.78rem;
+  }
+
+  .contact-flow-call-duration {
+    gap: 0.22rem;
+    font-size: 0.72rem;
+  }
+
+  .contact-flow-call-duration svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .contact-flow-date-input-label {
+    gap: 0.28rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .contact-flow-date-input {
+    min-height: 2.15rem;
+    border-radius: 10px;
+    padding-block: 0.28rem;
+  }
+
+  .contact-flow-date-grid {
+    gap: 0.28rem;
+  }
+
+  .contact-flow-date {
+    min-height: 2.15rem;
+    gap: 0.04rem;
+    border-radius: 8px;
+  }
+
+  .contact-flow-date span {
+    font-size: 0.58rem;
+  }
+
+  .contact-flow-date strong {
+    font-size: 0.82rem;
+  }
+
+  .contact-flow-time-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.22rem;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .contact-flow-time {
+    min-height: 1.55rem;
+    border-radius: 8px;
+    padding: 0.12rem 0.15rem;
+    font-size: 0.68rem;
+    white-space: nowrap;
+  }
+
+  .contact-flow-actions {
+    gap: 0.45rem;
+  }
 }
 
 /* Browser comment pass: light launch sections and gradient trust word. */

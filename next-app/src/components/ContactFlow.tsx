@@ -90,7 +90,7 @@ const STEP_COPY = [
     helper: "This helps us understand where the right people are finding Maser Media.",
   },
   {
-    title: "Lets Meet.",
+    title: "Let's Meet.",
     helper: "Begin your creative partnership with Maser Media.",
   },
   {
