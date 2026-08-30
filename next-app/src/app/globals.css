@@ -7625,6 +7625,7 @@ a.mm-client-name:focus-visible {
 .mm-home-slate > .mm-proof-band .mm-section.mm-section--clients.mm-clients,
 .mm-home-slate > .mm-section.mm-section--services.mm-services,
 .mm-home-slate > .mm-proof-band .mm-section.mm-section--services.mm-services,
+.mm-home-slate > .mm-section.mm-trust,
 .mm-home-slate > .mm-section.mm-section--process.mm-process-bento,
 .mm-home-slate > .mm-section.mm-section--work.mm-work,
 .mm-home-slate > .mm-section.mm-section--testimonials.testimonials-carousel.mm-testimonials-wave,
@@ -8203,6 +8204,8 @@ a.mm-client-name:focus-visible {
   z-index: 0;
 }
 
+.mm-home-slate > .mm-proof-band + .mm-section.mm-trust,
+.mm-home-slate > .mm-section.mm-trust + .mm-section.mm-section--process.mm-process-bento,
 .mm-home-slate > .mm-proof-band + .mm-section.mm-section--process.mm-process-bento,
 .mm-home-slate > .mm-section.mm-section--services.mm-services + .mm-section.mm-section--process.mm-process-bento,
 .mm-main > .mm-section.mm-section--services.mm-services + .mm-section.mm-section--process.mm-process-bento {

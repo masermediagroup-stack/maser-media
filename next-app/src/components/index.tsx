@@ -1069,6 +1069,7 @@ export function LandingPage({
       </div>
       <div className="mm-home-slate">
         <ProofBand />
+        <TrustSection />
         <ProcessBento />
         <Work />
         <Testimonials />
