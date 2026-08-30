@@ -17,6 +17,7 @@ import { isContactModalHref, openContactModalFromApp } from '@/lib/contactModalE
 import { HeroShaderBackground } from '@/components/hero-shader';
 import { useGsapLandingMotion, useMmScrollReveals } from '@/hooks/useGsapLandingMotion';
 import { useIsClient } from '@/hooks/useIsClient';
+import { TITLE_DISSOLVE_VIEWPORT } from '@/lib/stickyHeader';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { HOME_INTRO_CURTAIN_MS } from '@/lib/homeIntro';
 import { sanitizeScrollArtifacts } from '@/lib/scrollSanitize';
@@ -282,7 +283,7 @@ function FlipText({
       whileInView={replay ? undefined : 'show'}
       onViewportEnter={replay ? () => void controls.start('show') : undefined}
       onViewportLeave={replay ? () => void controls.start('hidden') : undefined}
-      viewport={{ once: !replay, amount: 0.65 }}
+      viewport={{ once: !replay, ...(replay ? TITLE_DISSOLVE_VIEWPORT : { amount: 0.65 }) }}
       aria-label={text}
     >
       {parts.map((part, index) => {
@@ -344,7 +345,7 @@ function RevealText({
       whileInView={replay ? undefined : 'show'}
       onViewportEnter={replay ? () => void controls.start('show') : undefined}
       onViewportLeave={replay ? () => void controls.start('hidden') : undefined}
-      viewport={{ once: !replay, amount }}
+      viewport={{ once: !replay, ...(replay ? TITLE_DISSOLVE_VIEWPORT : { amount }) }}
       variants={{
         hidden: {},
         show: {
@@ -1282,6 +1283,7 @@ export function Testimonials() {
                 data-mm-reveal="blur"
                 data-mm-reveal-repeat="true"
                 data-mm-reveal-reset="hidden"
+                data-mm-reveal-until="header"
               >
                 {title}
               </span>

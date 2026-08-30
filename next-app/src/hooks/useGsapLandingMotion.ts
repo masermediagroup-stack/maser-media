@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef } from 'react';
 import type { RefObject } from 'react';
+import { sectionTitleDissolveEnd } from '@/lib/stickyHeader';
 
 function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined') return false;
@@ -130,6 +131,7 @@ function bindLandingScrollReveals(
       : el;
     const repeat = el.dataset.mmRevealRepeat === 'true';
     const resetHidden = (el.dataset.mmRevealReset ?? 'hidden') === 'hidden';
+    const untilHeader = el.dataset.mmRevealUntil === 'header';
     const fromVars = revealFromVars(kind, isNarrow);
     const toVars = {
       ...revealToVars(kind),
@@ -143,17 +145,22 @@ function bindLandingScrollReveals(
       ScrollTrigger.create({
         trigger,
         start: el.dataset.mmRevealStart ?? 'top 88%',
+        ...(untilHeader ? { end: sectionTitleDissolveEnd(), invalidateOnRefresh: true } : {}),
         onEnter: () => {
-          timeline.restart();
+          if (untilHeader) timeline.play();
+          else timeline.restart();
         },
         onEnterBack: () => {
-          timeline.restart();
+          if (untilHeader) timeline.play();
+          else timeline.restart();
         },
         onLeave: () => {
-          if (resetHidden) timeline.pause(0);
+          if (untilHeader) timeline.reverse();
+          else if (resetHidden) timeline.pause(0);
         },
         onLeaveBack: () => {
-          if (resetHidden) timeline.pause(0);
+          if (untilHeader) timeline.reverse();
+          else if (resetHidden) timeline.pause(0);
         },
         ...stDefaults,
       });
@@ -166,7 +173,13 @@ function bindLandingScrollReveals(
       scrollTrigger: {
         trigger,
         start: el.dataset.mmRevealStart ?? 'top 88%',
-        toggleActions: 'play none none none',
+        ...(untilHeader
+          ? {
+              end: sectionTitleDissolveEnd(),
+              toggleActions: 'play reverse play reverse',
+              invalidateOnRefresh: true,
+            }
+          : { toggleActions: 'play none none none' }),
         ...stDefaults,
       },
     });
@@ -180,6 +193,7 @@ function bindLandingScrollReveals(
     const stagger = Number.parseFloat(group.dataset.mmRevealStagger ?? '') || (isNarrow ? 0.1 : 0.12);
     const repeat = group.dataset.mmRevealRepeat === 'true';
     const resetHidden = (group.dataset.mmRevealReset ?? 'hidden') === 'hidden';
+    const untilHeader = group.dataset.mmRevealUntil === 'header';
     const fromVars = revealFromVars(kind, isNarrow);
     const toVars = {
       ...revealToVars(kind),
@@ -194,17 +208,22 @@ function bindLandingScrollReveals(
       ScrollTrigger.create({
         trigger: group,
         start: group.dataset.mmRevealStart ?? 'top 86%',
+        ...(untilHeader ? { end: sectionTitleDissolveEnd(), invalidateOnRefresh: true } : {}),
         onEnter: () => {
-          timeline.restart();
+          if (untilHeader) timeline.play();
+          else timeline.restart();
         },
         onEnterBack: () => {
-          timeline.restart();
+          if (untilHeader) timeline.play();
+          else timeline.restart();
         },
         onLeave: () => {
-          if (resetHidden) timeline.pause(0);
+          if (untilHeader) timeline.reverse();
+          else if (resetHidden) timeline.pause(0);
         },
         onLeaveBack: () => {
-          if (resetHidden) timeline.pause(0);
+          if (untilHeader) timeline.reverse();
+          else if (resetHidden) timeline.pause(0);
         },
         ...stDefaults,
       });
@@ -217,7 +236,13 @@ function bindLandingScrollReveals(
       scrollTrigger: {
         trigger: group,
         start: group.dataset.mmRevealStart ?? 'top 86%',
-        toggleActions: 'play none none none',
+        ...(untilHeader
+          ? {
+              end: sectionTitleDissolveEnd(),
+              toggleActions: 'play reverse play reverse',
+              invalidateOnRefresh: true,
+            }
+          : { toggleActions: 'play none none none' }),
         ...stDefaults,
       },
     });
@@ -588,9 +613,11 @@ export function useGsapLandingMotion(
                   duration: isNarrow ? 1.45 : 1.85,
                   ease: 'power2.out',
                   scrollTrigger: {
-                    trigger: clientsSection ?? clientsHeadlineText,
+                    trigger: clientsHeadlineText,
                     start: 'top 88%',
-                    toggleActions: 'play none none none',
+                    end: sectionTitleDissolveEnd(),
+                    toggleActions: 'play reverse play reverse',
+                    invalidateOnRefresh: true,
                     ...stToggleActive(clientsHeadlineText),
                     ...scrollTriggerDefaults,
                   },
@@ -657,6 +684,16 @@ export function useGsapLandingMotion(
                   servicesTitle.querySelectorAll('.mm-services__title-line'),
                 );
 
+                const servicesTitleReveal = {
+                  trigger: servicesTitle,
+                  start: 'top 86%',
+                  end: sectionTitleDissolveEnd(),
+                  toggleActions: 'play reverse play reverse' as const,
+                  invalidateOnRefresh: true,
+                  ...stToggleActive(servicesIntro),
+                  ...scrollTriggerDefaults,
+                };
+
                 if (authoredTitleLines.length) {
                   gsap.from(authoredTitleLines, {
                     autoAlpha: 0,
@@ -664,13 +701,7 @@ export function useGsapLandingMotion(
                     duration: isNarrow ? 0.72 : 0.95,
                     stagger: { each: 0.075, from: 'start' },
                     ease: 'power4.out',
-                    scrollTrigger: {
-                      trigger: servicesIntro,
-                      start: 'top 86%',
-                      toggleActions: 'play none none none',
-                      ...stToggleActive(servicesIntro),
-                      ...scrollTriggerDefaults,
-                    },
+                    scrollTrigger: servicesTitleReveal,
                   });
                 } else {
                   SplitText.create(servicesTitle, {
@@ -688,13 +719,7 @@ export function useGsapLandingMotion(
                         duration: isNarrow ? 0.72 : 0.95,
                         stagger: { each: 0.075, from: 'start' },
                         ease: 'power4.out',
-                        scrollTrigger: {
-                          trigger: servicesIntro,
-                          start: 'top 86%',
-                          toggleActions: 'play none none none',
-                          ...stToggleActive(servicesIntro),
-                          ...scrollTriggerDefaults,
-                        },
+                        scrollTrigger: servicesTitleReveal,
                       });
                     },
                   });

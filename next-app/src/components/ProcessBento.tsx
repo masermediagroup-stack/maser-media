@@ -129,6 +129,7 @@ export function ProcessBento() {
         data-mm-reveal-repeat="true"
         data-mm-reveal-reset="hidden"
         data-mm-reveal-start="top 88%"
+        data-mm-reveal-until="header"
       >
         <h2 id="process-title">{title}</h2>
         <p>{subtitle}</p>
