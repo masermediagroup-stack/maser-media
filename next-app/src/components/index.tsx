@@ -653,16 +653,9 @@ export function Services() {
       id="services"
       aria-labelledby="services-heading"
     >
-      <div className="mm-services__shell mm-services-laydown-stage">
+      <div className="mm-services__shell">
         <div className="mm-services__masthead">
-          <h2
-            id="services-heading"
-            className="mm-services__title"
-            data-mm-reveal="fade"
-            data-mm-reveal-repeat="true"
-            data-mm-reveal-reset="hidden"
-            data-mm-reveal-start="top 86%"
-          >
+          <h2 id="services-heading" className="mm-services__title">
             {CONTENT.services.title.split(/(?<=\.)\s+/).map((line) => (
               <span className="mm-services__title-line" key={line}>
                 {line}
@@ -671,6 +664,7 @@ export function Services() {
           </h2>
         </div>
 
+        <div className="mm-services-laydown-stage">
         <div ref={laydownRef} className="mm-services-laydown-plane" data-mm-services-laydown>
           <Accordion className="mm-services__accordion">
             {pillars.map((pillar) => {
@@ -700,6 +694,7 @@ export function Services() {
               );
             })}
           </Accordion>
+        </div>
         </div>
 
         <button

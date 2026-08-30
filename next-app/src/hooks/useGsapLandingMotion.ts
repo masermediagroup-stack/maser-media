@@ -659,9 +659,8 @@ export function useGsapLandingMotion(
 
                 if (authoredTitleLines.length) {
                   gsap.from(authoredTitleLines, {
-                    xPercent: -16,
-                    yPercent: 18,
                     autoAlpha: 0,
+                    y: isNarrow ? 16 : 22,
                     duration: isNarrow ? 0.72 : 0.95,
                     stagger: { each: 0.075, from: 'start' },
                     ease: 'power4.out',
@@ -684,9 +683,8 @@ export function useGsapLandingMotion(
                       );
 
                       return gsap.from(linesTopToBottom, {
-                        xPercent: -16,
-                        yPercent: 18,
                         autoAlpha: 0,
+                        y: isNarrow ? 16 : 22,
                         duration: isNarrow ? 0.72 : 0.95,
                         stagger: { each: 0.075, from: 'start' },
                         ease: 'power4.out',
