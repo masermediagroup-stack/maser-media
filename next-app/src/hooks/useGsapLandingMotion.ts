@@ -277,15 +277,18 @@ export function useGsapLandingMotion(
       let introPlayed = false;
       let introPrepared = false;
 
+      const clearHeroTitleInlineMinHeight = (heroTitleEl: HTMLElement | null | undefined) => {
+        if (!heroTitleEl) return;
+        heroTitleEl.style.removeProperty('min-height');
+      };
+
       const markIntroPrepared = (heroTitleEl: HTMLElement | null | undefined) => {
         if (introPrepared) return;
         introPrepared = true;
-        if (heroTitleEl) {
-          const measuredHeight = heroTitleEl.offsetHeight;
-          if (measuredHeight > 0) {
-            heroTitleEl.style.minHeight = `${measuredHeight}px`;
-          }
-        }
+        // Keep min-height on `.mm-hero__title` in CSS (`2 * 1lh`) — do not lock px here.
+        // offsetHeight at split time uses the current breakpoint font, then sticks on resize
+        // and leaves a hero-height dead band between the H1 and sub on mobile.
+        clearHeroTitleInlineMinHeight(heroTitleEl);
         onHeroIntroPreparedRef.current?.();
       };
 
@@ -378,10 +381,20 @@ export function useGsapLandingMotion(
           heroIntroCompleteCount += 1;
           if (!heroIntroDone && heroIntroCompleteCount >= heroIntroSegmentCount) {
             heroIntroDone = true;
+            clearHeroTitleInlineMinHeight(heroTitle);
             root.dataset.heroMotion = 'ready';
             onHeroIntroDoneRef.current?.();
           }
         };
+
+        if (heroTitle) {
+          mm.add('(max-width: 767px)', () => {
+            clearHeroTitleInlineMinHeight(heroTitle);
+          });
+          mm.add('(min-width: 768px)', () => {
+            clearHeroTitleInlineMinHeight(heroTitle);
+          });
+        }
 
         if (!prepareHeroIntro) {
           root.dataset.heroMotion = 'ready';

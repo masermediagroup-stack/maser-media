@@ -4404,7 +4404,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-hero__headline {
   display: grid;
-  gap: clamp(0.28rem, 0.65vw, 0.42rem);
+  gap: clamp(0.16rem, 0.42vw, 0.34rem);
   justify-items: center;
   width: 100%;
   max-width: min(100%, 56rem);
@@ -4429,6 +4429,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   overflow: visible;
   /* Two authored lines at this element’s font-size — not the global display clamp. */
   min-height: calc(2 * 1lh);
+  /* SplitText line masks add slight vertical bleed; pull the sub up to sit under the last line. */
+  margin-block-end: -0.14em;
 }
 
 .mm-hero__title-break {
@@ -4491,6 +4493,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   font-weight: 470;
   line-height: 1.55;
   text-align: center;
+  /* Counter title mask bleed inside `.mm-hero__headline` without reintroducing margin-top. */
+  margin-block-start: -0.06em;
 }
 
 .mm-hero__actions,
