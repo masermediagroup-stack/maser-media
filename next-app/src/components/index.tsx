@@ -28,6 +28,7 @@ import { FooterCoolButton } from './FooterCoolButton';
 import { AuroraShader, MASER_AURORA_COLOR_STOPS } from './AuroraShader';
 import { ProcessBento } from './ProcessBento';
 import { CtaLogoTilt } from './CtaLogoTilt';
+import { LiquidMetalMeatballs } from '@/components/meatballs';
 
 type EntranceProps = { entrance?: boolean };
 type NavProps = EntranceProps & { introReady?: boolean };
@@ -594,7 +595,18 @@ export function Clients() {
       <ul className="mm-clients__grid" role="list">
         {items.map((item) => (
           <li key={item.name} className="mm-clients__grid-item">
-            <span className="mm-client-name">{item.name}</span>
+            {item.href ? (
+              <a
+                className="mm-client-name"
+                href={item.href}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {item.name}
+              </a>
+            ) : (
+              <span className="mm-client-name">{item.name}</span>
+            )}
           </li>
         ))}
       </ul>
@@ -675,16 +687,9 @@ export function Services() {
                   <AccordionContent className="mm-services__accordion-content">
                     <ul className="mm-services__service-grid">
                       {pillar.items.map((service) => (
-                        <motion.li
-                          className="mm-services__service-card"
-                          key={service.label}
-                          initial={{ opacity: 0, y: 12 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true, amount: 0.35 }}
-                          transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
-                        >
+                        <li className="mm-services__service-card" key={service.label}>
                           <h3>{service.label}</h3>
-                        </motion.li>
+                        </li>
                       ))}
                     </ul>
                   </AccordionContent>
@@ -990,6 +995,20 @@ export function Footer() {
   );
 }
 
+function ProofBand() {
+  const bandRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div ref={bandRef} className="mm-proof-band">
+      <LiquidMetalMeatballs triggerRef={bandRef} className="mm-proof-band__field" />
+      <div className="mm-proof-band__content">
+        <Clients />
+        <Services />
+      </div>
+    </div>
+  );
+}
+
 export function LandingPage({
   entrance = true,
   onCurtainReveal,
@@ -1049,8 +1068,7 @@ export function LandingPage({
         />
       </div>
       <div className="mm-home-slate">
-        <Clients />
-        <Services />
+        <ProofBand />
         <ProcessBento />
         <Work />
         <Testimonials />

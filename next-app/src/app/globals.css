@@ -3776,6 +3776,7 @@ body.mm-intro-complete .mm-preload-fallback {
 }
 
 .mm-home-slate > .mm-section,
+.mm-home-slate > .mm-proof-band .mm-section,
 .mm-home-slate > .mm-cta,
 .mm-home-slate > .mm-footer,
 .mm-home-slate .mm-cta__surface,
@@ -3787,6 +3788,28 @@ body.mm-intro-complete .mm-preload-fallback {
 .mm-hero-scene {
   position: relative;
   width: 100%;
+}
+
+.mm-proof-band {
+  position: relative;
+  isolation: isolate;
+}
+
+.mm-proof-band__field,
+.mm-proof-band .lmm-canvas,
+.mm-proof-band .lmm-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.52;
+}
+
+.mm-proof-band__content {
+  position: relative;
+  z-index: 1;
 }
 
 @media (min-width: 768px) and (pointer: fine) {
@@ -4894,9 +4917,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   color: var(--mm-services-ink);
   text-decoration: none !important;
   transform-origin: center;
-  transition:
-    color 260ms ease,
-    padding 260ms ease;
+  transition: color 260ms ease;
 }
 
 .mm-services__accordion-trigger:hover,
@@ -4959,51 +4980,94 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 .mm-services__accordion-content {
   grid-template-rows: 0fr;
   opacity: 0;
+  overflow: hidden;
   padding: 0;
+  transition:
+    grid-template-rows 280ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 180ms ease;
 }
 
 .mm-services__accordion-content[data-state='open'] {
   grid-template-rows: 1fr;
   opacity: 1;
-  overflow: visible;
+}
+
+.mm-services__accordion-content [data-slot='accordion-content-inner'] {
+  overflow: hidden;
   padding-bottom: clamp(1.2rem, 2.4vw, 1.65rem);
 }
 
 .mm-services__accordion-content[data-state='open'] [data-slot='accordion-content-inner'] {
-  overflow: visible;
+  overflow: hidden;
 }
 
 .mm-services__service-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem 1.35rem;
-  margin: 0 0 0.85rem;
-  padding: 0 0 0.35rem;
+  gap: 0.55rem 0.6rem;
+  margin: 0.15rem 0 0.35rem;
+  padding: 0;
   list-style: none;
 }
 
 .mm-services__service-card {
   position: relative;
-  display: block;
+  display: inline-flex;
   min-width: 0;
-  padding: 0.15rem 0;
+  margin: 0;
+  padding: 0;
   border: 0;
-  border-radius: 0;
-  overflow: visible;
   background: transparent;
   box-shadow: none;
-  transition: color 220ms ease;
 }
 
 .mm-services__service-card h3 {
   position: relative;
   z-index: 1;
+  display: inline-flex;
+  align-items: center;
   margin: 0;
+  padding: 0.52rem 1.05rem;
+  border: 1px solid rgba(7, 17, 31, 0.14);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(239, 239, 239, 0.78));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 1px 2px rgba(7, 17, 31, 0.04);
   color: var(--mm-services-ink);
-  font-size: 0.95rem;
-  font-weight: 680;
-  line-height: 1.3;
-  transition: color 220ms ease;
+  font-size: clamp(1.05rem, 1.7vw, 1.28rem);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition:
+    color 220ms ease,
+    border-color 220ms ease,
+    background 220ms ease;
+}
+
+.mm-services__accordion-content[data-state='open'] .mm-services__service-card {
+  animation: mm-service-badge-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.mm-services__accordion-content[data-state='open'] .mm-services__service-card:nth-child(1) { animation-delay: 20ms; }
+.mm-services__accordion-content[data-state='open'] .mm-services__service-card:nth-child(2) { animation-delay: 40ms; }
+.mm-services__accordion-content[data-state='open'] .mm-services__service-card:nth-child(3) { animation-delay: 60ms; }
+.mm-services__accordion-content[data-state='open'] .mm-services__service-card:nth-child(4) { animation-delay: 80ms; }
+.mm-services__accordion-content[data-state='open'] .mm-services__service-card:nth-child(5) { animation-delay: 100ms; }
+.mm-services__accordion-content[data-state='open'] .mm-services__service-card:nth-child(6) { animation-delay: 120ms; }
+.mm-services__accordion-content[data-state='open'] .mm-services__service-card:nth-child(7) { animation-delay: 140ms; }
+
+@keyframes mm-service-badge-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .mm-services__service-card p {
@@ -5019,6 +5083,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 .mm-services__service-card:hover h3,
 .mm-services__service-card:focus-within h3 {
   color: var(--mm-blue, #10a4ff);
+  border-color: rgba(16, 164, 255, 0.38);
 }
 
 .mm-services__service-card:hover p,
@@ -5105,6 +5170,14 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 @media (prefers-reduced-motion: reduce) {
   .accordion-chevron {
     transition: none;
+  }
+
+  .mm-services__accordion-content {
+    transition: none;
+  }
+
+  .mm-services__accordion-content[data-state='open'] .mm-services__service-card {
+    animation: none;
   }
 
   .mm-services__contact,
@@ -7316,7 +7389,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 @media (min-width: 720px) {
   .mm-clients__grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
   }
 }
 
@@ -7347,8 +7420,14 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   line-height: 1.35;
   text-align: center;
   text-wrap: balance;
+  text-decoration: none;
   backface-visibility: hidden;
   will-change: opacity, transform;
+}
+
+a.mm-client-name:hover,
+a.mm-client-name:focus-visible {
+  color: var(--mm-blue, #10a4ff);
 }
 
 .mm-clients .mm-client-name .mm-client-line,
@@ -7543,7 +7622,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 /* Homepage: one shared plate. Beat per-section paper fills so rooms do not repaint. */
 .mm-home-slate > .mm-section.mm-section--clients.mm-clients,
+.mm-home-slate > .mm-proof-band .mm-section.mm-section--clients.mm-clients,
 .mm-home-slate > .mm-section.mm-section--services.mm-services,
+.mm-home-slate > .mm-proof-band .mm-section.mm-section--services.mm-services,
 .mm-home-slate > .mm-section.mm-section--process.mm-process-bento,
 .mm-home-slate > .mm-section.mm-section--work.mm-work,
 .mm-home-slate > .mm-section.mm-section--testimonials.testimonials-carousel.mm-testimonials-wave,
@@ -8122,6 +8203,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   z-index: 0;
 }
 
+.mm-home-slate > .mm-proof-band + .mm-section.mm-section--process.mm-process-bento,
 .mm-home-slate > .mm-section.mm-section--services.mm-services + .mm-section.mm-section--process.mm-process-bento,
 .mm-main > .mm-section.mm-section--services.mm-services + .mm-section.mm-section--process.mm-process-bento {
   margin-top: -2px;
@@ -9414,7 +9496,13 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-services-laydown-plane--ready {
   opacity: 1;
-  transform: translateZ(0);
+  transform: none;
+  transform-style: flat;
+  will-change: auto;
+}
+
+.mm-services-laydown-stage:has(.mm-services-laydown-plane--ready) {
+  perspective: none;
 }
 
 .mm-tactile-button,

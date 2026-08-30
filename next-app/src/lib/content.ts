@@ -45,6 +45,7 @@ export interface HeroConfig {
 export interface ClientItem {
   name: string;
   logo: string | null;
+  href?: string;
 }
 
 export interface ServiceItem {
@@ -193,7 +194,7 @@ export const CONTENT: Content = {
     badge: "One crew. Brand, product, and web.",
     storyTitle: "Need one creative team?",
     storyHighlight: "HERE WE ARE.",
-    lead: "We work as one integrated studio so your story, visuals, and site stay aligned from first sketch to launch - fewer handoffs, clearer outcomes.",
+    lead: "Fewer handoffs. Clearer outcomes.",
     trustStrip: ["Startups shipping fast", "Service brands going digital", "Founder-led products"],
     heroLogo: {
       src: "/assets/logo-maser-cloud-white-transparent.png",
@@ -223,6 +224,7 @@ export const CONTENT: Content = {
       { name: "Paradox Customs", logo: null },
       { name: "Main Street Pub & Grub", logo: null },
       { name: "Cat Eye Construction", logo: null },
+      { name: "319Junk", logo: null, href: "https://319junk.com" },
     ],
     supportingLabel: "",
     categories: [],
@@ -358,29 +360,28 @@ export const CONTENT: Content = {
   },
 
   whyMaserMedia: {
-    title: "Why Maser Media",
-    subtitle:
-      "Maser Media is built for companies, startups, and brands that need a polished brand presence without slow layers.",
-    pullQuote: "One studio. Clear decisions. Launch-ready work.",
+    title: "Why it's us",
+    subtitle: "Tyler on the look. Grayson on the story. Same two people the whole way.",
+    pullQuote: "Two creatives. Tired of watching shops drop the ball.",
     items: [
       {
         id: "direct",
-        title: "Direct communication",
-        text: "You work close to the people making the decisions and the work, so feedback stays visible and turns into progress quickly.",
+        title: "You talk to us.",
+        text: "Feedback hits the people making it.",
         icon: "direct",
         variant: "hero",
       },
       {
         id: "system",
-        title: "One connected system",
-        text: "Brand, website, content, and launch assets share one point of view, so the final experience feels aligned instead of stitched together.",
+        title: "One job.",
+        text: "Brand, site, and launch stay together.",
         icon: "system",
         variant: "card",
       },
       {
         id: "launch",
-        title: "Built for launch pressure",
-        text: "Every sprint is scoped around clear decisions, realistic timelines, reusable assets, and what your team needs to send next.",
+        title: "Ready to send.",
+        text: "We scope for what you need next week.",
         icon: "launch",
         variant: "accent",
       },
