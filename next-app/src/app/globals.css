@@ -5540,7 +5540,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-flip-text {
-  display: inline;
+  display: inline-block;
+  max-width: 100%;
   perspective: 900px;
 }
 
@@ -9164,7 +9165,10 @@ a.mm-client-name:focus-visible {
 }
 
 .mm-reveal-text {
-  display: inline;
+  /* inline-block so IntersectionObserver has a real box; inline collapsed
+     mid-wrap ledes and left words stuck at the hidden 14% opacity. */
+  display: inline-block;
+  max-width: 100%;
   overflow: visible;
 }
 

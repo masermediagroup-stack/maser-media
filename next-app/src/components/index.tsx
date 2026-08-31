@@ -549,10 +549,10 @@ export function Services() {
                   <AccordionTrigger className="mm-services__accordion-trigger">
                     <span className="mm-services__accordion-trigger-copy">
                       <span className="mm-services__accordion-title">
-                        <RevealText text={pillar.title} amount={0.6} blur={false} />
+                        <RevealText text={pillar.title} amount={0.15} blur={false} />
                       </span>
                       <span className="mm-services__accordion-summary">
-                        <RevealText text={pillar.lede} stagger={0.015} amount={0.55} blur={false} />
+                        <RevealText text={pillar.lede} stagger={0.015} amount={0.15} blur={false} />
                       </span>
                     </span>
                   </AccordionTrigger>
@@ -678,7 +678,7 @@ export function Work({ stacked = true }: WorkProps = {}) {
                 className="mm-splitting-text"
                 stagger={0.018}
                 delay={0.12}
-                replay
+                amount={0.15}
               />
             </p>
           ) : null}

@@ -43,6 +43,7 @@ export function RevealText({
   const reduceMotion = useReducedMotion();
   const controls = useAnimationControls();
   const dissolveViewport = useTitleDissolveViewport();
+  const reverseOnLeave = replay && !dissolveViewport.once;
   const revealClassName = [
     'mm-reveal-text',
     singleLine ? 'mm-reveal-text--single-line' : '',
@@ -62,11 +63,15 @@ export function RevealText({
       animate={replay ? controls : undefined}
       whileInView={replay ? undefined : 'show'}
       onViewportEnter={replay ? () => void controls.start('show') : undefined}
-      onViewportLeave={replay ? () => void controls.start('hidden') : undefined}
-      viewport={{
-        once: !replay,
-        ...(replay ? dissolveViewport : { amount }),
-      }}
+      onViewportLeave={reverseOnLeave ? () => void controls.start('hidden') : undefined}
+      viewport={
+        replay
+          ? dissolveViewport
+          : {
+              once: true,
+              amount,
+            }
+      }
       variants={{
         hidden: {},
         show: {
@@ -155,6 +160,7 @@ export function FlipText({
   const controls = useAnimationControls();
   const dissolveViewport = useTitleDissolveViewport();
   const reduceMotion = useReducedMotion();
+  const reverseOnLeave = replay && !dissolveViewport.once;
   const flipClassName = `mm-flip-text ${className}`.trim();
 
   if (reduceMotion) {
@@ -168,11 +174,15 @@ export function FlipText({
       animate={replay ? controls : undefined}
       whileInView={replay ? undefined : 'show'}
       onViewportEnter={replay ? () => void controls.start('show') : undefined}
-      onViewportLeave={replay ? () => void controls.start('hidden') : undefined}
-      viewport={{
-        once: !replay,
-        ...(replay ? dissolveViewport : { amount: 0.65 }),
-      }}
+      onViewportLeave={reverseOnLeave ? () => void controls.start('hidden') : undefined}
+      viewport={
+        replay
+          ? dissolveViewport
+          : {
+              once: true,
+              amount: 0.65,
+            }
+      }
       aria-label={text}
     >
       {parts.map((part, index) => {

@@ -85,7 +85,8 @@ Rules:
 - Similar sections should not use unrelated headline clamps.
 - Global website heading weight should stay at or below `500`.
 - Letter spacing should use `--mm-tracking-title` / `--mm-tracking-display` (`0`) except small uppercase eyebrows (`--mm-tracking-eyebrow`).
-- Animated section titles use the font’s native word space, not a flex `column-gap`. They dissolve only after the last line tucks under the sticky nav (`amount: 0` in `stickyHeader.ts`), with a shorter mobile inset (72px) than desktop (112px).
+- Animated section titles use the font’s native word space, not a flex `column-gap`. The reveal wrapper is `inline-block` so IntersectionObserver can measure wrapping lines.
+- Desktop replay titles dissolve after the last line tucks under the sticky nav (`amount: 0`, 112px inset). Mobile titles and category copy fade in once and stay solid.
 
 ### Spacing And Layout
 
@@ -177,7 +178,7 @@ Routes added:
 - Respect `prefers-reduced-motion`.
 - Do not use React state per frame for decorative animation.
 - Mobile gets simpler motion, smaller shader DPR, and fewer scrubbed effects.
-- Replay headings stay visible until they tuck under the sticky nav. Use `amount: 0` and a header-height inset (`stickyHeader.ts`); do not hide when the first line reaches the bar.
+- Replay headings on desktop stay visible until they tuck under the sticky nav. On mobile they fade in once and do not reverse — reversing left wrapped category copy faded mid-screen.
 
 ## Implementation Rules
 
