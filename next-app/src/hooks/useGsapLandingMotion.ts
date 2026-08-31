@@ -137,12 +137,16 @@ function bindLandingScrollReveals(
       ease: 'power2.out',
     };
 
+    const start = el.dataset.mmRevealStart ?? 'top 88%';
+    const end = el.dataset.mmRevealEnd ?? (isNarrow ? 'bottom+=40 top' : 'bottom top');
+
     if (repeat) {
       const timeline = gsap.timeline({ paused: true }).fromTo(el, fromVars, toVars);
 
       ScrollTrigger.create({
         trigger,
-        start: el.dataset.mmRevealStart ?? 'top 88%',
+        start,
+        end,
         onEnter: () => {
           timeline.restart();
         },
@@ -165,7 +169,7 @@ function bindLandingScrollReveals(
       ...toVars,
       scrollTrigger: {
         trigger,
-        start: el.dataset.mmRevealStart ?? 'top 88%',
+        start,
         toggleActions: 'play none none none',
         ...stDefaults,
       },
@@ -180,6 +184,8 @@ function bindLandingScrollReveals(
     const stagger = Number.parseFloat(group.dataset.mmRevealStagger ?? '') || (isNarrow ? 0.1 : 0.12);
     const repeat = group.dataset.mmRevealRepeat === 'true';
     const resetHidden = (group.dataset.mmRevealReset ?? 'hidden') === 'hidden';
+    const start = group.dataset.mmRevealStart ?? 'top 86%';
+    const end = group.dataset.mmRevealEnd ?? (isNarrow ? 'bottom+=40 top' : 'bottom top');
     const fromVars = revealFromVars(kind, isNarrow);
     const toVars = {
       ...revealToVars(kind),
@@ -193,7 +199,8 @@ function bindLandingScrollReveals(
 
       ScrollTrigger.create({
         trigger: group,
-        start: group.dataset.mmRevealStart ?? 'top 86%',
+        start,
+        end,
         onEnter: () => {
           timeline.restart();
         },
@@ -216,7 +223,7 @@ function bindLandingScrollReveals(
       ...toVars,
       scrollTrigger: {
         trigger: group,
-        start: group.dataset.mmRevealStart ?? 'top 86%',
+        start,
         toggleActions: 'play none none none',
         ...stDefaults,
       },

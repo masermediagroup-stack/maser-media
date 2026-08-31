@@ -177,6 +177,9 @@
   --mm-leading-display: 1.06;
   --mm-leading-title: 1.08;
   --mm-leading-body: 1.58;
+  --mm-tracking-display: 0;
+  --mm-tracking-title: 0;
+  --mm-tracking-eyebrow: 0.13em;
 
   /* Spacing */
   --section-padding: clamp(4rem, 10vw, 8rem);
@@ -4029,7 +4032,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   color: var(--mm-warm);
   font-size: clamp(0.72rem, 1vw, 0.84rem);
   font-weight: 750;
-  letter-spacing: 0.13em;
+  letter-spacing: var(--mm-tracking-eyebrow);
   text-transform: uppercase;
 }
 
@@ -4056,7 +4059,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   font-size: var(--mm-type-section-title);
   font-weight: 650;
   line-height: var(--mm-leading-title);
-  letter-spacing: 0;
+  letter-spacing: var(--mm-tracking-title);
 }
 
 .mm-section-heading p,
@@ -4510,7 +4513,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   font-size: var(--mm-type-display);
   font-weight: 500;
   line-height: var(--mm-leading-display);
-  letter-spacing: 0;
+  letter-spacing: var(--mm-tracking-display);
   text-wrap: pretty;
 }
 
@@ -4526,7 +4529,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 .mm-hero__title-break {
   display: block;
   white-space: nowrap;
-  letter-spacing: -0.018em;
+  letter-spacing: var(--mm-tracking-display);
 }
 
 .mm-hero__title .mm-hero-title-line-mask {
@@ -4739,7 +4742,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   font-size: var(--mm-type-section-title);
   font-weight: 500;
   line-height: var(--mm-leading-title);
-  letter-spacing: 0;
+  letter-spacing: var(--mm-tracking-title);
   text-align: center;
   text-wrap: balance;
   color: var(--mm-ink);
@@ -4987,7 +4990,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   font-family: var(--font-display);
   font-size: var(--mm-type-section-title);
   font-weight: 720;
-  letter-spacing: 0;
+  letter-spacing: var(--mm-tracking-title);
   line-height: var(--mm-leading-title);
 }
 
@@ -5069,7 +5072,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   font-family: var(--font-display);
   font-size: clamp(1.85rem, 4vw, 2.45rem);
   font-weight: 720;
-  letter-spacing: 0;
+  letter-spacing: var(--mm-tracking-title);
   line-height: var(--mm-leading-title);
   transition: color 220ms ease;
 }
@@ -5144,10 +5147,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
     inset 0 1px 0 rgba(255, 255, 255, 0.88),
     0 1px 2px rgba(7, 17, 31, 0.04);
   color: var(--mm-services-ink);
-  font-size: clamp(1.05rem, 1.7vw, 1.28rem);
-  font-weight: 650;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
+  letter-spacing: var(--mm-tracking-title);
   white-space: nowrap;
   transition:
     color 220ms ease,
@@ -5540,10 +5540,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-flip-text {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  column-gap: 0.28em;
+  display: inline;
   perspective: 900px;
 }
 
@@ -5551,7 +5548,10 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   display: inline-block;
   transform-origin: 50% 100%;
   transform-style: preserve-3d;
-  will-change: transform, opacity;
+}
+
+.mm-flip-text__space {
+  white-space: pre;
 }
 
 .mm-flip-text--lead .mm-flip-text__word {
@@ -6060,7 +6060,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--mm-tracking-title);
   /* >1 so descenders (y,g,p,q) are not clipped; 0.92 was cropping AuroraText “you” */
   line-height: 1.08;
   font-size: var(--mm-type-section-title);
@@ -6299,7 +6299,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
     align-items: center;
     font-size: var(--mm-type-section-title-mobile);
     font-weight: 500;
-    letter-spacing: 0.04em;
+    letter-spacing: var(--mm-tracking-title);
     text-align: center;
   }
 
@@ -6357,7 +6357,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   .mm-testimonials-wave__title {
     font-size: var(--mm-type-section-title-mobile);
     line-height: 1.12;
-    letter-spacing: 0;
+    letter-spacing: var(--mm-tracking-title);
   }
 
   .mm-testimonials-wave__marquee-mask {
@@ -6439,7 +6439,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   color: rgba(255, 255, 255, 0.72);
   font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: var(--mm-tracking-eyebrow);
   line-height: 1.2;
   text-transform: uppercase;
 }
@@ -6449,10 +6449,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   margin: 0;
   color: #07111f;
   font-family: var(--font-display);
-  font-size: clamp(1.35rem, 2.3vw, 2.05rem);
-  font-weight: 650;
-  letter-spacing: 0.04em;
-  line-height: 1.1;
+  letter-spacing: var(--mm-tracking-title);
   text-align: center;
   text-shadow: none;
 }
@@ -7794,7 +7791,7 @@ a.mm-client-name:focus-visible {
   max-width: min(100%, 52rem);
   font-size: 80px !important;
   line-height: 1.28 !important;
-  letter-spacing: 0;
+  letter-spacing: var(--mm-tracking-title);
   padding-bottom: 0.35em;
   overflow: visible;
   transform: none;
@@ -8577,7 +8574,7 @@ a.mm-client-name:focus-visible {
   color: #07111f;
   font-size: clamp(2rem, 4.8vw, 4.25rem);
   line-height: 1.05;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--mm-tracking-title);
 }
 
 .mm-process-bento__grid {
@@ -9047,7 +9044,7 @@ a.mm-client-name:focus-visible {
   margin: 0;
   font-size: clamp(1.35rem, 2.2vw, 1.85rem);
   line-height: 1.08;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--mm-tracking-title);
   color: #07111f;
 }
 
@@ -9063,7 +9060,8 @@ a.mm-client-name:focus-visible {
 .mm-process-bento__text-reveal-line {
   display: block;
   overflow: hidden;
-  font-kerning: none;
+  padding-block: 0.08em;
+  margin-block: -0.08em;
 }
 
 .mm-process-bento__text-reveal-inner {
@@ -9093,7 +9091,7 @@ a.mm-client-name:focus-visible {
   text-align: center;
   font-size: clamp(1.35rem, 2.2vw, 1.85rem);
   line-height: 1.14;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--mm-tracking-title);
   font-weight: 600;
 }
 
@@ -9166,20 +9164,12 @@ a.mm-client-name:focus-visible {
 }
 
 .mm-reveal-text {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: baseline;
+  display: inline;
   overflow: visible;
-  column-gap: 0.28em;
 }
 
 .mm-reveal-text--single-line {
-  display: inline-flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
   white-space: nowrap;
-  max-width: 100%;
-  column-gap: 0.28em;
 }
 
 .mm-reveal-text--single-line .mm-reveal-word,
@@ -9190,16 +9180,10 @@ a.mm-client-name:focus-visible {
 .mm-reveal-word {
   display: inline-block;
   transform-origin: 50% 100%;
-  will-change: opacity, transform, filter;
 }
 
 .mm-reveal-space {
-  /* Gap on the flex row carries word rhythm; keep node for authored splits. */
-  flex: 0 0 0;
-  width: 0;
-  overflow: hidden;
-  opacity: 0;
-  pointer-events: none;
+  white-space: pre;
 }
 
 .mm-section-heading h2 .mm-reveal-text,
@@ -9446,7 +9430,7 @@ h2.mm-services__title .mm-reveal-text,
     max-width: min(17rem, 100%);
     font-size: clamp(1.35rem, 6.4vw, 1.6rem);
     line-height: 1.06;
-    letter-spacing: 0;
+    letter-spacing: var(--mm-tracking-title);
   }
 
   .mm-process-bento__copy p {

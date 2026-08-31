@@ -1147,6 +1147,7 @@ export function Testimonials() {
                 data-mm-reveal-repeat="true"
                 data-mm-reveal-reset="hidden"
                 data-mm-reveal-start="top 90%"
+                data-mm-reveal-end="bottom+=40 top"
               >
                 {eyebrow}
               </p>
