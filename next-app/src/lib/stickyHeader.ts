@@ -5,10 +5,11 @@
 export const STICKY_HEADER_OFFSET_PX = 112;
 
 /**
- * Section-title dissolve inset: 20% past nav collision so headings stay readable longer.
- * (112px × 1.2 → 134px)
+ * Section-title dissolve inset: 44% past nav collision so headings stay solid until
+ * they reach the sticky header line.
+ * (112px × 1.44 → 161px; was 112 × 1.2 → 134px)
  */
-export const TITLE_DISSOLVE_HEADER_OFFSET_PX = Math.round(STICKY_HEADER_OFFSET_PX * 1.2);
+export const TITLE_DISSOLVE_HEADER_OFFSET_PX = Math.round(STICKY_HEADER_OFFSET_PX * 1.44);
 
 /**
  * Motion viewport for replay section titles (Our Work pattern):
