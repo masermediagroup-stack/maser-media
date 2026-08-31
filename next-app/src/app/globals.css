@@ -3102,15 +3102,19 @@ button.premium-btn {
 .contact-flow-wrap {
   width: 100%;
   max-width: 880px;
+  min-width: 0;
   margin: 0 auto;
   color: #0a0a0a;
 }
 
 .contact-flow-shell {
   display: flex;
+  min-width: 0;
   min-height: 0;
+  max-width: 100%;
   flex-direction: column;
   gap: clamp(1rem, 2.4vw, 1.45rem);
+  overflow-x: hidden;
   border-radius: 28px;
   padding: clamp(1.75rem, 3.8vw, 2.55rem) clamp(1.35rem, 4vw, 2.45rem) clamp(1.35rem, 3.2vw, 2rem);
   background: #fff;
@@ -3124,7 +3128,8 @@ button.premium-btn {
   text-align: center;
 }
 
-.contact-flow-header {
+.contact-flow-header,
+.contact-flow-progress {
   max-width: calc(100% - 3.2rem);
 }
 
@@ -3155,7 +3160,10 @@ button.premium-btn {
 }
 
 .contact-flow-progress {
+  width: 100%;
+  min-width: 0;
   height: 6px;
+  box-sizing: border-box;
   border-radius: 999px;
   overflow: hidden;
   background: #e8e8e8;
@@ -3170,26 +3178,79 @@ button.premium-btn {
 }
 
 .contact-flow-step {
+  min-width: 0;
   min-height: 0;
+  max-width: 100%;
 }
 
 .contact-flow-scheduler {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(13rem, 0.42fr);
+  gap: 0.7rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.contact-flow-schedule-card {
+  display: grid;
+  gap: 0.7rem;
+  min-width: 0;
+  padding: clamp(0.75rem, 1.8vw, 1.05rem);
   overflow: hidden;
   border: 1px solid #e5e5e5;
-  border-radius: 22px;
+  border-radius: 18px;
   background: #fff;
 }
 
-.contact-flow-calendar-panel,
-.contact-flow-time-panel {
-  min-width: 0;
-  padding: clamp(1rem, 2.2vw, 1.35rem);
+.contact-flow-date-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2.7rem;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  background: #fafafa;
+  color: #111;
+  cursor: pointer;
 }
 
-.contact-flow-calendar-panel {
-  border-right: 1px solid #e5e5e5;
+.contact-flow-date-row strong {
+  min-width: 0;
+  font-size: 0.98rem;
+  font-weight: 760;
+  letter-spacing: -0.01em;
+}
+
+.contact-flow-date-cal {
+  display: grid;
+  flex: 0 0 auto;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  color: #10a4ff;
+  pointer-events: none;
+}
+
+.contact-flow-date-row-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  color-scheme: light;
+}
+
+.contact-flow-date-row-input::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .contact-flow-calendar-head {
@@ -3198,6 +3259,11 @@ button.premium-btn {
   justify-content: space-between;
   gap: 1.35rem;
   margin-bottom: 1rem;
+}
+
+.contact-flow-time-head {
+  align-items: center;
+  margin-bottom: 0;
 }
 
 .contact-flow-calendar-head span {
@@ -3237,62 +3303,8 @@ button.premium-btn {
   white-space: nowrap;
 }
 
-.contact-flow-date-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(3.25rem, 1fr));
-  gap: 0.5rem;
-}
-
-.contact-flow-weekdays {
-  margin-bottom: 0.45rem;
-  color: #737373;
-  font-size: 0.72rem;
-  font-weight: 760;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.contact-flow-weekdays span {
-  text-align: center;
-}
-
-.contact-flow-date,
-.contact-flow-time {
-  border: 1px solid #dfe5ea;
-  background: #fff;
-  color: #111;
-  cursor: pointer;
-  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease;
-}
-
-.contact-flow-date {
-  display: grid;
-  min-height: 3.65rem;
-  place-items: center;
-  gap: 0.12rem;
-  border-radius: 12px;
-}
-
-.contact-flow-date span {
-  color: #737373;
-  font-size: 0.72rem;
-  font-weight: 720;
-  text-transform: uppercase;
-}
-
-.contact-flow-date strong {
-  font-size: 1.12rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
 .contact-flow-time-list {
-  display: grid;
-  gap: 0.55rem;
-  max-height: 15.65rem;
-  overflow: auto;
-  padding-right: 0;
-  scrollbar-width: thin;
+  display: none;
 }
 
 .contact-flow-time {
@@ -3302,22 +3314,116 @@ button.premium-btn {
   font-weight: 720;
 }
 
-.contact-flow-date:hover,
+.contact-flow-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.contact-flow-time-dial {
+  position: relative;
+  min-width: 0;
+}
+
+.contact-flow-dial {
+  --dial-item: 2.2rem;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) minmax(0, 0.85fr);
+  align-items: stretch;
+  min-width: 0;
+  height: calc(var(--dial-item) * 3);
+  overflow: hidden;
+}
+
+.contact-flow-dial-window {
+  position: absolute;
+  z-index: 1;
+  left: 0.2rem;
+  right: 0.2rem;
+  top: 50%;
+  height: var(--dial-item);
+  pointer-events: none;
+  border-radius: 10px;
+  border: 1px solid rgba(16, 164, 255, 0.28);
+  background: rgba(16, 164, 255, 0.1);
+  transform: translateY(-50%);
+}
+
+.contact-flow-dial-column {
+  position: relative;
+  z-index: 2;
+  height: calc(var(--dial-item) * 3);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  scroll-snap-type: y mandatory;
+  padding-block: var(--dial-item);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 28%, #000 72%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 28%, #000 72%, transparent 100%);
+}
+
+.contact-flow-dial-column::-webkit-scrollbar {
+  display: none;
+}
+
+.contact-flow-dial-option {
+  display: grid;
+  width: 100%;
+  height: var(--dial-item);
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #9a9a9a;
+  font-size: 1.05rem;
+  font-weight: 640;
+  line-height: 1;
+  cursor: pointer;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+.contact-flow-dial-option.is-selected {
+  color: #07111f;
+  font-weight: 800;
+}
+
+.contact-flow-dial-column:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px rgba(16, 164, 255, 0.28);
+}
+
+.contact-flow-dial-option:focus-visible {
+  outline: none;
+  color: #078fdc;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-flow-dial-column {
+    scroll-behavior: auto;
+  }
+}
+
 .contact-flow-time:hover {
   border-color: #a6dfff;
   background: #f7fcff;
 }
 
-.contact-flow-date.is-selected,
 .contact-flow-time.is-selected {
   border-color: #10a4ff;
   background: #10a4ff;
   color: #fff;
   box-shadow: 0 10px 22px rgba(16, 164, 255, 0.2);
-}
-
-.contact-flow-date.is-selected span {
-  color: rgba(255, 255, 255, 0.78);
 }
 
 .contact-flow-fieldset {
@@ -3588,7 +3694,6 @@ button.premium-btn {
 .contact-flow-back:focus-visible,
 .contact-flow-primary:focus-visible,
 .contact-flow-option:focus-visible,
-.contact-flow-date:focus-visible,
 .contact-flow-time:focus-visible {
   outline: none;
   box-shadow: 0 0 0 4px rgba(16, 164, 255, 0.16);
@@ -3625,24 +3730,8 @@ button.premium-btn {
     min-height: auto;
   }
 
-  .contact-flow-grid--services,
-  .contact-flow-grid--budget,
-  .contact-flow-grid--heard-about,
-  .contact-flow-actions {
-    grid-template-columns: 1fr;
-  }
-
   .contact-flow-scheduler {
     grid-template-columns: 1fr;
-  }
-
-  .contact-flow-calendar-panel {
-    border-right: 0;
-    border-bottom: 1px solid #e5e5e5;
-  }
-
-  .contact-flow-time-panel {
-    min-width: 0;
   }
 
   .contact-flow-option.is-wide {
@@ -7297,7 +7386,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .liquid-contact-modal {
   position: fixed !important;
-  overflow: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
   padding-top: 0 !important;
 }
 
@@ -7366,6 +7456,181 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .liquid-contact-modal .contact-flow-wrap {
   padding-top: 1.25rem !important;
+}
+
+@media (max-width: 760px) {
+  .liquid-contact-modal {
+    overflow-x: hidden !important;
+  }
+
+  .liquid-contact-modal .contact-flow-wrap {
+    padding-top: 0.7rem !important;
+  }
+
+  .contact-flow-header,
+  .contact-flow-progress {
+    max-width: calc(100% - 3.2rem);
+  }
+
+  .contact-flow-shell {
+    gap: 0.55rem;
+    padding: 0.95rem 0.9rem 0.8rem;
+  }
+
+  .contact-flow-step-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+  }
+
+  .contact-flow-title {
+    margin-top: 0.28rem;
+  }
+
+  .contact-flow-subtitle {
+    margin-top: 0.28rem;
+    font-size: 0.88rem;
+    line-height: 1.35;
+  }
+
+  .contact-flow-grid {
+    gap: 0.4rem;
+  }
+
+  .contact-flow-grid--services,
+  .contact-flow-grid--budget,
+  .contact-flow-grid--heard-about,
+  .contact-flow-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .contact-flow-option,
+  .contact-flow-input,
+  .contact-flow-primary,
+  .contact-flow-back {
+    min-height: 2.4rem;
+    border-radius: 12px;
+  }
+
+  .contact-flow-option {
+    gap: 0.45rem;
+    padding: 0.38rem 0.62rem;
+  }
+
+  .contact-flow-option-label {
+    font-size: 0.82rem;
+    line-height: 1.15;
+  }
+
+  .contact-flow-option-check {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .contact-flow-option--budget,
+  .contact-flow-option--heard-about {
+    min-height: 2.25rem;
+    padding-inline: 0.62rem;
+  }
+
+  .contact-flow-primary,
+  .contact-flow-back {
+    gap: 0.35rem;
+    padding-inline: 0.55rem;
+    font-size: 0.82rem;
+  }
+
+  .contact-flow-primary svg,
+  .contact-flow-back svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .contact-flow-fields {
+    gap: 0.65rem;
+  }
+
+  .contact-flow-input {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.92rem;
+  }
+
+  .contact-flow-textarea {
+    min-height: 7.25rem;
+  }
+
+  .contact-flow-text-field {
+    gap: 0.3rem;
+    font-size: 0.88rem;
+  }
+
+  .contact-flow-field-note {
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+
+  .contact-flow-schedule-card {
+    gap: 0.45rem;
+    padding: 0.5rem 0.55rem 0.55rem;
+  }
+
+  .contact-flow-date-row {
+    min-height: 2.2rem;
+    padding: 0.28rem 0.6rem;
+    border-radius: 10px;
+  }
+
+  .contact-flow-date-row strong {
+    font-size: 0.86rem;
+  }
+
+  .contact-flow-date-cal {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+
+  .contact-flow-date-cal svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .contact-flow-calendar-head {
+    gap: 0.45rem;
+    margin-bottom: 0;
+  }
+
+  .contact-flow-calendar-head span {
+    font-size: 0.62rem;
+  }
+
+  .contact-flow-calendar-head strong {
+    font-size: 0.78rem;
+  }
+
+  .contact-flow-call-duration {
+    gap: 0.22rem;
+    font-size: 0.72rem;
+  }
+
+  .contact-flow-call-duration svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .contact-flow-dial {
+    --dial-item: 1.85rem;
+  }
+
+  .contact-flow-dial-option {
+    font-size: 0.92rem;
+  }
+
+  .contact-flow-dial-colon {
+    font-size: 1.05rem;
+  }
+
+  .contact-flow-actions {
+    gap: 0.45rem;
+  }
 }
 
 /* Browser comment pass: light launch sections and gradient trust word. */
@@ -9566,7 +9831,6 @@ h2.mm-services__title,
 
 .mm-tactile-button,
 .contact-flow-option,
-.contact-flow-date,
 .contact-flow-time {
   border: 0.5px solid rgba(7, 17, 31, 0.16) !important;
   background:
@@ -9586,8 +9850,6 @@ h2.mm-services__title,
 .mm-tactile-button:focus-visible,
 .contact-flow-option:hover,
 .contact-flow-option:focus-visible,
-.contact-flow-date:hover,
-.contact-flow-date:focus-visible,
 .contact-flow-time:hover,
 .contact-flow-time:focus-visible {
   transform: translateY(-1px);
@@ -9600,7 +9862,6 @@ h2.mm-services__title,
 
 .mm-tactile-button:active,
 .contact-flow-option:active,
-.contact-flow-date:active,
 .contact-flow-time:active {
   transform: translateY(1px);
   box-shadow:
@@ -9645,7 +9906,6 @@ h2.mm-services__title,
 .mm-cta__actions--contact .mm-cta__contact-btn:hover,
 .mm-cta__actions--contact .mm-cta__contact-btn:focus-visible,
 .contact-flow-option.is-selected,
-.contact-flow-date.is-selected,
 .contact-flow-time.is-selected {
   background:
     linear-gradient(180deg, rgba(47, 183, 255, 0.96), rgba(16, 164, 255, 0.92)) !important;
