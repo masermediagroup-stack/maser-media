@@ -4486,8 +4486,20 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   margin-inline: auto;
   display: grid;
   justify-items: center;
+  gap: clamp(1rem, 3.2vw, 1.55rem);
   text-align: center;
   transform: translateY(clamp(-4.5rem, -10svh, -2.5rem));
+}
+
+.mm-hero__headline {
+  display: grid;
+  /* ~3% of the two-line H1 block — small drop under “Here we are.”, not hero-height void. */
+  gap: calc(2 * 1lh * 0.03);
+  justify-items: center;
+  width: 100%;
+  max-width: min(100%, 56rem);
+  font-size: var(--mm-type-display);
+  line-height: var(--mm-leading-display);
 }
 
 /* Primary display scale (hero h1); reuse on lower-level headings via .mm-type-display when a route must not duplicate h1. */
@@ -4507,8 +4519,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   color: #ffffff;
   text-align: center;
   overflow: visible;
-  /* Reserve the split-line box before intro play so the headline cannot re-seat after becoming visible. */
-  min-height: calc(var(--mm-type-display) * var(--mm-leading-display) * 2);
+  /* Two authored lines at this element’s font-size — not the global display clamp. */
+  min-height: calc(2 * 1lh);
 }
 
 .mm-hero__title-break {
@@ -4565,9 +4577,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
 .mm-hero__lead {
   max-width: 46rem;
-  margin: clamp(1.2rem, 2.4vw, 1.9rem) 0 0;
+  margin: 0;
   color: #ffffff;
-  font-size: clamp(1rem, 1.45vw, 1.2rem);
+  font-size: var(--mm-type-body-small);
   font-weight: 470;
   line-height: 1.55;
   text-align: center;
@@ -5528,7 +5540,10 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-flip-text {
-  display: inline-block;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.28em;
   perspective: 900px;
 }
 
@@ -6041,11 +6056,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-testimonials-wave__title {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
+  display: block;
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
@@ -6061,13 +6072,16 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-testimonials-wave__title-anim {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  justify-content: center;
   text-align: center;
   color: #07111f;
   overflow: visible;
   text-shadow: none;
+  white-space: nowrap;
 }
 
 .mm-testimonials-wave__title-line {
@@ -6285,7 +6299,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
     align-items: center;
     font-size: var(--mm-type-section-title-mobile);
     font-weight: 500;
-    letter-spacing: 0;
+    letter-spacing: 0.04em;
     text-align: center;
   }
 
@@ -6437,7 +6451,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   font-family: var(--font-display);
   font-size: clamp(1.35rem, 2.3vw, 2.05rem);
   font-weight: 650;
-  letter-spacing: 0;
+  letter-spacing: 0.04em;
   line-height: 1.1;
   text-align: center;
   text-shadow: none;
@@ -6802,9 +6816,9 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 
   .mm-hero__lead {
     max-width: min(100%, 20.75rem);
-    margin-top: clamp(1.05rem, 4.8vw, 1.45rem);
+    margin: 0;
     color: #ffffff;
-    font-size: clamp(0.98rem, 4vw, 1.12rem);
+    font-size: var(--mm-type-body-small);
     line-height: 1.45;
   }
 
@@ -9156,6 +9170,21 @@ a.mm-client-name:focus-visible {
   flex-wrap: wrap;
   align-items: baseline;
   overflow: visible;
+  column-gap: 0.28em;
+}
+
+.mm-reveal-text--single-line {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  max-width: 100%;
+  column-gap: 0.28em;
+}
+
+.mm-reveal-text--single-line .mm-reveal-word,
+.mm-reveal-text--single-line .mm-reveal-space {
+  white-space: nowrap;
 }
 
 .mm-reveal-word {
@@ -9165,7 +9194,20 @@ a.mm-client-name:focus-visible {
 }
 
 .mm-reveal-space {
-  white-space: pre;
+  /* Gap on the flex row carries word rhythm; keep node for authored splits. */
+  flex: 0 0 0;
+  width: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mm-section-heading h2 .mm-reveal-text,
+.mm-clients__headline .mm-reveal-text,
+h2.mm-services__title .mm-reveal-text,
+.mm-testimonials-wave__title .mm-reveal-text,
+.mm-process-bento__heading .mm-reveal-text {
+  letter-spacing: inherit;
 }
 
 .mm-work .mm-section-heading .mm-splitting-text {
@@ -9693,6 +9735,7 @@ a.mm-client-name:focus-visible {
 
 /* Typography consistency pass: keep recurring section and card text on shared scales. */
 .mm-hero__title,
+.mm-hero__headline,
 .mm-type-display {
   font-size: var(--mm-type-display) !important;
   line-height: var(--mm-leading-display) !important;
@@ -9701,17 +9744,25 @@ a.mm-client-name:focus-visible {
 /* Hero H1 is two authored lines. Beat the display clamp so the first line
    does not wrap (which would make a third line). Type/measure only. */
 @media (max-width: 1100px) {
-  .mm-hero__title {
+  .mm-hero__title,
+  .mm-hero__headline {
     font-size: clamp(1.7rem, 4.6vw, 3.35rem) !important;
     line-height: 1.12 !important;
+  }
+
+  .mm-hero__title {
     max-width: min(100%, 44rem);
   }
 }
 
 @media (max-width: 640px) {
-  .mm-hero__title {
+  .mm-hero__title,
+  .mm-hero__headline {
     font-size: clamp(1.22rem, 5.2vw, 1.92rem) !important;
     line-height: 1.14 !important;
+  }
+
+  .mm-hero__title {
     max-width: min(100%, 24.5rem);
   }
 }
@@ -9725,7 +9776,6 @@ a.mm-client-name:focus-visible {
 .mm-cta__title {
   font-size: var(--mm-type-section-title) !important;
   line-height: var(--mm-leading-title) !important;
-  letter-spacing: 0 !important;
 }
 
 /* Services heading needs room for g/y. Do not inherit the tight title leading. */
@@ -9733,7 +9783,6 @@ h2.mm-services__title,
 .mm-services__title {
   font-size: var(--mm-type-section-title) !important;
   line-height: 1.28 !important;
-  letter-spacing: 0 !important;
   overflow: visible !important;
 }
 
@@ -9772,7 +9821,6 @@ h2.mm-services__title,
 .mm-faq__item h3 {
   font-size: var(--mm-type-card-title) !important;
   line-height: var(--mm-leading-title) !important;
-  letter-spacing: 0 !important;
 }
 
 @media (max-width: 760px) {

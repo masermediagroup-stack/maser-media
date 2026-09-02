@@ -277,15 +277,18 @@ export function useGsapLandingMotion(
       let introPlayed = false;
       let introPrepared = false;
 
+      const clearHeroTitleInlineMinHeight = (heroTitleEl: HTMLElement | null | undefined) => {
+        if (!heroTitleEl) return;
+        heroTitleEl.style.removeProperty('min-height');
+      };
+
       const markIntroPrepared = (heroTitleEl: HTMLElement | null | undefined) => {
         if (introPrepared) return;
         introPrepared = true;
-        if (heroTitleEl) {
-          const measuredHeight = heroTitleEl.offsetHeight;
-          if (measuredHeight > 0) {
-            heroTitleEl.style.minHeight = `${measuredHeight}px`;
-          }
-        }
+        // Keep min-height on `.mm-hero__title` in CSS (`2 * 1lh`) — do not lock px here.
+        // offsetHeight at split time uses the current breakpoint font, then sticks on resize
+        // and leaves a hero-height dead band between the H1 and sub on mobile.
+        clearHeroTitleInlineMinHeight(heroTitleEl);
         onHeroIntroPreparedRef.current?.();
       };
 
@@ -378,10 +381,20 @@ export function useGsapLandingMotion(
           heroIntroCompleteCount += 1;
           if (!heroIntroDone && heroIntroCompleteCount >= heroIntroSegmentCount) {
             heroIntroDone = true;
+            clearHeroTitleInlineMinHeight(heroTitle);
             root.dataset.heroMotion = 'ready';
             onHeroIntroDoneRef.current?.();
           }
         };
+
+        if (heroTitle) {
+          mm.add('(max-width: 767px)', () => {
+            clearHeroTitleInlineMinHeight(heroTitle);
+          });
+          mm.add('(min-width: 768px)', () => {
+            clearHeroTitleInlineMinHeight(heroTitle);
+          });
+        }
 
         if (!prepareHeroIntro) {
           root.dataset.heroMotion = 'ready';
@@ -573,30 +586,9 @@ export function useGsapLandingMotion(
             }
 
             const clientsSection = root.querySelector<HTMLElement>('.mm-clients');
-            const clientsHeadlineText = root.querySelector<HTMLElement>('.mm-clients__headline-text');
             const clientPanelFadeItems = clientsSection?.querySelectorAll<HTMLElement>(
               '.mm-client-name',
             );
-
-            if (clientsHeadlineText) {
-              gsap.fromTo(
-                clientsHeadlineText,
-                { autoAlpha: 0, y: isNarrow ? 14 : 22 },
-                {
-                  autoAlpha: 1,
-                  y: 0,
-                  duration: isNarrow ? 1.45 : 1.85,
-                  ease: 'power2.out',
-                  scrollTrigger: {
-                    trigger: clientsSection ?? clientsHeadlineText,
-                    start: 'top 88%',
-                    toggleActions: 'play none none none',
-                    ...stToggleActive(clientsHeadlineText),
-                    ...scrollTriggerDefaults,
-                  },
-                },
-              );
-            }
 
             if (clientsSection && clientPanelFadeItems && clientPanelFadeItems.length) {
               SplitText.create(clientPanelFadeItems, {
@@ -646,98 +638,7 @@ export function useGsapLandingMotion(
             }
 
             const servicesSection = root.querySelector<HTMLElement>('#services');
-            const servicesIntro = servicesSection?.querySelector<HTMLElement>('.mm-services__masthead');
-            const servicesTitle = servicesSection?.querySelector<HTMLElement>('.mm-services__title');
-            const servicesLede = servicesSection?.querySelector<HTMLElement>('.mm-services__lede');
             const servicesCategoryStage = servicesSection?.querySelector<HTMLElement>('.mm-services__category-stage');
-
-            if (servicesIntro) {
-              if (servicesTitle) {
-                const authoredTitleLines = gsap.utils.toArray<HTMLElement>(
-                  servicesTitle.querySelectorAll('.mm-services__title-line'),
-                );
-
-                if (authoredTitleLines.length) {
-                  gsap.from(authoredTitleLines, {
-                    autoAlpha: 0,
-                    y: isNarrow ? 16 : 22,
-                    duration: isNarrow ? 0.72 : 0.95,
-                    stagger: { each: 0.075, from: 'start' },
-                    ease: 'power4.out',
-                    scrollTrigger: {
-                      trigger: servicesIntro,
-                      start: 'top 86%',
-                      toggleActions: 'play none none none',
-                      ...stToggleActive(servicesIntro),
-                      ...scrollTriggerDefaults,
-                    },
-                  });
-                } else {
-                  SplitText.create(servicesTitle, {
-                    type: 'lines',
-                    linesClass: 'mm-services-title-line++',
-                    autoSplit: true,
-                    onSplit(self) {
-                      const linesTopToBottom = [...self.lines].sort(
-                        (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top,
-                      );
-
-                      return gsap.from(linesTopToBottom, {
-                        autoAlpha: 0,
-                        y: isNarrow ? 16 : 22,
-                        duration: isNarrow ? 0.72 : 0.95,
-                        stagger: { each: 0.075, from: 'start' },
-                        ease: 'power4.out',
-                        scrollTrigger: {
-                          trigger: servicesIntro,
-                          start: 'top 86%',
-                          toggleActions: 'play none none none',
-                          ...stToggleActive(servicesIntro),
-                          ...scrollTriggerDefaults,
-                        },
-                      });
-                    },
-                  });
-                }
-
-                if (servicesLede) {
-                  SplitText.create(servicesLede, {
-                  type: 'lines',
-                  mask: 'lines',
-                  linesClass: 'mm-services-lede-line++',
-                  autoSplit: true,
-                  onSplit(self) {
-                    const linesTopToBottom = [...self.lines].sort(
-                      (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top,
-                    );
-
-                    return gsap.from(linesTopToBottom, {
-                      xPercent: 18,
-                      autoAlpha: 0,
-                      duration: 0.72,
-                      stagger: { each: 0.055, from: 'start' },
-                      ease: 'power3.out',
-                      scrollTrigger: {
-                        trigger: servicesIntro,
-                        start: 'top 86%',
-                        toggleActions: 'play none none none',
-                        ...scrollTriggerDefaults,
-                      },
-                    });
-                  },
-                });
-                }
-              } else {
-                gsap.set(servicesIntro, { autoAlpha: 1, y: 0 });
-                ScrollTrigger.create({
-                  trigger: servicesIntro,
-                  start: 'top 88%',
-                  toggleActions: 'play none none none',
-                  ...stToggleActive(servicesIntro),
-                  ...scrollTriggerDefaults,
-                });
-              }
-            }
 
             if (servicesCategoryStage) {
               gsap.fromTo(
