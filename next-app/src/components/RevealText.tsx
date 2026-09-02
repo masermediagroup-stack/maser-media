@@ -1,8 +1,22 @@
 'use client';
 
 import { motion, useAnimationControls, useReducedMotion } from 'motion/react';
-import { useMemo } from 'react';
-import { TITLE_DISSOLVE_VIEWPORT } from '@/lib/stickyHeader';
+import { useLayoutEffect, useMemo, useState } from 'react';
+import { TITLE_DISSOLVE_MQ_NARROW, getTitleDissolveViewport } from '@/lib/stickyHeader';
+
+function useTitleDissolveViewport() {
+  const [isNarrow, setIsNarrow] = useState(true);
+
+  useLayoutEffect(() => {
+    const mq = window.matchMedia(TITLE_DISSOLVE_MQ_NARROW);
+    const apply = () => setIsNarrow(mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
+
+  return getTitleDissolveViewport(isNarrow);
+}
 
 export function RevealText({
   text,
@@ -28,6 +42,8 @@ export function RevealText({
   const parts = useMemo(() => text.split(/(\s+)/).filter(Boolean), [text]);
   const reduceMotion = useReducedMotion();
   const controls = useAnimationControls();
+  const dissolveViewport = useTitleDissolveViewport();
+  const reverseOnLeave = replay && !dissolveViewport.once;
   const revealClassName = [
     'mm-reveal-text',
     singleLine ? 'mm-reveal-text--single-line' : '',
@@ -47,8 +63,15 @@ export function RevealText({
       animate={replay ? controls : undefined}
       whileInView={replay ? undefined : 'show'}
       onViewportEnter={replay ? () => void controls.start('show') : undefined}
-      onViewportLeave={replay ? () => void controls.start('hidden') : undefined}
-      viewport={{ once: !replay, ...(replay ? TITLE_DISSOLVE_VIEWPORT : { amount }) }}
+      onViewportLeave={reverseOnLeave ? () => void controls.start('hidden') : undefined}
+      viewport={
+        replay
+          ? dissolveViewport
+          : {
+              once: true,
+              amount,
+            }
+      }
       variants={{
         hidden: {},
         show: {
@@ -135,21 +158,40 @@ export function FlipText({
 }) {
   const parts = text.split(/(\s+)/);
   const controls = useAnimationControls();
+  const dissolveViewport = useTitleDissolveViewport();
+  const reduceMotion = useReducedMotion();
+  const reverseOnLeave = replay && !dissolveViewport.once;
+  const flipClassName = `mm-flip-text ${className}`.trim();
+
+  if (reduceMotion) {
+    return <span className={flipClassName}>{text}</span>;
+  }
 
   return (
     <motion.span
-      className={`mm-flip-text ${className}`}
+      className={flipClassName}
       initial="hidden"
       animate={replay ? controls : undefined}
       whileInView={replay ? undefined : 'show'}
       onViewportEnter={replay ? () => void controls.start('show') : undefined}
-      onViewportLeave={replay ? () => void controls.start('hidden') : undefined}
-      viewport={{ once: !replay, ...(replay ? TITLE_DISSOLVE_VIEWPORT : { amount: 0.65 }) }}
+      onViewportLeave={reverseOnLeave ? () => void controls.start('hidden') : undefined}
+      viewport={
+        replay
+          ? dissolveViewport
+          : {
+              once: true,
+              amount: 0.65,
+            }
+      }
       aria-label={text}
     >
       {parts.map((part, index) => {
         if (/^\s+$/.test(part)) {
-          return <span aria-hidden key={`space-${index}`}> </span>;
+          return (
+            <span className="mm-flip-text__space" aria-hidden key={`space-${index}`}>
+              {part}
+            </span>
+          );
         }
 
         return (

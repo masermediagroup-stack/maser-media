@@ -73,6 +73,9 @@ Use dark surfaces for hero/nav/high-motion moments. Use `--mm-section-surface` f
 --mm-leading-display: 1.06;
 --mm-leading-title: 1.08;
 --mm-leading-body: 1.58;
+--mm-tracking-display: 0;
+--mm-tracking-title: 0;
+--mm-tracking-eyebrow: 0.13em;
 ```
 
 Rules:
@@ -81,7 +84,9 @@ Rules:
 - Mobile section headings should cap at `--mm-type-section-title-mobile`.
 - Similar sections should not use unrelated headline clamps.
 - Global website heading weight should stay at or below `500`.
-- Letter spacing should be `0` except small uppercase eyebrows and nav labels.
+- Letter spacing should use `--mm-tracking-title` / `--mm-tracking-display` (`0`) except small uppercase eyebrows (`--mm-tracking-eyebrow`).
+- Animated section titles use the font’s native word space, not a flex `column-gap`. The reveal wrapper is `inline-block` so IntersectionObserver can measure wrapping lines.
+- Desktop replay titles dissolve after the last line tucks under the sticky nav (`amount: 0`, 112px inset). Mobile titles and category copy fade in once and stay solid.
 
 ### Spacing And Layout
 
@@ -173,6 +178,7 @@ Routes added:
 - Respect `prefers-reduced-motion`.
 - Do not use React state per frame for decorative animation.
 - Mobile gets simpler motion, smaller shader DPR, and fewer scrubbed effects.
+- Replay headings on desktop stay visible until they tuck under the sticky nav. On mobile they fade in once and do not reverse — reversing left wrapped category copy faded mid-screen.
 
 ## Implementation Rules
 

@@ -71,8 +71,11 @@ function useProcessBentoReveal(gridRef: RefObject<HTMLDivElement | null>) {
         grid.classList.remove('mm-process-bento__grid--text-motion-ready');
       },
       {
-        rootMargin: '0px 0px -18% 0px',
-        threshold: 0.24,
+        // Keep tile copy on screen until the grid has actually left.
+        // A 0.24 threshold + bottom shrink hid every card's text while later
+        // stacked tiles were still in view on mobile.
+        rootMargin: '0px 0px 20% 0px',
+        threshold: 0,
       },
     );
 
@@ -139,6 +142,7 @@ export function ProcessBento() {
         data-mm-reveal-reset="hidden"
         data-mm-reveal-stagger="0.09"
         data-mm-reveal-start="top 82%"
+        data-mm-reveal-end="bottom+=48 top"
         role="list"
         aria-label="Why Maser Media"
       >

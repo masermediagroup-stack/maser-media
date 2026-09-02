@@ -4,18 +4,30 @@
  */
 export const STICKY_HEADER_OFFSET_PX = 112;
 
-/**
- * Section-title dissolve inset: 87.2% past nav collision so headings stay solid until
- * they reach the sticky header line.
- * (112px × 1.872 → 210px; 161px × 1.3 ≈ 209px)
- */
-export const TITLE_DISSOLVE_HEADER_OFFSET_PX = Math.round(STICKY_HEADER_OFFSET_PX * 1.872);
+export const TITLE_DISSOLVE_MQ_NARROW = '(max-width: 767px)';
+
+export type TitleDissolveViewport = {
+  once: boolean;
+  amount: 0;
+  margin?: string;
+};
+
+/** Desktop: last pixel tucks under the liquid nav, then the title may reverse. */
+export const TITLE_DISSOLVE_VIEWPORT: TitleDissolveViewport = {
+  once: false,
+  amount: 0,
+  margin: `-${STICKY_HEADER_OFFSET_PX}px 0px 0px 0px`,
+};
 
 /**
- * Motion viewport for replay section titles (Our Work pattern):
- * `amount: "all"` + top inset matching the title dissolve line.
+ * Mobile: fade in once and stay solid. Reversing at a header inset still
+ * left category copy and wrapped ledes at 14% opacity mid-viewport.
  */
-export const TITLE_DISSOLVE_VIEWPORT = {
-  amount: 'all' as const,
-  margin: `-${TITLE_DISSOLVE_HEADER_OFFSET_PX}px 0px 0px 0px`,
+export const TITLE_DISSOLVE_VIEWPORT_MOBILE: TitleDissolveViewport = {
+  once: true,
+  amount: 0,
 };
+
+export function getTitleDissolveViewport(isNarrow: boolean): TitleDissolveViewport {
+  return isNarrow ? TITLE_DISSOLVE_VIEWPORT_MOBILE : TITLE_DISSOLVE_VIEWPORT;
+}
