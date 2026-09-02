@@ -4485,7 +4485,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-hero__copy {
-  max-width: 58rem;
+  max-width: 100%;
   margin-inline: auto;
   display: grid;
   justify-items: center;
@@ -4500,7 +4500,7 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
   gap: calc(2 * 1lh * 0.03);
   justify-items: center;
   width: 100%;
-  max-width: min(100%, 56rem);
+  max-width: 100%;
   font-size: var(--mm-type-display);
   line-height: var(--mm-leading-display);
 }
@@ -4518,7 +4518,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 }
 
 .mm-hero__title {
-  max-width: min(100%, 56rem);
+  max-width: 100%;
+  width: max-content;
   color: #ffffff;
   text-align: center;
   overflow: visible;
@@ -4535,6 +4536,8 @@ html.mm-inner-route .mm-inner-main > .mm-footer:last-child::after {
 .mm-hero__title .mm-hero-title-line-mask {
   display: block;
   overflow: visible;
+  width: max-content !important;
+  max-width: none !important;
   padding-block: 0.18em;
   margin-block: -0.12em;
 }
