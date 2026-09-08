@@ -33,6 +33,8 @@ Do not rewrite these lines.
 
 ## Observable decisions
 
+Center the hero heading and sub. Do not left-align the display line.
+
 Paint the homepage closer as `CtaLogoTilt` on Blue-HD. Do not replace the footer `AsciiWaveFooter` strip with this look.
 
 Fill the mark with a four-blob Maser-blue wash. Sample neighboring palette stops. Do not bilinear-mix opposite corners (that crease is the hard diagonal).
