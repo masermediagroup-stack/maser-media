@@ -52,6 +52,7 @@ export function CtaLogoGradient({
   const cssWashRef = useRef<HTMLDivElement>(null);
   const washRef = useRef<HTMLCanvasElement>(null);
   const asciiRef = useRef<HTMLCanvasElement>(null);
+  const flyRef = useRef<HTMLCanvasElement>(null);
   const lookRef = useRef<CtaLogoGradientLook>(look);
   const [gpuPainted, setGpuPainted] = useState(false);
 
@@ -63,6 +64,8 @@ export function CtaLogoGradient({
     const clock = createWashClock();
     const wash = washRef.current;
     const ascii = asciiRef.current;
+    const fly = flyRef.current;
+    const hit = hitRef.current;
     const cssWash = cssWashRef.current;
     let rafId = 0;
     const tick = () => {
@@ -80,15 +83,23 @@ export function CtaLogoGradient({
           onPainted: () => setGpuPainted(true),
         })
       : () => {};
-    const stopAscii = ascii
-      ? startAsciiGrain({ canvas: ascii, lookRef, clock })
-      : () => {};
+    const stopAscii =
+      ascii && fly && hit
+        ? startAsciiGrain({
+            canvas: ascii,
+            flyCanvas: fly,
+            hit,
+            lookRef,
+            clock,
+            forceReducedMotion,
+          })
+        : () => {};
     return () => {
       window.cancelAnimationFrame(rafId);
       stopWash();
       stopAscii();
     };
-  }, []);
+  }, [forceReducedMotion]);
 
   useEffect(() => {
     const hit = hitRef.current;
@@ -214,6 +225,7 @@ export function CtaLogoGradient({
             <canvas ref={washRef} className="clg-canvas" />
             <canvas ref={asciiRef} className="clg-ascii" />
           </div>
+          <canvas ref={flyRef} className="clg-ascii-fly" aria-hidden="true" />
         </div>
       </div>
     </div>
