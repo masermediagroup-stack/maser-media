@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { LOGO_SRC } from "@/components/cta-logo-gradient/constants";
 import { AsciiShader, ASCII_SHADER_DEFAULTS } from "./ascii-shader";
-import { parseSvgMarkup } from "./fill-svg";
+import { parseSvgMarkup, type ParsedSvg } from "./fill-svg";
 import "./cta-ascii-shader.css";
 
 const MASER_BLUE = "16,164,255";
@@ -17,11 +17,7 @@ function maserColor(): string {
  * filling the production Blue-HD mark (not the Vercel triangle).
  */
 export function CtaAsciiShaderTest() {
-  const [svg, setSvg] = useState<{
-    pathData: string;
-    width: number;
-    height: number;
-  } | null>(null);
+  const [svg, setSvg] = useState<ParsedSvg | null>(null);
   const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
@@ -54,11 +50,18 @@ export function CtaAsciiShaderTest() {
   return (
     <div className="cta-er-test">
       <p className="cta-er-test__label">Evil Rabbit test cut</p>
-      <div className="cta-er-test__stage">
+      <div
+        className="cta-er-test__stage"
+        style={
+          svg
+            ? { aspectRatio: `${svg.width} / ${svg.height}` }
+            : undefined
+        }
+      >
         <div className="cta-er-test__canvas">
           {svg ? (
             <AsciiShader
-              svgPath={svg.pathData}
+              svgMarkup={svg.markup}
               svgWidth={svg.width}
               svgHeight={svg.height}
               config={ASCII_SHADER_DEFAULTS}

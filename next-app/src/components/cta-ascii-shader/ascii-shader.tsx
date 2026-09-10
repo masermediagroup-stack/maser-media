@@ -1,7 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import { fitLogoTransform, rasterFillSvg, type SvgFillPoint } from "./fill-svg";
+import {
+  fitLogoTransform,
+  loadSvgImage,
+  parseSvgMarkup,
+  rasterFillSvg,
+  sampleSvgImageOnGrid,
+  type SvgFillPoint,
+} from "./fill-svg";
 
 export const ASCII_CHARSETS = {
   blocks: " ░▒▓█",
@@ -23,9 +30,9 @@ export type AsciiShaderConfig = {
   charSet: AsciiCharSet;
 };
 
-/** Evil Rabbit AsciiShader defaults. */
+/** Evil Rabbit AsciiShader defaults. cellSize 2 densifies the Blue-HD silhouette. */
 export const ASCII_SHADER_DEFAULTS: AsciiShaderConfig = {
-  cellSize: 16,
+  cellSize: 2,
   speed: 1,
   waveFreq: 3,
   waveIntensity: 0.5,
@@ -42,10 +49,13 @@ const SPEED_THRESH = 1600;
 const SPAWN_DIVISOR = 400;
 const SPAWN_CAP = 6;
 const CELL_KEY = 100000;
-const RASTER_WIDTH = 420;
+const CELL_BIAS = 50000;
+const RASTER_WIDTH = 1024;
+const SCATTER_PAD = 1.56;
 
 export type AsciiShaderProps = {
-  svgPath: string;
+  /** Full Blue-HD (or replacement) SVG markup. Rasterized via the SVG renderer. */
+  svgMarkup: string;
   svgWidth: number;
   svgHeight: number;
   config?: AsciiShaderConfig;
@@ -92,7 +102,13 @@ type FlyingChar = {
 type Velocity = { vx: number; vy: number; speed: number };
 
 function cellKey(col: number, row: number): number {
-  return CELL_KEY * col + row;
+  return CELL_KEY * (col + CELL_BIAS) + (row + CELL_BIAS);
+}
+
+function decodeCellKey(key: number): { col: number; row: number } {
+  const row = (key % CELL_KEY) - CELL_BIAS;
+  const col = (key - (row + CELL_BIAS)) / CELL_KEY - CELL_BIAS;
+  return { col, row };
 }
 
 function hash01(n: number): number {
@@ -102,10 +118,10 @@ function hash01(n: number): number {
 
 /**
  * Full Evil Rabbit AsciiShader, scoped to this canvas.
- * Triangle SVG_PATH is replaced by the caller (Blue-HD).
+ * Triangle SVG_PATH is replaced by the caller (Blue-HD markup).
  */
 export function AsciiShader({
-  svgPath,
+  svgMarkup,
   svgWidth,
   svgHeight,
   config = ASCII_SHADER_DEFAULTS,
@@ -130,6 +146,7 @@ export function AsciiShader({
   const lastFrameRef = useRef(0);
   const visibleRef = useRef(true);
   const samplesRef = useRef<SvgFillPoint[] | null>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
     configRef.current = config;
@@ -142,8 +159,7 @@ export function AsciiShader({
     const canvas = canvasRef.current;
     const parent = canvas?.parentElement;
     if (!canvas || !parent) return;
-    const samples = samplesRef.current;
-    if (!samples) return;
+    if (parent.clientWidth < 2 || parent.clientHeight < 2) return;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const cssW = Math.max(1, parent.clientWidth);
@@ -154,8 +170,8 @@ export function AsciiShader({
     canvas.style.height = `${cssH}px`;
     sizeRef.current = { w: cssW, h: cssH };
 
-    const innerW = cssW / 1.56;
-    const innerH = cssH / 1.56;
+    const innerW = cssW / SCATTER_PAD;
+    const innerH = cssH / SCATTER_PAD;
     const padX = (cssW - innerW) / 2;
     const padY = (cssH - innerH) / 2;
     const fitted = fitLogoTransform(innerW, innerH, svgWidth, svgHeight);
@@ -164,6 +180,36 @@ export function AsciiShader({
     const offsetY = fitted.offsetY + padY;
     const cellSize = configRef.current.cellSize;
     const cellH = 1.6 * cellSize;
+    const image = imageRef.current;
+
+    if (image) {
+      const grid = sampleSvgImageOnGrid({
+        image,
+        cssWidth: cssW,
+        cssHeight: cssH,
+        svgWidth,
+        svgHeight,
+        cellSize,
+        offsetX,
+        offsetY,
+        scale,
+      });
+      cellsRef.current = grid.map((sample) => ({
+        col: sample.col,
+        row: sample.row,
+        x: sample.x,
+        y: sample.y,
+        density: sample.density,
+        edgeFactor: sample.edgeFactor,
+        tornUntil: 0,
+      }));
+      flyingRef.current = [];
+      return;
+    }
+
+    const samples = samplesRef.current;
+    if (!samples) return;
+
     const bins = new Map<number, { count: number; edgeSum: number }>();
 
     for (const sample of samples) {
@@ -187,8 +233,7 @@ export function AsciiShader({
 
     const cells: Cell[] = [];
     for (const [key, bin] of bins) {
-      const row = key % CELL_KEY;
-      const col = (key - row) / CELL_KEY;
+      const { col, row } = decodeCellKey(key);
       cells.push({
         col,
         row,
@@ -205,12 +250,31 @@ export function AsciiShader({
   }, [svgWidth, svgHeight]);
 
   useEffect(() => {
-    samplesRef.current = rasterFillSvg(
-      { pathData: svgPath, width: svgWidth, height: svgHeight },
-      RASTER_WIDTH,
-    );
-    rebuild();
-  }, [rebuild, svgPath, svgWidth, svgHeight]);
+    let cancelled = false;
+    imageRef.current = null;
+    samplesRef.current = null;
+    cellsRef.current = [];
+
+    void loadSvgImage(svgMarkup, svgWidth, svgHeight)
+      .then((image) => {
+        if (cancelled) return;
+        imageRef.current = image;
+        rebuild();
+      })
+      .catch(() => {
+        if (cancelled) return;
+        try {
+          samplesRef.current = rasterFillSvg(parseSvgMarkup(svgMarkup), RASTER_WIDTH);
+        } catch {
+          samplesRef.current = [];
+        }
+        rebuild();
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [rebuild, svgMarkup, svgWidth, svgHeight]);
 
   useEffect(() => {
     rebuild();
