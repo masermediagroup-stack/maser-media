@@ -7,6 +7,7 @@ import {
   parseSvgMarkup,
   rasterFillSvg,
   sampleSvgImageOnGrid,
+  toBrandSilhouetteMarkup,
   type SvgFillPoint,
 } from "./fill-svg";
 
@@ -30,7 +31,7 @@ export type AsciiShaderConfig = {
   charSet: AsciiCharSet;
 };
 
-/** Evil Rabbit AsciiShader defaults. cellSize 2 densifies the Blue-HD silhouette. */
+/** Evil Rabbit AsciiShader defaults. cellSize 2 densifies the Maser mark. */
 export const ASCII_SHADER_DEFAULTS: AsciiShaderConfig = {
   cellSize: 2,
   speed: 1,
@@ -54,7 +55,7 @@ const RASTER_WIDTH = 1024;
 const SCATTER_PAD = 1.56;
 
 export type AsciiShaderProps = {
-  /** Full Blue-HD (or replacement) SVG markup. Rasterized via the SVG renderer. */
+  /** Full mark SVG markup. Rasterized via the SVG renderer (brand-fill only). */
   svgMarkup: string;
   svgWidth: number;
   svgHeight: number;
@@ -118,7 +119,7 @@ function hash01(n: number): number {
 
 /**
  * Full Evil Rabbit AsciiShader, scoped to this canvas.
- * Triangle SVG_PATH is replaced by the caller (Blue-HD markup).
+ * Triangle SVG_PATH is replaced by the caller (Maser Media mark markup).
  */
 export function AsciiShader({
   svgMarkup,
@@ -255,7 +256,8 @@ export function AsciiShader({
     samplesRef.current = null;
     cellsRef.current = [];
 
-    void loadSvgImage(svgMarkup, svgWidth, svgHeight)
+    const silhouette = toBrandSilhouetteMarkup(svgMarkup);
+    void loadSvgImage(silhouette, svgWidth, svgHeight)
       .then((image) => {
         if (cancelled) return;
         imageRef.current = image;
@@ -264,7 +266,7 @@ export function AsciiShader({
       .catch(() => {
         if (cancelled) return;
         try {
-          samplesRef.current = rasterFillSvg(parseSvgMarkup(svgMarkup), RASTER_WIDTH);
+          samplesRef.current = rasterFillSvg(parseSvgMarkup(silhouette), RASTER_WIDTH);
         } catch {
           samplesRef.current = [];
         }

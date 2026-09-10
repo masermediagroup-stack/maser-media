@@ -26,6 +26,63 @@ export type GridSample = {
 };
 
 const DEFAULT_SIZE = 32;
+export const BRAND_FILL = "#0097f5";
+const BRAND_FILL_RE = /#0097f5|#2cafff/i;
+
+function parseStyleFills(styleText: string): Map<string, string> {
+  const map = new Map<string, string>();
+  const block = /\.([A-Za-z0-9_-]+)\s*\{([^}]*)\}/g;
+  let match: RegExpExecArray | null = block.exec(styleText);
+  while (match) {
+    const fill = /fill\s*:\s*([^;]+)/i.exec(match[2] ?? "");
+    if (fill?.[1]) map.set(match[1], fill[1].trim());
+    match = block.exec(styleText);
+  }
+  return map;
+}
+
+function isBrandFillValue(value: string): boolean {
+  return BRAND_FILL_RE.test(value.replace(/\s/g, ""));
+}
+
+function pathIsBrandFill(path: Element, classFills: Map<string, string>): boolean {
+  const fillAttr = path.getAttribute("fill") ?? "";
+  if (isBrandFillValue(fillAttr)) return true;
+  const classes = (path.getAttribute("class") ?? "").trim().split(/\s+/);
+  if (classes.includes("st0")) return true;
+  for (const name of classes) {
+    const mapped = classFills.get(name);
+    if (mapped && isBrandFillValue(mapped)) return true;
+  }
+  return false;
+}
+
+/**
+ * Keep only the brand-fill silhouette (Illustrator `.st0` / `#0097f5`).
+ * Shade/chrome paths are dropped so ASCII occupancy follows the real mark.
+ */
+export function toBrandSilhouetteMarkup(svgText: string, fill = BRAND_FILL): string {
+  const doc = new DOMParser().parseFromString(svgText, "image/svg+xml");
+  const svg = doc.querySelector("svg");
+  if (!svg) return svgText;
+  const classFills = parseStyleFills(svg.querySelector("style")?.textContent ?? "");
+  const paths = [...svg.querySelectorAll("path")];
+  const branded = paths.filter((path) => pathIsBrandFill(path, classFills));
+  const keep = branded.length > 0 ? branded : paths;
+  const keepSet = new Set(keep);
+  for (const path of paths) {
+    if (!keepSet.has(path)) path.remove();
+  }
+  for (const path of keep) {
+    path.setAttribute("fill", fill);
+    path.setAttribute("class", "st0");
+    path.removeAttribute("opacity");
+    path.removeAttribute("stroke");
+  }
+  const style = svg.querySelector("style");
+  if (style) style.textContent = `.st0{fill:${fill};}`;
+  return new XMLSerializer().serializeToString(svg);
+}
 
 export function parseSvgMarkup(svgText: string): ParsedSvg {
   const doc = new DOMParser().parseFromString(svgText, "image/svg+xml");

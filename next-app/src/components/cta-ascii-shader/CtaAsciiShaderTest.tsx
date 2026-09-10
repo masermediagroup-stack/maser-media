@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LOGO_SRC } from "@/components/cta-logo-gradient/constants";
 import { AsciiShader, ASCII_SHADER_DEFAULTS } from "./ascii-shader";
 import { parseSvgMarkup, type ParsedSvg } from "./fill-svg";
 import "./cta-ascii-shader.css";
 
-const MASER_BLUE = "16,164,255";
+export const ASCII_LOGO_SRC = "/assets/cta-ascii-shader/maser-media-mark.svg";
+
+/** Brand fill #0097f5 */
+const MASER_BLUE = "0,151,245";
 
 function maserColor(): string {
   return MASER_BLUE;
@@ -14,7 +16,7 @@ function maserColor(): string {
 
 /**
  * Homepage CTA test cut: full Evil Rabbit AsciiShader
- * filling the production Blue-HD mark (not the Vercel triangle).
+ * filling the HQ-aspect Maser Media mark (not the Vercel triangle).
  */
 export function CtaAsciiShaderTest() {
   const [svg, setSvg] = useState<ParsedSvg | null>(null);
@@ -30,9 +32,9 @@ export function CtaAsciiShaderTest() {
 
   useEffect(() => {
     let cancelled = false;
-    void fetch(LOGO_SRC)
+    void fetch(ASCII_LOGO_SRC)
       .then((res) => {
-        if (!res.ok) throw new Error("Blue-HD missing");
+        if (!res.ok) throw new Error("Maser mark SVG missing");
         return res.text();
       })
       .then((text) => {
