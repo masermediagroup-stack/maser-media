@@ -29,6 +29,7 @@ import { FooterCoolButton } from './FooterCoolButton';
 import { AuroraShader, MASER_AURORA_COLOR_STOPS } from './AuroraShader';
 import { ProcessBento } from './ProcessBento';
 import { CtaLogoTilt } from './CtaLogoTilt';
+import { CtaAsciiShaderTest } from '@/components/cta-ascii-shader';
 import { LiquidMetalMeatballs } from '@/components/meatballs';
 
 type EntranceProps = { entrance?: boolean };
@@ -787,6 +788,8 @@ export function Cta() {
   const reduceMotion = useReducedMotion();
   const isClient = useIsClient();
   const animateLogo = isClient && !reduceMotion;
+  const productionCta =
+    isClient && new URLSearchParams(window.location.search).get("cta") === "production";
 
   return (
     <section className="mm-cta mm-section--cta" id="contact" aria-labelledby="contact-heading">
@@ -820,9 +823,13 @@ export function Cta() {
               viewport={{ once: true, amount: 0.45 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Link href="/#hero" className="mm-cta__logo-link" aria-label="Back to the Maser Media hero">
-                <CtaLogoTilt />
-              </Link>
+              {productionCta ? (
+                <Link href="/#hero" className="mm-cta__logo-link" aria-label="Back to the Maser Media hero">
+                  <CtaLogoTilt />
+                </Link>
+              ) : (
+                <CtaAsciiShaderTest />
+              )}
             </motion.div>
           </div>
         </div>

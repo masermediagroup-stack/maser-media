@@ -21,8 +21,6 @@
   aspect-ratio: 3776.87 / 1915.83;
   border-radius: 1rem;
   pointer-events: auto;
-  touch-action: none;
-  overflow: visible;
   transform-style: preserve-3d;
   outline: none;
 }
@@ -50,7 +48,6 @@
     rotateY(var(--cta-logo-tilt-y, 0deg))
     translate3d(0, 0, var(--cta-logo-tilt-z, 0px));
   will-change: transform;
-  overflow: visible;
 }
 
 .clg-plate {
@@ -155,17 +152,6 @@
   display: block;
 }
 
-/* Unmasked overlay so torn glyphs can leave the silhouette. */
-.clg-ascii-fly {
-  position: absolute;
-  inset: -30%;
-  z-index: 4;
-  width: auto;
-  height: auto;
-  display: block;
-  pointer-events: none;
-}
-
 .clg-mark[data-gpu="painting"] .clg-canvas {
   opacity: 1;
 }
@@ -177,9 +163,5 @@
 @media (prefers-reduced-motion: reduce) {
   .clg-tilt {
     transform: none !important;
-  }
-
-  .clg-ascii-fly {
-    display: none;
   }
 }
